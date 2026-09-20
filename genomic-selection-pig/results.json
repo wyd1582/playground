@@ -1,0 +1,3635 @@
+{
+ "meta": {
+  "generated": "2026-09-20T09:14:50.204617",
+  "runtime_min": 10.0,
+  "cpu": 4,
+  "seeds": [
+   0,
+   1,
+   2
+  ],
+  "alphas": [
+   0.1,
+   0.3,
+   1.0,
+   3.0,
+   10.0
+  ],
+  "maf_min": 0.01,
+  "datasets": {
+   "wheat": {
+    "role": "PRIMARY (spec-sanctioned fallback)",
+    "n": 599,
+    "snp_qc": 1278,
+    "traits": [
+     "env1",
+     "env2",
+     "env4",
+     "env5"
+    ],
+    "provenance": {
+     "repo": "https://github.com/gdlc/BGLR-R",
+     "commit": "de839cf90fc5d2d6a397252a5b2e289306059f5f",
+     "path": "data/wheat.RData",
+     "local": "/home/user/playground/genomic-selection-pig/data/wheat.RData"
+    },
+    "models": [
+     "L0_pedBLUP",
+     "L1_GBLUP",
+     "L2_GBM",
+     "L3_wRidge"
+    ]
+   },
+   "pig": {
+    "role": "SUPPLEMENTARY ONLY (fails primary verification: 1/5 traits, no pedigree)",
+    "n": 3534,
+    "snp_qc": 50436,
+    "traits": [
+     "t1"
+    ],
+    "provenance": {
+     "repo": "https://github.com/QuantGen/G2P-Datasets",
+     "commit": "a7bf58a1de7270d4cf6ea13c23eb11ffbb36719d",
+     "path": "Datasets/00070_PigDataPICG3/curated_geno_pheno_map.rdata",
+     "local": "/home/user/playground/genomic-selection-pig/data/pig_cleveland_curated.rdata"
+    },
+    "models": [
+     "L1_GBLUP",
+     "L2_GBM",
+     "L3_wRidge"
+    ],
+    "l2_thinning": "every 5th SNP (phenotype-free, declared)"
+   }
+  },
+  "protocols": {
+   "random": "KFold(5, shuffle, seed)",
+   "group": "proxy: hierarchical clustering of G into 10 groups -> GroupKFold(5); no sire IDs available (declared)",
+   "forward": "proxy: most-distant G-clusters held out (>=20%); no time/generation axis available (declared)"
+  },
+  "engines": {
+   "wheat_L2": "lightgbm(+GBR reference check)",
+   "pig_L2": "lightgbm on 1/5 thinned SNPs (+full-SNP reference check)"
+  },
+  "l2_params": {
+   "n_estimators": 300,
+   "max_depth": 3,
+   "learning_rate": 0.05,
+   "subsample": 0.8
+  },
+  "expected_cells": {
+   "wheat": 144,
+   "pig": 27
+  },
+  "probe_timings": {
+   "gbr_pig_fit_min": 17.3,
+   "gbr_wheat_fit_s": 3.2,
+   "lgbm_thin_s": 5.5,
+   "lgbm_full_s": 37.0
+  }
+ },
+ "checks": {
+  "equivalence": [
+   {
+    "dataset": "wheat",
+    "trait": "env1",
+    "r_kernel": 0.5196,
+    "r_marker": 0.5057,
+    "abs_dr": 0.0138,
+    "sec": 0.1
+   },
+   {
+    "dataset": "wheat",
+    "trait": "env2",
+    "r_kernel": 0.4919,
+    "r_marker": 0.4996,
+    "abs_dr": 0.0077,
+    "sec": 0.1
+   },
+   {
+    "dataset": "wheat",
+    "trait": "env4",
+    "r_kernel": 0.3127,
+    "r_marker": 0.3759,
+    "abs_dr": 0.0632,
+    "sec": 0.1
+   },
+   {
+    "dataset": "wheat",
+    "trait": "env5",
+    "r_kernel": 0.4387,
+    "r_marker": 0.4396,
+    "abs_dr": 0.0009,
+    "sec": 0.1
+   },
+   {
+    "dataset": "pig",
+    "trait": "t1",
+    "r_kernel": 0.0644,
+    "r_marker": 0.0664,
+    "abs_dr": 0.002,
+    "sec": 28.2
+   }
+  ],
+  "equivalence_max_abs_dr": 0.0632,
+  "l2_reference": {
+   "pig_fullSNP_vs_thin": {
+    "r_full": 0.0456,
+    "r_thin": 0.0721,
+    "abs_dr": 0.0265,
+    "sec": 173.0
+   },
+   "wheat_gbr_reference": [
+    {
+     "trait": "env1",
+     "r_gbr": 0.5396,
+     "r_lgbm": 0.5346746374375303
+    },
+    {
+     "trait": "env2",
+     "r_gbr": 0.478,
+     "r_lgbm": 0.4623805878254606
+    },
+    {
+     "trait": "env4",
+     "r_gbr": 0.4073,
+     "r_lgbm": 0.3960976658991821
+    },
+    {
+     "trait": "env5",
+     "r_gbr": 0.4431,
+     "r_lgbm": 0.49132286103009193
+    }
+   ]
+  }
+ },
+ "results": [
+  {
+   "dataset": "pig",
+   "model": "L1_GBLUP",
+   "protocol": "forward",
+   "trait": "t1",
+   "seed": 0,
+   "r": -0.06511452191993193,
+   "bias_slope": -1.7579849878191003,
+   "top10": 0.09876543209876543,
+   "n_eval": 803,
+   "sec": 0.53,
+   "extra": {
+    "alphas": [
+     10.0
+    ]
+   }
+  },
+  {
+   "dataset": "pig",
+   "model": "L1_GBLUP",
+   "protocol": "forward",
+   "trait": "t1",
+   "seed": 1,
+   "r": -0.06511452191993193,
+   "bias_slope": -1.7579849878191003,
+   "top10": 0.09876543209876543,
+   "n_eval": 803,
+   "sec": 0.5,
+   "extra": {
+    "alphas": [
+     10.0
+    ]
+   }
+  },
+  {
+   "dataset": "pig",
+   "model": "L1_GBLUP",
+   "protocol": "forward",
+   "trait": "t1",
+   "seed": 2,
+   "r": -0.06497662936114117,
+   "bias_slope": -0.7605879034110435,
+   "top10": 0.09876543209876543,
+   "n_eval": 803,
+   "sec": 0.5,
+   "extra": {
+    "alphas": [
+     3.0
+    ]
+   }
+  },
+  {
+   "dataset": "pig",
+   "model": "L1_GBLUP",
+   "protocol": "group",
+   "trait": "t1",
+   "seed": 0,
+   "r": -0.0017123089179448988,
+   "bias_slope": -0.03458803458770356,
+   "top10": 0.1103202846975089,
+   "n_eval": 2804,
+   "sec": 2.8,
+   "extra": {
+    "alphas": [
+     10.0,
+     10.0,
+     10.0,
+     10.0,
+     10.0
+    ]
+   }
+  },
+  {
+   "dataset": "pig",
+   "model": "L1_GBLUP",
+   "protocol": "group",
+   "trait": "t1",
+   "seed": 1,
+   "r": -0.0009815262919916678,
+   "bias_slope": -0.01391105129735006,
+   "top10": 0.12455516014234876,
+   "n_eval": 2804,
+   "sec": 2.76,
+   "extra": {
+    "alphas": [
+     10.0,
+     3.0,
+     10.0,
+     10.0,
+     10.0
+    ]
+   }
+  },
+  {
+   "dataset": "pig",
+   "model": "L1_GBLUP",
+   "protocol": "group",
+   "trait": "t1",
+   "seed": 2,
+   "r": -0.011491486314081412,
+   "bias_slope": -0.18220954537321585,
+   "top10": 0.1103202846975089,
+   "n_eval": 2804,
+   "sec": 2.68,
+   "extra": {
+    "alphas": [
+     3.0,
+     10.0,
+     10.0,
+     10.0,
+     10.0
+    ]
+   }
+  },
+  {
+   "dataset": "pig",
+   "model": "L1_GBLUP",
+   "protocol": "random",
+   "trait": "t1",
+   "seed": 0,
+   "r": 0.06441204177578792,
+   "bias_slope": 0.7402832651424699,
+   "top10": 0.12099644128113879,
+   "n_eval": 2804,
+   "sec": 3.26,
+   "extra": {
+    "alphas": [
+     10.0,
+     10.0,
+     10.0,
+     3.0,
+     10.0
+    ]
+   }
+  },
+  {
+   "dataset": "pig",
+   "model": "L1_GBLUP",
+   "protocol": "random",
+   "trait": "t1",
+   "seed": 1,
+   "r": 0.03742887343683106,
+   "bias_slope": 0.3558990548840675,
+   "top10": 0.12099644128113879,
+   "n_eval": 2804,
+   "sec": 3.07,
+   "extra": {
+    "alphas": [
+     10.0,
+     10.0,
+     3.0,
+     10.0,
+     3.0
+    ]
+   }
+  },
+  {
+   "dataset": "pig",
+   "model": "L1_GBLUP",
+   "protocol": "random",
+   "trait": "t1",
+   "seed": 2,
+   "r": 0.06575148043753073,
+   "bias_slope": 0.9599501873713961,
+   "top10": 0.12811387900355872,
+   "n_eval": 2804,
+   "sec": 2.6,
+   "extra": {
+    "alphas": [
+     10.0,
+     10.0,
+     10.0,
+     10.0,
+     10.0
+    ]
+   }
+  },
+  {
+   "dataset": "pig",
+   "model": "L2_GBM",
+   "protocol": "forward",
+   "trait": "t1",
+   "seed": 0,
+   "r": -0.04520708161415702,
+   "bias_slope": -0.12583884488322328,
+   "top10": 0.024691358024691357,
+   "n_eval": 803,
+   "sec": 4.07,
+   "extra": {
+    "engine": "lightgbm",
+    "params": {
+     "n_estimators": 300,
+     "max_depth": 3,
+     "learning_rate": 0.05,
+     "subsample": 0.8
+    }
+   }
+  },
+  {
+   "dataset": "pig",
+   "model": "L2_GBM",
+   "protocol": "forward",
+   "trait": "t1",
+   "seed": 1,
+   "r": -0.05629777888689527,
+   "bias_slope": -0.16229140700977132,
+   "top10": 0.037037037037037035,
+   "n_eval": 803,
+   "sec": 4.1,
+   "extra": {
+    "engine": "lightgbm",
+    "params": {
+     "n_estimators": 300,
+     "max_depth": 3,
+     "learning_rate": 0.05,
+     "subsample": 0.8
+    }
+   }
+  },
+  {
+   "dataset": "pig",
+   "model": "L2_GBM",
+   "protocol": "forward",
+   "trait": "t1",
+   "seed": 2,
+   "r": -0.026264707725826692,
+   "bias_slope": -0.07265982116652019,
+   "top10": 0.06172839506172839,
+   "n_eval": 803,
+   "sec": 4.17,
+   "extra": {
+    "engine": "lightgbm",
+    "params": {
+     "n_estimators": 300,
+     "max_depth": 3,
+     "learning_rate": 0.05,
+     "subsample": 0.8
+    }
+   }
+  },
+  {
+   "dataset": "pig",
+   "model": "L2_GBM",
+   "protocol": "group",
+   "trait": "t1",
+   "seed": 0,
+   "r": 0.0037032755298454715,
+   "bias_slope": 0.012028867723329641,
+   "top10": 0.07473309608540925,
+   "n_eval": 2804,
+   "sec": 26.86,
+   "extra": {
+    "engine": "lightgbm",
+    "params": {
+     "n_estimators": 300,
+     "max_depth": 3,
+     "learning_rate": 0.05,
+     "subsample": 0.8
+    }
+   }
+  },
+  {
+   "dataset": "pig",
+   "model": "L2_GBM",
+   "protocol": "group",
+   "trait": "t1",
+   "seed": 1,
+   "r": -0.013536033945154242,
+   "bias_slope": -0.04329803677107638,
+   "top10": 0.07829181494661921,
+   "n_eval": 2804,
+   "sec": 27.05,
+   "extra": {
+    "engine": "lightgbm",
+    "params": {
+     "n_estimators": 300,
+     "max_depth": 3,
+     "learning_rate": 0.05,
+     "subsample": 0.8
+    }
+   }
+  },
+  {
+   "dataset": "pig",
+   "model": "L2_GBM",
+   "protocol": "group",
+   "trait": "t1",
+   "seed": 2,
+   "r": 0.004332291407198684,
+   "bias_slope": 0.013681555679315296,
+   "top10": 0.07473309608540925,
+   "n_eval": 2804,
+   "sec": 26.65,
+   "extra": {
+    "engine": "lightgbm",
+    "params": {
+     "n_estimators": 300,
+     "max_depth": 3,
+     "learning_rate": 0.05,
+     "subsample": 0.8
+    }
+   }
+  },
+  {
+   "dataset": "pig",
+   "model": "L2_GBM",
+   "protocol": "random",
+   "trait": "t1",
+   "seed": 0,
+   "r": 0.07209774737074934,
+   "bias_slope": 0.2527245926074189,
+   "top10": 0.15302491103202848,
+   "n_eval": 2804,
+   "sec": 27.51,
+   "extra": {
+    "engine": "lightgbm",
+    "params": {
+     "n_estimators": 300,
+     "max_depth": 3,
+     "learning_rate": 0.05,
+     "subsample": 0.8
+    }
+   }
+  },
+  {
+   "dataset": "pig",
+   "model": "L2_GBM",
+   "protocol": "random",
+   "trait": "t1",
+   "seed": 1,
+   "r": 0.07208630376590572,
+   "bias_slope": 0.2599172082941118,
+   "top10": 0.15302491103202848,
+   "n_eval": 2804,
+   "sec": 27.72,
+   "extra": {
+    "engine": "lightgbm",
+    "params": {
+     "n_estimators": 300,
+     "max_depth": 3,
+     "learning_rate": 0.05,
+     "subsample": 0.8
+    }
+   }
+  },
+  {
+   "dataset": "pig",
+   "model": "L2_GBM",
+   "protocol": "random",
+   "trait": "t1",
+   "seed": 2,
+   "r": 0.07341524790003735,
+   "bias_slope": 0.2677067112549794,
+   "top10": 0.12455516014234876,
+   "n_eval": 2804,
+   "sec": 27.67,
+   "extra": {
+    "engine": "lightgbm",
+    "params": {
+     "n_estimators": 300,
+     "max_depth": 3,
+     "learning_rate": 0.05,
+     "subsample": 0.8
+    }
+   }
+  },
+  {
+   "dataset": "pig",
+   "model": "L3_wRidge",
+   "protocol": "forward",
+   "trait": "t1",
+   "seed": 0,
+   "r": -0.060891831168343555,
+   "bias_slope": -1.6419670078884099,
+   "top10": 0.08641975308641975,
+   "n_eval": 803,
+   "sec": 0.48,
+   "extra": {
+    "alphas": [
+     10.0
+    ],
+    "note": "placeholder weights, NOT real functional priors"
+   }
+  },
+  {
+   "dataset": "pig",
+   "model": "L3_wRidge",
+   "protocol": "forward",
+   "trait": "t1",
+   "seed": 1,
+   "r": -0.06779371411681291,
+   "bias_slope": -1.8341317707606601,
+   "top10": 0.09876543209876543,
+   "n_eval": 803,
+   "sec": 0.49,
+   "extra": {
+    "alphas": [
+     10.0
+    ],
+    "note": "placeholder weights, NOT real functional priors"
+   }
+  },
+  {
+   "dataset": "pig",
+   "model": "L3_wRidge",
+   "protocol": "forward",
+   "trait": "t1",
+   "seed": 2,
+   "r": -0.06288689599293563,
+   "bias_slope": -0.7349675525618357,
+   "top10": 0.08641975308641975,
+   "n_eval": 803,
+   "sec": 0.49,
+   "extra": {
+    "alphas": [
+     3.0
+    ],
+    "note": "placeholder weights, NOT real functional priors"
+   }
+  },
+  {
+   "dataset": "pig",
+   "model": "L3_wRidge",
+   "protocol": "group",
+   "trait": "t1",
+   "seed": 0,
+   "r": -0.0011729401309356873,
+   "bias_slope": -0.02367195468756203,
+   "top10": 0.10676156583629894,
+   "n_eval": 2804,
+   "sec": 2.55,
+   "extra": {
+    "alphas": [
+     10.0,
+     10.0,
+     10.0,
+     10.0,
+     10.0
+    ],
+    "note": "placeholder weights, NOT real functional priors"
+   }
+  },
+  {
+   "dataset": "pig",
+   "model": "L3_wRidge",
+   "protocol": "group",
+   "trait": "t1",
+   "seed": 1,
+   "r": -0.0019895880915640806,
+   "bias_slope": -0.028256433593700475,
+   "top10": 0.12455516014234876,
+   "n_eval": 2804,
+   "sec": 2.61,
+   "extra": {
+    "alphas": [
+     10.0,
+     3.0,
+     10.0,
+     10.0,
+     10.0
+    ],
+    "note": "placeholder weights, NOT real functional priors"
+   }
+  },
+  {
+   "dataset": "pig",
+   "model": "L3_wRidge",
+   "protocol": "group",
+   "trait": "t1",
+   "seed": 2,
+   "r": -0.011160150017246401,
+   "bias_slope": -0.17686709852601426,
+   "top10": 0.1103202846975089,
+   "n_eval": 2804,
+   "sec": 2.53,
+   "extra": {
+    "alphas": [
+     3.0,
+     10.0,
+     10.0,
+     10.0,
+     10.0
+    ],
+    "note": "placeholder weights, NOT real functional priors"
+   }
+  },
+  {
+   "dataset": "pig",
+   "model": "L3_wRidge",
+   "protocol": "random",
+   "trait": "t1",
+   "seed": 0,
+   "r": 0.06525875581067483,
+   "bias_slope": 0.7497813323635717,
+   "top10": 0.12099644128113879,
+   "n_eval": 2804,
+   "sec": 4.32,
+   "extra": {
+    "alphas": [
+     10.0,
+     10.0,
+     10.0,
+     3.0,
+     10.0
+    ],
+    "note": "placeholder weights, NOT real functional priors"
+   }
+  },
+  {
+   "dataset": "pig",
+   "model": "L3_wRidge",
+   "protocol": "random",
+   "trait": "t1",
+   "seed": 1,
+   "r": 0.037021509386342806,
+   "bias_slope": 0.3523534990957231,
+   "top10": 0.11743772241992882,
+   "n_eval": 2804,
+   "sec": 4.24,
+   "extra": {
+    "alphas": [
+     10.0,
+     10.0,
+     3.0,
+     10.0,
+     3.0
+    ],
+    "note": "placeholder weights, NOT real functional priors"
+   }
+  },
+  {
+   "dataset": "pig",
+   "model": "L3_wRidge",
+   "protocol": "random",
+   "trait": "t1",
+   "seed": 2,
+   "r": 0.06613090094090898,
+   "bias_slope": 0.9671787264462843,
+   "top10": 0.12455516014234876,
+   "n_eval": 2804,
+   "sec": 4.23,
+   "extra": {
+    "alphas": [
+     10.0,
+     10.0,
+     10.0,
+     10.0,
+     10.0
+    ],
+    "note": "placeholder weights, NOT real functional priors"
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L0_pedBLUP",
+   "protocol": "forward",
+   "trait": "env1",
+   "seed": 0,
+   "r": -0.008806832492230446,
+   "bias_slope": -0.0226902580593006,
+   "top10": 0.16666666666666666,
+   "n_eval": 238,
+   "sec": 0.02,
+   "extra": {
+    "alphas": [
+     1.0
+    ]
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L0_pedBLUP",
+   "protocol": "forward",
+   "trait": "env1",
+   "seed": 1,
+   "r": -0.008806832492230446,
+   "bias_slope": -0.0226902580593006,
+   "top10": 0.16666666666666666,
+   "n_eval": 238,
+   "sec": 0.02,
+   "extra": {
+    "alphas": [
+     1.0
+    ]
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L0_pedBLUP",
+   "protocol": "forward",
+   "trait": "env1",
+   "seed": 2,
+   "r": -0.008806832492230446,
+   "bias_slope": -0.0226902580593006,
+   "top10": 0.16666666666666666,
+   "n_eval": 238,
+   "sec": 0.02,
+   "extra": {
+    "alphas": [
+     1.0
+    ]
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L0_pedBLUP",
+   "protocol": "forward",
+   "trait": "env2",
+   "seed": 0,
+   "r": 0.14644015479829778,
+   "bias_slope": 0.6499212384164811,
+   "top10": 0.08333333333333333,
+   "n_eval": 238,
+   "sec": 0.02,
+   "extra": {
+    "alphas": [
+     3.0
+    ]
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L0_pedBLUP",
+   "protocol": "forward",
+   "trait": "env2",
+   "seed": 1,
+   "r": 0.14644015479829778,
+   "bias_slope": 0.6499212384164811,
+   "top10": 0.08333333333333333,
+   "n_eval": 238,
+   "sec": 0.02,
+   "extra": {
+    "alphas": [
+     3.0
+    ]
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L0_pedBLUP",
+   "protocol": "forward",
+   "trait": "env2",
+   "seed": 2,
+   "r": 0.14644015479829778,
+   "bias_slope": 0.6499212384164811,
+   "top10": 0.08333333333333333,
+   "n_eval": 238,
+   "sec": 0.02,
+   "extra": {
+    "alphas": [
+     3.0
+    ]
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L0_pedBLUP",
+   "protocol": "forward",
+   "trait": "env4",
+   "seed": 0,
+   "r": 0.14684278827581565,
+   "bias_slope": 0.6871277265720065,
+   "top10": 0.2916666666666667,
+   "n_eval": 238,
+   "sec": 0.02,
+   "extra": {
+    "alphas": [
+     1.0
+    ]
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L0_pedBLUP",
+   "protocol": "forward",
+   "trait": "env4",
+   "seed": 1,
+   "r": 0.14361074217402794,
+   "bias_slope": 0.5192480115257491,
+   "top10": 0.125,
+   "n_eval": 238,
+   "sec": 0.02,
+   "extra": {
+    "alphas": [
+     0.3
+    ]
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L0_pedBLUP",
+   "protocol": "forward",
+   "trait": "env4",
+   "seed": 2,
+   "r": 0.14684278827581565,
+   "bias_slope": 0.6871277265720065,
+   "top10": 0.2916666666666667,
+   "n_eval": 238,
+   "sec": 0.02,
+   "extra": {
+    "alphas": [
+     1.0
+    ]
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L0_pedBLUP",
+   "protocol": "forward",
+   "trait": "env5",
+   "seed": 0,
+   "r": 0.2189118337752157,
+   "bias_slope": 0.6886301556038429,
+   "top10": 0.20833333333333334,
+   "n_eval": 238,
+   "sec": 0.02,
+   "extra": {
+    "alphas": [
+     1.0
+    ]
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L0_pedBLUP",
+   "protocol": "forward",
+   "trait": "env5",
+   "seed": 1,
+   "r": 0.2189118337752157,
+   "bias_slope": 0.6886301556038429,
+   "top10": 0.20833333333333334,
+   "n_eval": 238,
+   "sec": 0.02,
+   "extra": {
+    "alphas": [
+     1.0
+    ]
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L0_pedBLUP",
+   "protocol": "forward",
+   "trait": "env5",
+   "seed": 2,
+   "r": 0.2189118337752157,
+   "bias_slope": 0.6886301556038429,
+   "top10": 0.20833333333333334,
+   "n_eval": 238,
+   "sec": 0.02,
+   "extra": {
+    "alphas": [
+     1.0
+    ]
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L0_pedBLUP",
+   "protocol": "group",
+   "trait": "env1",
+   "seed": 0,
+   "r": 0.0035198847674112466,
+   "bias_slope": 0.010317527653463238,
+   "top10": 0.16666666666666666,
+   "n_eval": 599,
+   "sec": 0.12,
+   "extra": {
+    "alphas": [
+     1.0,
+     1.0,
+     3.0,
+     3.0,
+     3.0
+    ]
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L0_pedBLUP",
+   "protocol": "group",
+   "trait": "env1",
+   "seed": 1,
+   "r": 0.000679203351595335,
+   "bias_slope": 0.00202566118403275,
+   "top10": 0.18333333333333332,
+   "n_eval": 599,
+   "sec": 0.11,
+   "extra": {
+    "alphas": [
+     1.0,
+     3.0,
+     1.0,
+     3.0,
+     3.0
+    ]
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L0_pedBLUP",
+   "protocol": "group",
+   "trait": "env1",
+   "seed": 2,
+   "r": 0.006444295423335192,
+   "bias_slope": 0.01819591101634446,
+   "top10": 0.18333333333333332,
+   "n_eval": 599,
+   "sec": 0.11,
+   "extra": {
+    "alphas": [
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     3.0
+    ]
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L0_pedBLUP",
+   "protocol": "group",
+   "trait": "env2",
+   "seed": 0,
+   "r": 0.20755230448913875,
+   "bias_slope": 0.9397565714335023,
+   "top10": 0.18333333333333332,
+   "n_eval": 599,
+   "sec": 0.12,
+   "extra": {
+    "alphas": [
+     3.0,
+     3.0,
+     10.0,
+     3.0,
+     10.0
+    ]
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L0_pedBLUP",
+   "protocol": "group",
+   "trait": "env2",
+   "seed": 1,
+   "r": 0.19929653976828385,
+   "bias_slope": 0.7916404257652122,
+   "top10": 0.15,
+   "n_eval": 599,
+   "sec": 0.11,
+   "extra": {
+    "alphas": [
+     3.0,
+     3.0,
+     3.0,
+     3.0,
+     1.0
+    ]
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L0_pedBLUP",
+   "protocol": "group",
+   "trait": "env2",
+   "seed": 2,
+   "r": 0.20626649578822215,
+   "bias_slope": 0.850648042771798,
+   "top10": 0.15,
+   "n_eval": 599,
+   "sec": 0.11,
+   "extra": {
+    "alphas": [
+     3.0,
+     3.0,
+     3.0,
+     3.0,
+     3.0
+    ]
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L0_pedBLUP",
+   "protocol": "group",
+   "trait": "env4",
+   "seed": 0,
+   "r": 0.14291612630828798,
+   "bias_slope": 0.6136508085391603,
+   "top10": 0.15,
+   "n_eval": 599,
+   "sec": 0.11,
+   "extra": {
+    "alphas": [
+     1.0,
+     10.0,
+     3.0,
+     3.0,
+     3.0
+    ]
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L0_pedBLUP",
+   "protocol": "group",
+   "trait": "env4",
+   "seed": 1,
+   "r": 0.18573295955689395,
+   "bias_slope": 0.600448832342523,
+   "top10": 0.18333333333333332,
+   "n_eval": 599,
+   "sec": 0.11,
+   "extra": {
+    "alphas": [
+     0.3,
+     1.0,
+     3.0,
+     1.0,
+     3.0
+    ]
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L0_pedBLUP",
+   "protocol": "group",
+   "trait": "env4",
+   "seed": 2,
+   "r": 0.1715891349210479,
+   "bias_slope": 0.6195566055311907,
+   "top10": 0.18333333333333332,
+   "n_eval": 599,
+   "sec": 0.12,
+   "extra": {
+    "alphas": [
+     1.0,
+     3.0,
+     3.0,
+     1.0,
+     1.0
+    ]
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L0_pedBLUP",
+   "protocol": "group",
+   "trait": "env5",
+   "seed": 0,
+   "r": 0.28118748539002847,
+   "bias_slope": 0.7269384277801364,
+   "top10": 0.18333333333333332,
+   "n_eval": 599,
+   "sec": 0.11,
+   "extra": {
+    "alphas": [
+     1.0,
+     1.0,
+     3.0,
+     3.0,
+     1.0
+    ]
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L0_pedBLUP",
+   "protocol": "group",
+   "trait": "env5",
+   "seed": 1,
+   "r": 0.27991429125852413,
+   "bias_slope": 0.7940967332283114,
+   "top10": 0.2,
+   "n_eval": 599,
+   "sec": 0.11,
+   "extra": {
+    "alphas": [
+     1.0,
+     3.0,
+     3.0,
+     1.0,
+     1.0
+    ]
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L0_pedBLUP",
+   "protocol": "group",
+   "trait": "env5",
+   "seed": 2,
+   "r": 0.28174349634072193,
+   "bias_slope": 0.7221840586210359,
+   "top10": 0.2,
+   "n_eval": 599,
+   "sec": 0.11,
+   "extra": {
+    "alphas": [
+     1.0,
+     1.0,
+     3.0,
+     1.0,
+     1.0
+    ]
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L0_pedBLUP",
+   "protocol": "random",
+   "trait": "env1",
+   "seed": 0,
+   "r": 0.38983101558991434,
+   "bias_slope": 0.9181335478807252,
+   "top10": 0.25,
+   "n_eval": 599,
+   "sec": 0.13,
+   "extra": {
+    "alphas": [
+     1.0,
+     1.0,
+     3.0,
+     3.0,
+     0.3
+    ]
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L0_pedBLUP",
+   "protocol": "random",
+   "trait": "env1",
+   "seed": 1,
+   "r": 0.3657255752256245,
+   "bias_slope": 0.905291749602894,
+   "top10": 0.25,
+   "n_eval": 599,
+   "sec": 0.12,
+   "extra": {
+    "alphas": [
+     0.3,
+     3.0,
+     1.0,
+     1.0,
+     3.0
+    ]
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L0_pedBLUP",
+   "protocol": "random",
+   "trait": "env1",
+   "seed": 2,
+   "r": 0.38106139349578444,
+   "bias_slope": 1.0101408887738543,
+   "top10": 0.26666666666666666,
+   "n_eval": 599,
+   "sec": 0.11,
+   "extra": {
+    "alphas": [
+     1.0,
+     1.0,
+     1.0,
+     3.0,
+     3.0
+    ]
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L0_pedBLUP",
+   "protocol": "random",
+   "trait": "env2",
+   "seed": 0,
+   "r": 0.3428642714066834,
+   "bias_slope": 1.1607239590145075,
+   "top10": 0.18333333333333332,
+   "n_eval": 599,
+   "sec": 0.11,
+   "extra": {
+    "alphas": [
+     3.0,
+     10.0,
+     3.0,
+     10.0,
+     3.0
+    ]
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L0_pedBLUP",
+   "protocol": "random",
+   "trait": "env2",
+   "seed": 1,
+   "r": 0.35580359563794234,
+   "bias_slope": 1.1097107149960745,
+   "top10": 0.2,
+   "n_eval": 599,
+   "sec": 0.11,
+   "extra": {
+    "alphas": [
+     3.0,
+     3.0,
+     3.0,
+     3.0,
+     3.0
+    ]
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L0_pedBLUP",
+   "protocol": "random",
+   "trait": "env2",
+   "seed": 2,
+   "r": 0.34803561630068397,
+   "bias_slope": 1.1082225337179015,
+   "top10": 0.16666666666666666,
+   "n_eval": 599,
+   "sec": 0.12,
+   "extra": {
+    "alphas": [
+     3.0,
+     3.0,
+     3.0,
+     3.0,
+     10.0
+    ]
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L0_pedBLUP",
+   "protocol": "random",
+   "trait": "env4",
+   "seed": 0,
+   "r": 0.36176616073006107,
+   "bias_slope": 1.0026323012926526,
+   "top10": 0.25,
+   "n_eval": 599,
+   "sec": 0.11,
+   "extra": {
+    "alphas": [
+     3.0,
+     3.0,
+     1.0,
+     3.0,
+     1.0
+    ]
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L0_pedBLUP",
+   "protocol": "random",
+   "trait": "env4",
+   "seed": 1,
+   "r": 0.3298311316135348,
+   "bias_slope": 1.1144983067614977,
+   "top10": 0.23333333333333334,
+   "n_eval": 599,
+   "sec": 0.11,
+   "extra": {
+    "alphas": [
+     10.0,
+     3.0,
+     3.0,
+     3.0,
+     3.0
+    ]
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L0_pedBLUP",
+   "protocol": "random",
+   "trait": "env4",
+   "seed": 2,
+   "r": 0.32713921833581333,
+   "bias_slope": 1.0640794404706133,
+   "top10": 0.23333333333333334,
+   "n_eval": 599,
+   "sec": 0.11,
+   "extra": {
+    "alphas": [
+     3.0,
+     3.0,
+     3.0,
+     3.0,
+     3.0
+    ]
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L0_pedBLUP",
+   "protocol": "random",
+   "trait": "env5",
+   "seed": 0,
+   "r": 0.44134089774238333,
+   "bias_slope": 1.0898654208259098,
+   "top10": 0.2833333333333333,
+   "n_eval": 599,
+   "sec": 0.11,
+   "extra": {
+    "alphas": [
+     1.0,
+     3.0,
+     3.0,
+     3.0,
+     1.0
+    ]
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L0_pedBLUP",
+   "protocol": "random",
+   "trait": "env5",
+   "seed": 1,
+   "r": 0.4366292018602665,
+   "bias_slope": 1.0869316480470668,
+   "top10": 0.3333333333333333,
+   "n_eval": 599,
+   "sec": 0.11,
+   "extra": {
+    "alphas": [
+     1.0,
+     3.0,
+     1.0,
+     3.0,
+     3.0
+    ]
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L0_pedBLUP",
+   "protocol": "random",
+   "trait": "env5",
+   "seed": 2,
+   "r": 0.4495180313390668,
+   "bias_slope": 0.9945534407526074,
+   "top10": 0.35,
+   "n_eval": 599,
+   "sec": 0.11,
+   "extra": {
+    "alphas": [
+     1.0,
+     1.0,
+     3.0,
+     1.0,
+     1.0
+    ]
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L1_GBLUP",
+   "protocol": "forward",
+   "trait": "env1",
+   "seed": 0,
+   "r": 0.22654070675600185,
+   "bias_slope": 0.5028950424176541,
+   "top10": 0.125,
+   "n_eval": 238,
+   "sec": 0.02,
+   "extra": {
+    "alphas": [
+     0.1
+    ]
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L1_GBLUP",
+   "protocol": "forward",
+   "trait": "env1",
+   "seed": 1,
+   "r": 0.22654070675600185,
+   "bias_slope": 0.5028950424176541,
+   "top10": 0.125,
+   "n_eval": 238,
+   "sec": 0.02,
+   "extra": {
+    "alphas": [
+     0.1
+    ]
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L1_GBLUP",
+   "protocol": "forward",
+   "trait": "env1",
+   "seed": 2,
+   "r": 0.22654070675600185,
+   "bias_slope": 0.5028950424176541,
+   "top10": 0.125,
+   "n_eval": 238,
+   "sec": 0.02,
+   "extra": {
+    "alphas": [
+     0.1
+    ]
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L1_GBLUP",
+   "protocol": "forward",
+   "trait": "env2",
+   "seed": 0,
+   "r": 0.42233408934662203,
+   "bias_slope": 1.0376407779735042,
+   "top10": 0.16666666666666666,
+   "n_eval": 238,
+   "sec": 0.02,
+   "extra": {
+    "alphas": [
+     0.1
+    ]
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L1_GBLUP",
+   "protocol": "forward",
+   "trait": "env2",
+   "seed": 1,
+   "r": 0.42233408934662203,
+   "bias_slope": 1.0376407779735042,
+   "top10": 0.16666666666666666,
+   "n_eval": 238,
+   "sec": 0.02,
+   "extra": {
+    "alphas": [
+     0.1
+    ]
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L1_GBLUP",
+   "protocol": "forward",
+   "trait": "env2",
+   "seed": 2,
+   "r": 0.42233408934662203,
+   "bias_slope": 1.0376407779735042,
+   "top10": 0.16666666666666666,
+   "n_eval": 238,
+   "sec": 0.02,
+   "extra": {
+    "alphas": [
+     0.1
+    ]
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L1_GBLUP",
+   "protocol": "forward",
+   "trait": "env4",
+   "seed": 0,
+   "r": 0.3213069834588919,
+   "bias_slope": 0.8362902035506751,
+   "top10": 0.2916666666666667,
+   "n_eval": 238,
+   "sec": 0.02,
+   "extra": {
+    "alphas": [
+     0.1
+    ]
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L1_GBLUP",
+   "protocol": "forward",
+   "trait": "env4",
+   "seed": 1,
+   "r": 0.3213069834588919,
+   "bias_slope": 0.8362902035506751,
+   "top10": 0.2916666666666667,
+   "n_eval": 238,
+   "sec": 0.02,
+   "extra": {
+    "alphas": [
+     0.1
+    ]
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L1_GBLUP",
+   "protocol": "forward",
+   "trait": "env4",
+   "seed": 2,
+   "r": 0.3213069834588919,
+   "bias_slope": 0.8362902035506751,
+   "top10": 0.2916666666666667,
+   "n_eval": 238,
+   "sec": 0.02,
+   "extra": {
+    "alphas": [
+     0.1
+    ]
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L1_GBLUP",
+   "protocol": "forward",
+   "trait": "env5",
+   "seed": 0,
+   "r": 0.19037810124055624,
+   "bias_slope": 0.44019483401032444,
+   "top10": 0.20833333333333334,
+   "n_eval": 238,
+   "sec": 0.02,
+   "extra": {
+    "alphas": [
+     0.1
+    ]
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L1_GBLUP",
+   "protocol": "forward",
+   "trait": "env5",
+   "seed": 1,
+   "r": 0.19037810124055624,
+   "bias_slope": 0.44019483401032444,
+   "top10": 0.20833333333333334,
+   "n_eval": 238,
+   "sec": 0.02,
+   "extra": {
+    "alphas": [
+     0.1
+    ]
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L1_GBLUP",
+   "protocol": "forward",
+   "trait": "env5",
+   "seed": 2,
+   "r": 0.19037810124055624,
+   "bias_slope": 0.44019483401032444,
+   "top10": 0.20833333333333334,
+   "n_eval": 238,
+   "sec": 0.02,
+   "extra": {
+    "alphas": [
+     0.1
+    ]
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L1_GBLUP",
+   "protocol": "group",
+   "trait": "env1",
+   "seed": 0,
+   "r": 0.19067966150873802,
+   "bias_slope": 0.4437005542625457,
+   "top10": 0.11666666666666667,
+   "n_eval": 599,
+   "sec": 0.1,
+   "extra": {
+    "alphas": [
+     0.1,
+     0.1,
+     0.1,
+     0.1,
+     0.1
+    ]
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L1_GBLUP",
+   "protocol": "group",
+   "trait": "env1",
+   "seed": 1,
+   "r": 0.19067966150873802,
+   "bias_slope": 0.4437005542625457,
+   "top10": 0.11666666666666667,
+   "n_eval": 599,
+   "sec": 0.11,
+   "extra": {
+    "alphas": [
+     0.1,
+     0.1,
+     0.1,
+     0.1,
+     0.1
+    ]
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L1_GBLUP",
+   "protocol": "group",
+   "trait": "env1",
+   "seed": 2,
+   "r": 0.19067966150873802,
+   "bias_slope": 0.4437005542625457,
+   "top10": 0.11666666666666667,
+   "n_eval": 599,
+   "sec": 0.11,
+   "extra": {
+    "alphas": [
+     0.1,
+     0.1,
+     0.1,
+     0.1,
+     0.1
+    ]
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L1_GBLUP",
+   "protocol": "group",
+   "trait": "env2",
+   "seed": 0,
+   "r": 0.3205075132410797,
+   "bias_slope": 0.7735845229700281,
+   "top10": 0.18333333333333332,
+   "n_eval": 599,
+   "sec": 0.11,
+   "extra": {
+    "alphas": [
+     0.1,
+     0.1,
+     0.1,
+     0.3,
+     0.1
+    ]
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L1_GBLUP",
+   "protocol": "group",
+   "trait": "env2",
+   "seed": 1,
+   "r": 0.31855956334523294,
+   "bias_slope": 0.7685698967167421,
+   "top10": 0.2,
+   "n_eval": 599,
+   "sec": 0.11,
+   "extra": {
+    "alphas": [
+     0.1,
+     0.3,
+     0.1,
+     0.1,
+     0.1
+    ]
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L1_GBLUP",
+   "protocol": "group",
+   "trait": "env2",
+   "seed": 2,
+   "r": 0.31097503963774864,
+   "bias_slope": 0.7712608654714034,
+   "top10": 0.16666666666666666,
+   "n_eval": 599,
+   "sec": 0.11,
+   "extra": {
+    "alphas": [
+     0.1,
+     0.3,
+     0.1,
+     0.3,
+     0.1
+    ]
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L1_GBLUP",
+   "protocol": "group",
+   "trait": "env4",
+   "seed": 0,
+   "r": 0.1967680757954851,
+   "bias_slope": 0.5391773495981139,
+   "top10": 0.16666666666666666,
+   "n_eval": 599,
+   "sec": 0.11,
+   "extra": {
+    "alphas": [
+     0.1,
+     1.0,
+     0.3,
+     0.3,
+     0.3
+    ]
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L1_GBLUP",
+   "protocol": "group",
+   "trait": "env4",
+   "seed": 1,
+   "r": 0.1936523154408346,
+   "bias_slope": 0.48766429894033525,
+   "top10": 0.2,
+   "n_eval": 599,
+   "sec": 0.11,
+   "extra": {
+    "alphas": [
+     0.1,
+     0.3,
+     0.3,
+     0.3,
+     0.1
+    ]
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L1_GBLUP",
+   "protocol": "group",
+   "trait": "env4",
+   "seed": 2,
+   "r": 0.19852281118593024,
+   "bias_slope": 0.5623956645292632,
+   "top10": 0.16666666666666666,
+   "n_eval": 599,
+   "sec": 0.11,
+   "extra": {
+    "alphas": [
+     0.1,
+     1.0,
+     0.3,
+     1.0,
+     0.3
+    ]
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L1_GBLUP",
+   "protocol": "group",
+   "trait": "env5",
+   "seed": 0,
+   "r": 0.17770563064838868,
+   "bias_slope": 0.4577340323353743,
+   "top10": 0.21666666666666667,
+   "n_eval": 599,
+   "sec": 0.11,
+   "extra": {
+    "alphas": [
+     0.1,
+     0.3,
+     0.3,
+     0.3,
+     0.1
+    ]
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L1_GBLUP",
+   "protocol": "group",
+   "trait": "env5",
+   "seed": 1,
+   "r": 0.16920708183190308,
+   "bias_slope": 0.43030410245658846,
+   "top10": 0.18333333333333332,
+   "n_eval": 599,
+   "sec": 0.11,
+   "extra": {
+    "alphas": [
+     0.1,
+     1.0,
+     0.1,
+     0.3,
+     0.1
+    ]
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L1_GBLUP",
+   "protocol": "group",
+   "trait": "env5",
+   "seed": 2,
+   "r": 0.18241554982062344,
+   "bias_slope": 0.4440890810370765,
+   "top10": 0.23333333333333334,
+   "n_eval": 599,
+   "sec": 0.11,
+   "extra": {
+    "alphas": [
+     0.1,
+     0.1,
+     0.3,
+     0.3,
+     0.1
+    ]
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L1_GBLUP",
+   "protocol": "random",
+   "trait": "env1",
+   "seed": 0,
+   "r": 0.5195844537575611,
+   "bias_slope": 0.9511204492696238,
+   "top10": 0.21666666666666667,
+   "n_eval": 599,
+   "sec": 0.11,
+   "extra": {
+    "alphas": [
+     0.1,
+     0.1,
+     0.1,
+     0.1,
+     0.1
+    ]
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L1_GBLUP",
+   "protocol": "random",
+   "trait": "env1",
+   "seed": 1,
+   "r": 0.5041748705118954,
+   "bias_slope": 0.9518907781704403,
+   "top10": 0.25,
+   "n_eval": 599,
+   "sec": 0.11,
+   "extra": {
+    "alphas": [
+     0.1,
+     0.3,
+     0.1,
+     0.1,
+     0.1
+    ]
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L1_GBLUP",
+   "protocol": "random",
+   "trait": "env1",
+   "seed": 2,
+   "r": 0.5014147078080563,
+   "bias_slope": 1.0282197881853583,
+   "top10": 0.13333333333333333,
+   "n_eval": 599,
+   "sec": 0.11,
+   "extra": {
+    "alphas": [
+     0.3,
+     0.3,
+     0.1,
+     0.1,
+     0.1
+    ]
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L1_GBLUP",
+   "protocol": "random",
+   "trait": "env2",
+   "seed": 0,
+   "r": 0.4919023375259195,
+   "bias_slope": 1.0266759111976467,
+   "top10": 0.3,
+   "n_eval": 599,
+   "sec": 0.11,
+   "extra": {
+    "alphas": [
+     0.1,
+     0.1,
+     0.1,
+     0.3,
+     0.3
+    ]
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L1_GBLUP",
+   "protocol": "random",
+   "trait": "env2",
+   "seed": 1,
+   "r": 0.44215199997491544,
+   "bias_slope": 0.8535825394039614,
+   "top10": 0.3333333333333333,
+   "n_eval": 599,
+   "sec": 0.11,
+   "extra": {
+    "alphas": [
+     0.1,
+     0.3,
+     0.1,
+     0.1,
+     0.1
+    ]
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L1_GBLUP",
+   "protocol": "random",
+   "trait": "env2",
+   "seed": 2,
+   "r": 0.491844725934292,
+   "bias_slope": 0.9459078953188472,
+   "top10": 0.3,
+   "n_eval": 599,
+   "sec": 0.11,
+   "extra": {
+    "alphas": [
+     0.1,
+     0.1,
+     0.1,
+     0.1,
+     0.1
+    ]
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L1_GBLUP",
+   "protocol": "random",
+   "trait": "env4",
+   "seed": 0,
+   "r": 0.3127422429734728,
+   "bias_slope": 0.8563726304686422,
+   "top10": 0.26666666666666666,
+   "n_eval": 599,
+   "sec": 0.11,
+   "extra": {
+    "alphas": [
+     1.0,
+     1.0,
+     0.3,
+     0.1,
+     1.0
+    ]
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L1_GBLUP",
+   "protocol": "random",
+   "trait": "env4",
+   "seed": 1,
+   "r": 0.34699534269636617,
+   "bias_slope": 0.9304570209779605,
+   "top10": 0.3,
+   "n_eval": 599,
+   "sec": 0.11,
+   "extra": {
+    "alphas": [
+     0.3,
+     0.3,
+     0.3,
+     1.0,
+     0.3
+    ]
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L1_GBLUP",
+   "protocol": "random",
+   "trait": "env4",
+   "seed": 2,
+   "r": 0.33506101318232834,
+   "bias_slope": 0.9916301388623048,
+   "top10": 0.31666666666666665,
+   "n_eval": 599,
+   "sec": 0.11,
+   "extra": {
+    "alphas": [
+     0.3,
+     0.3,
+     0.3,
+     1.0,
+     1.0
+    ]
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L1_GBLUP",
+   "protocol": "random",
+   "trait": "env5",
+   "seed": 0,
+   "r": 0.4386787777440573,
+   "bias_slope": 0.9245198317362332,
+   "top10": 0.4,
+   "n_eval": 599,
+   "sec": 0.11,
+   "extra": {
+    "alphas": [
+     0.1,
+     0.3,
+     0.3,
+     0.1,
+     0.3
+    ]
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L1_GBLUP",
+   "protocol": "random",
+   "trait": "env5",
+   "seed": 1,
+   "r": 0.41697172343487926,
+   "bias_slope": 0.8763869845904284,
+   "top10": 0.38333333333333336,
+   "n_eval": 599,
+   "sec": 0.11,
+   "extra": {
+    "alphas": [
+     0.1,
+     0.3,
+     0.3,
+     0.3,
+     0.1
+    ]
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L1_GBLUP",
+   "protocol": "random",
+   "trait": "env5",
+   "seed": 2,
+   "r": 0.4506345034498095,
+   "bias_slope": 0.913715280117353,
+   "top10": 0.36666666666666664,
+   "n_eval": 599,
+   "sec": 0.11,
+   "extra": {
+    "alphas": [
+     0.3,
+     0.3,
+     0.1,
+     0.1,
+     0.1
+    ]
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L2_GBM",
+   "protocol": "forward",
+   "trait": "env1",
+   "seed": 0,
+   "r": 0.07218347365326862,
+   "bias_slope": 0.1664742442597919,
+   "top10": 0.125,
+   "n_eval": 238,
+   "sec": 0.15,
+   "extra": {
+    "engine": "lightgbm",
+    "params": {
+     "n_estimators": 300,
+     "max_depth": 3,
+     "learning_rate": 0.05,
+     "subsample": 0.8
+    }
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L2_GBM",
+   "protocol": "forward",
+   "trait": "env1",
+   "seed": 1,
+   "r": 0.04230679021250038,
+   "bias_slope": 0.10043775379463267,
+   "top10": 0.08333333333333333,
+   "n_eval": 238,
+   "sec": 0.14,
+   "extra": {
+    "engine": "lightgbm",
+    "params": {
+     "n_estimators": 300,
+     "max_depth": 3,
+     "learning_rate": 0.05,
+     "subsample": 0.8
+    }
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L2_GBM",
+   "protocol": "forward",
+   "trait": "env1",
+   "seed": 2,
+   "r": 0.08312425356984528,
+   "bias_slope": 0.19415912627678505,
+   "top10": 0.125,
+   "n_eval": 238,
+   "sec": 0.15,
+   "extra": {
+    "engine": "lightgbm",
+    "params": {
+     "n_estimators": 300,
+     "max_depth": 3,
+     "learning_rate": 0.05,
+     "subsample": 0.8
+    }
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L2_GBM",
+   "protocol": "forward",
+   "trait": "env2",
+   "seed": 0,
+   "r": 0.38928334545644355,
+   "bias_slope": 1.056721251725655,
+   "top10": 0.375,
+   "n_eval": 238,
+   "sec": 0.2,
+   "extra": {
+    "engine": "lightgbm",
+    "params": {
+     "n_estimators": 300,
+     "max_depth": 3,
+     "learning_rate": 0.05,
+     "subsample": 0.8
+    }
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L2_GBM",
+   "protocol": "forward",
+   "trait": "env2",
+   "seed": 1,
+   "r": 0.3391220326799063,
+   "bias_slope": 0.8390459343944346,
+   "top10": 0.2916666666666667,
+   "n_eval": 238,
+   "sec": 0.19,
+   "extra": {
+    "engine": "lightgbm",
+    "params": {
+     "n_estimators": 300,
+     "max_depth": 3,
+     "learning_rate": 0.05,
+     "subsample": 0.8
+    }
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L2_GBM",
+   "protocol": "forward",
+   "trait": "env2",
+   "seed": 2,
+   "r": 0.37625322127062616,
+   "bias_slope": 0.9614788088931104,
+   "top10": 0.25,
+   "n_eval": 238,
+   "sec": 0.15,
+   "extra": {
+    "engine": "lightgbm",
+    "params": {
+     "n_estimators": 300,
+     "max_depth": 3,
+     "learning_rate": 0.05,
+     "subsample": 0.8
+    }
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L2_GBM",
+   "protocol": "forward",
+   "trait": "env4",
+   "seed": 0,
+   "r": 0.28854566865460707,
+   "bias_slope": 0.8198157236107138,
+   "top10": 0.2916666666666667,
+   "n_eval": 238,
+   "sec": 0.15,
+   "extra": {
+    "engine": "lightgbm",
+    "params": {
+     "n_estimators": 300,
+     "max_depth": 3,
+     "learning_rate": 0.05,
+     "subsample": 0.8
+    }
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L2_GBM",
+   "protocol": "forward",
+   "trait": "env4",
+   "seed": 1,
+   "r": 0.2636879397177458,
+   "bias_slope": 0.7322771251997372,
+   "top10": 0.3333333333333333,
+   "n_eval": 238,
+   "sec": 0.15,
+   "extra": {
+    "engine": "lightgbm",
+    "params": {
+     "n_estimators": 300,
+     "max_depth": 3,
+     "learning_rate": 0.05,
+     "subsample": 0.8
+    }
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L2_GBM",
+   "protocol": "forward",
+   "trait": "env4",
+   "seed": 2,
+   "r": 0.302228681566511,
+   "bias_slope": 0.8409767929338858,
+   "top10": 0.2916666666666667,
+   "n_eval": 238,
+   "sec": 0.15,
+   "extra": {
+    "engine": "lightgbm",
+    "params": {
+     "n_estimators": 300,
+     "max_depth": 3,
+     "learning_rate": 0.05,
+     "subsample": 0.8
+    }
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L2_GBM",
+   "protocol": "forward",
+   "trait": "env5",
+   "seed": 0,
+   "r": 0.1958107677526484,
+   "bias_slope": 0.46610135307215955,
+   "top10": 0.16666666666666666,
+   "n_eval": 238,
+   "sec": 0.16,
+   "extra": {
+    "engine": "lightgbm",
+    "params": {
+     "n_estimators": 300,
+     "max_depth": 3,
+     "learning_rate": 0.05,
+     "subsample": 0.8
+    }
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L2_GBM",
+   "protocol": "forward",
+   "trait": "env5",
+   "seed": 1,
+   "r": 0.19652325469765808,
+   "bias_slope": 0.48382018520941217,
+   "top10": 0.20833333333333334,
+   "n_eval": 238,
+   "sec": 0.15,
+   "extra": {
+    "engine": "lightgbm",
+    "params": {
+     "n_estimators": 300,
+     "max_depth": 3,
+     "learning_rate": 0.05,
+     "subsample": 0.8
+    }
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L2_GBM",
+   "protocol": "forward",
+   "trait": "env5",
+   "seed": 2,
+   "r": 0.20338633009575727,
+   "bias_slope": 0.4946663731346082,
+   "top10": 0.20833333333333334,
+   "n_eval": 238,
+   "sec": 0.15,
+   "extra": {
+    "engine": "lightgbm",
+    "params": {
+     "n_estimators": 300,
+     "max_depth": 3,
+     "learning_rate": 0.05,
+     "subsample": 0.8
+    }
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L2_GBM",
+   "protocol": "group",
+   "trait": "env1",
+   "seed": 0,
+   "r": 0.0603626513908112,
+   "bias_slope": 0.1173382363421788,
+   "top10": 0.13333333333333333,
+   "n_eval": 599,
+   "sec": 0.91,
+   "extra": {
+    "engine": "lightgbm",
+    "params": {
+     "n_estimators": 300,
+     "max_depth": 3,
+     "learning_rate": 0.05,
+     "subsample": 0.8
+    }
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L2_GBM",
+   "protocol": "group",
+   "trait": "env1",
+   "seed": 1,
+   "r": 0.058087274858672065,
+   "bias_slope": 0.11594111565157852,
+   "top10": 0.15,
+   "n_eval": 599,
+   "sec": 0.89,
+   "extra": {
+    "engine": "lightgbm",
+    "params": {
+     "n_estimators": 300,
+     "max_depth": 3,
+     "learning_rate": 0.05,
+     "subsample": 0.8
+    }
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L2_GBM",
+   "protocol": "group",
+   "trait": "env1",
+   "seed": 2,
+   "r": 0.07642324626029319,
+   "bias_slope": 0.14770109069534412,
+   "top10": 0.16666666666666666,
+   "n_eval": 599,
+   "sec": 0.88,
+   "extra": {
+    "engine": "lightgbm",
+    "params": {
+     "n_estimators": 300,
+     "max_depth": 3,
+     "learning_rate": 0.05,
+     "subsample": 0.8
+    }
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L2_GBM",
+   "protocol": "group",
+   "trait": "env2",
+   "seed": 0,
+   "r": 0.27407854980530405,
+   "bias_slope": 0.6519292622001434,
+   "top10": 0.23333333333333334,
+   "n_eval": 599,
+   "sec": 0.88,
+   "extra": {
+    "engine": "lightgbm",
+    "params": {
+     "n_estimators": 300,
+     "max_depth": 3,
+     "learning_rate": 0.05,
+     "subsample": 0.8
+    }
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L2_GBM",
+   "protocol": "group",
+   "trait": "env2",
+   "seed": 1,
+   "r": 0.26341932752491365,
+   "bias_slope": 0.5927731801751667,
+   "top10": 0.25,
+   "n_eval": 599,
+   "sec": 0.92,
+   "extra": {
+    "engine": "lightgbm",
+    "params": {
+     "n_estimators": 300,
+     "max_depth": 3,
+     "learning_rate": 0.05,
+     "subsample": 0.8
+    }
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L2_GBM",
+   "protocol": "group",
+   "trait": "env2",
+   "seed": 2,
+   "r": 0.25357338011014025,
+   "bias_slope": 0.6047747223168327,
+   "top10": 0.2,
+   "n_eval": 599,
+   "sec": 0.88,
+   "extra": {
+    "engine": "lightgbm",
+    "params": {
+     "n_estimators": 300,
+     "max_depth": 3,
+     "learning_rate": 0.05,
+     "subsample": 0.8
+    }
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L2_GBM",
+   "protocol": "group",
+   "trait": "env4",
+   "seed": 0,
+   "r": 0.2057101203054832,
+   "bias_slope": 0.4679162770000177,
+   "top10": 0.16666666666666666,
+   "n_eval": 599,
+   "sec": 0.87,
+   "extra": {
+    "engine": "lightgbm",
+    "params": {
+     "n_estimators": 300,
+     "max_depth": 3,
+     "learning_rate": 0.05,
+     "subsample": 0.8
+    }
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L2_GBM",
+   "protocol": "group",
+   "trait": "env4",
+   "seed": 1,
+   "r": 0.20391802853417781,
+   "bias_slope": 0.4730496180864714,
+   "top10": 0.2,
+   "n_eval": 599,
+   "sec": 0.88,
+   "extra": {
+    "engine": "lightgbm",
+    "params": {
+     "n_estimators": 300,
+     "max_depth": 3,
+     "learning_rate": 0.05,
+     "subsample": 0.8
+    }
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L2_GBM",
+   "protocol": "group",
+   "trait": "env4",
+   "seed": 2,
+   "r": 0.2254046004560112,
+   "bias_slope": 0.5141668352676197,
+   "top10": 0.16666666666666666,
+   "n_eval": 599,
+   "sec": 0.89,
+   "extra": {
+    "engine": "lightgbm",
+    "params": {
+     "n_estimators": 300,
+     "max_depth": 3,
+     "learning_rate": 0.05,
+     "subsample": 0.8
+    }
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L2_GBM",
+   "protocol": "group",
+   "trait": "env5",
+   "seed": 0,
+   "r": 0.21220471719354161,
+   "bias_slope": 0.4660930767577537,
+   "top10": 0.11666666666666667,
+   "n_eval": 599,
+   "sec": 0.89,
+   "extra": {
+    "engine": "lightgbm",
+    "params": {
+     "n_estimators": 300,
+     "max_depth": 3,
+     "learning_rate": 0.05,
+     "subsample": 0.8
+    }
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L2_GBM",
+   "protocol": "group",
+   "trait": "env5",
+   "seed": 1,
+   "r": 0.19339452455120154,
+   "bias_slope": 0.42966533730790685,
+   "top10": 0.11666666666666667,
+   "n_eval": 599,
+   "sec": 0.89,
+   "extra": {
+    "engine": "lightgbm",
+    "params": {
+     "n_estimators": 300,
+     "max_depth": 3,
+     "learning_rate": 0.05,
+     "subsample": 0.8
+    }
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L2_GBM",
+   "protocol": "group",
+   "trait": "env5",
+   "seed": 2,
+   "r": 0.20650844026352178,
+   "bias_slope": 0.4502395727383311,
+   "top10": 0.13333333333333333,
+   "n_eval": 599,
+   "sec": 0.88,
+   "extra": {
+    "engine": "lightgbm",
+    "params": {
+     "n_estimators": 300,
+     "max_depth": 3,
+     "learning_rate": 0.05,
+     "subsample": 0.8
+    }
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L2_GBM",
+   "protocol": "random",
+   "trait": "env1",
+   "seed": 0,
+   "r": 0.5346746374375303,
+   "bias_slope": 0.8906323204905506,
+   "top10": 0.25,
+   "n_eval": 599,
+   "sec": 1.07,
+   "extra": {
+    "engine": "lightgbm",
+    "params": {
+     "n_estimators": 300,
+     "max_depth": 3,
+     "learning_rate": 0.05,
+     "subsample": 0.8
+    }
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L2_GBM",
+   "protocol": "random",
+   "trait": "env1",
+   "seed": 1,
+   "r": 0.5232973146633633,
+   "bias_slope": 0.8634992625574187,
+   "top10": 0.25,
+   "n_eval": 599,
+   "sec": 0.91,
+   "extra": {
+    "engine": "lightgbm",
+    "params": {
+     "n_estimators": 300,
+     "max_depth": 3,
+     "learning_rate": 0.05,
+     "subsample": 0.8
+    }
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L2_GBM",
+   "protocol": "random",
+   "trait": "env1",
+   "seed": 2,
+   "r": 0.5668034746954784,
+   "bias_slope": 0.9223888042626556,
+   "top10": 0.25,
+   "n_eval": 599,
+   "sec": 0.95,
+   "extra": {
+    "engine": "lightgbm",
+    "params": {
+     "n_estimators": 300,
+     "max_depth": 3,
+     "learning_rate": 0.05,
+     "subsample": 0.8
+    }
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L2_GBM",
+   "protocol": "random",
+   "trait": "env2",
+   "seed": 0,
+   "r": 0.4623805878254606,
+   "bias_slope": 0.8303552754655878,
+   "top10": 0.31666666666666665,
+   "n_eval": 599,
+   "sec": 0.88,
+   "extra": {
+    "engine": "lightgbm",
+    "params": {
+     "n_estimators": 300,
+     "max_depth": 3,
+     "learning_rate": 0.05,
+     "subsample": 0.8
+    }
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L2_GBM",
+   "protocol": "random",
+   "trait": "env2",
+   "seed": 1,
+   "r": 0.42780386911168405,
+   "bias_slope": 0.7479356488357916,
+   "top10": 0.31666666666666665,
+   "n_eval": 599,
+   "sec": 0.88,
+   "extra": {
+    "engine": "lightgbm",
+    "params": {
+     "n_estimators": 300,
+     "max_depth": 3,
+     "learning_rate": 0.05,
+     "subsample": 0.8
+    }
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L2_GBM",
+   "protocol": "random",
+   "trait": "env2",
+   "seed": 2,
+   "r": 0.4863443133012515,
+   "bias_slope": 0.8902879982593781,
+   "top10": 0.31666666666666665,
+   "n_eval": 599,
+   "sec": 0.89,
+   "extra": {
+    "engine": "lightgbm",
+    "params": {
+     "n_estimators": 300,
+     "max_depth": 3,
+     "learning_rate": 0.05,
+     "subsample": 0.8
+    }
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L2_GBM",
+   "protocol": "random",
+   "trait": "env4",
+   "seed": 0,
+   "r": 0.3960976658991821,
+   "bias_slope": 0.748933703264741,
+   "top10": 0.31666666666666665,
+   "n_eval": 599,
+   "sec": 0.9,
+   "extra": {
+    "engine": "lightgbm",
+    "params": {
+     "n_estimators": 300,
+     "max_depth": 3,
+     "learning_rate": 0.05,
+     "subsample": 0.8
+    }
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L2_GBM",
+   "protocol": "random",
+   "trait": "env4",
+   "seed": 1,
+   "r": 0.38022033712982584,
+   "bias_slope": 0.7006190570236589,
+   "top10": 0.26666666666666666,
+   "n_eval": 599,
+   "sec": 0.88,
+   "extra": {
+    "engine": "lightgbm",
+    "params": {
+     "n_estimators": 300,
+     "max_depth": 3,
+     "learning_rate": 0.05,
+     "subsample": 0.8
+    }
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L2_GBM",
+   "protocol": "random",
+   "trait": "env4",
+   "seed": 2,
+   "r": 0.4169830430993063,
+   "bias_slope": 0.8085195759840336,
+   "top10": 0.26666666666666666,
+   "n_eval": 599,
+   "sec": 0.89,
+   "extra": {
+    "engine": "lightgbm",
+    "params": {
+     "n_estimators": 300,
+     "max_depth": 3,
+     "learning_rate": 0.05,
+     "subsample": 0.8
+    }
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L2_GBM",
+   "protocol": "random",
+   "trait": "env5",
+   "seed": 0,
+   "r": 0.49132286103009193,
+   "bias_slope": 0.8152490917719868,
+   "top10": 0.38333333333333336,
+   "n_eval": 599,
+   "sec": 0.9,
+   "extra": {
+    "engine": "lightgbm",
+    "params": {
+     "n_estimators": 300,
+     "max_depth": 3,
+     "learning_rate": 0.05,
+     "subsample": 0.8
+    }
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L2_GBM",
+   "protocol": "random",
+   "trait": "env5",
+   "seed": 1,
+   "r": 0.46398195513334134,
+   "bias_slope": 0.7777396220201364,
+   "top10": 0.43333333333333335,
+   "n_eval": 599,
+   "sec": 0.9,
+   "extra": {
+    "engine": "lightgbm",
+    "params": {
+     "n_estimators": 300,
+     "max_depth": 3,
+     "learning_rate": 0.05,
+     "subsample": 0.8
+    }
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L2_GBM",
+   "protocol": "random",
+   "trait": "env5",
+   "seed": 2,
+   "r": 0.511728640459048,
+   "bias_slope": 0.8831561051119522,
+   "top10": 0.38333333333333336,
+   "n_eval": 599,
+   "sec": 0.96,
+   "extra": {
+    "engine": "lightgbm",
+    "params": {
+     "n_estimators": 300,
+     "max_depth": 3,
+     "learning_rate": 0.05,
+     "subsample": 0.8
+    }
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L3_wRidge",
+   "protocol": "forward",
+   "trait": "env1",
+   "seed": 0,
+   "r": 0.22901884081318866,
+   "bias_slope": 0.49920516110440766,
+   "top10": 0.125,
+   "n_eval": 238,
+   "sec": 0.02,
+   "extra": {
+    "alphas": [
+     0.1
+    ],
+    "note": "placeholder weights, NOT real functional priors"
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L3_wRidge",
+   "protocol": "forward",
+   "trait": "env1",
+   "seed": 1,
+   "r": 0.22697010316080518,
+   "bias_slope": 0.4994947581435483,
+   "top10": 0.08333333333333333,
+   "n_eval": 238,
+   "sec": 0.02,
+   "extra": {
+    "alphas": [
+     0.1
+    ],
+    "note": "placeholder weights, NOT real functional priors"
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L3_wRidge",
+   "protocol": "forward",
+   "trait": "env1",
+   "seed": 2,
+   "r": 0.2189372248053269,
+   "bias_slope": 0.4813537231488089,
+   "top10": 0.125,
+   "n_eval": 238,
+   "sec": 0.02,
+   "extra": {
+    "alphas": [
+     0.1
+    ],
+    "note": "placeholder weights, NOT real functional priors"
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L3_wRidge",
+   "protocol": "forward",
+   "trait": "env2",
+   "seed": 0,
+   "r": 0.42147916937488816,
+   "bias_slope": 1.0424527845848095,
+   "top10": 0.16666666666666666,
+   "n_eval": 238,
+   "sec": 0.02,
+   "extra": {
+    "alphas": [
+     0.1
+    ],
+    "note": "placeholder weights, NOT real functional priors"
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L3_wRidge",
+   "protocol": "forward",
+   "trait": "env2",
+   "seed": 1,
+   "r": 0.4404743187783998,
+   "bias_slope": 1.0732546854657983,
+   "top10": 0.20833333333333334,
+   "n_eval": 238,
+   "sec": 0.02,
+   "extra": {
+    "alphas": [
+     0.1
+    ],
+    "note": "placeholder weights, NOT real functional priors"
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L3_wRidge",
+   "protocol": "forward",
+   "trait": "env2",
+   "seed": 2,
+   "r": 0.42117637492878457,
+   "bias_slope": 1.021245208186875,
+   "top10": 0.20833333333333334,
+   "n_eval": 238,
+   "sec": 0.02,
+   "extra": {
+    "alphas": [
+     0.1
+    ],
+    "note": "placeholder weights, NOT real functional priors"
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L3_wRidge",
+   "protocol": "forward",
+   "trait": "env4",
+   "seed": 0,
+   "r": 0.3292538929634394,
+   "bias_slope": 0.854618097401782,
+   "top10": 0.25,
+   "n_eval": 238,
+   "sec": 0.02,
+   "extra": {
+    "alphas": [
+     0.1
+    ],
+    "note": "placeholder weights, NOT real functional priors"
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L3_wRidge",
+   "protocol": "forward",
+   "trait": "env4",
+   "seed": 1,
+   "r": 0.3358744779162691,
+   "bias_slope": 0.8622933427228555,
+   "top10": 0.25,
+   "n_eval": 238,
+   "sec": 0.02,
+   "extra": {
+    "alphas": [
+     0.1
+    ],
+    "note": "placeholder weights, NOT real functional priors"
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L3_wRidge",
+   "protocol": "forward",
+   "trait": "env4",
+   "seed": 2,
+   "r": 0.34061375069448424,
+   "bias_slope": 0.8916851750422755,
+   "top10": 0.25,
+   "n_eval": 238,
+   "sec": 0.02,
+   "extra": {
+    "alphas": [
+     0.1
+    ],
+    "note": "placeholder weights, NOT real functional priors"
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L3_wRidge",
+   "protocol": "forward",
+   "trait": "env5",
+   "seed": 0,
+   "r": 0.19269764674205045,
+   "bias_slope": 0.4428924091883511,
+   "top10": 0.20833333333333334,
+   "n_eval": 238,
+   "sec": 0.02,
+   "extra": {
+    "alphas": [
+     0.1
+    ],
+    "note": "placeholder weights, NOT real functional priors"
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L3_wRidge",
+   "protocol": "forward",
+   "trait": "env5",
+   "seed": 1,
+   "r": 0.17713896594207562,
+   "bias_slope": 0.4111477212309017,
+   "top10": 0.20833333333333334,
+   "n_eval": 238,
+   "sec": 0.02,
+   "extra": {
+    "alphas": [
+     0.1
+    ],
+    "note": "placeholder weights, NOT real functional priors"
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L3_wRidge",
+   "protocol": "forward",
+   "trait": "env5",
+   "seed": 2,
+   "r": 0.1775162664506727,
+   "bias_slope": 0.4065932942629472,
+   "top10": 0.16666666666666666,
+   "n_eval": 238,
+   "sec": 0.02,
+   "extra": {
+    "alphas": [
+     0.1
+    ],
+    "note": "placeholder weights, NOT real functional priors"
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L3_wRidge",
+   "protocol": "group",
+   "trait": "env1",
+   "seed": 0,
+   "r": 0.19313249142810981,
+   "bias_slope": 0.44514616098404525,
+   "top10": 0.11666666666666667,
+   "n_eval": 599,
+   "sec": 0.11,
+   "extra": {
+    "alphas": [
+     0.1,
+     0.1,
+     0.1,
+     0.1,
+     0.1
+    ],
+    "note": "placeholder weights, NOT real functional priors"
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L3_wRidge",
+   "protocol": "group",
+   "trait": "env1",
+   "seed": 1,
+   "r": 0.19235312666498636,
+   "bias_slope": 0.440355616479761,
+   "top10": 0.13333333333333333,
+   "n_eval": 599,
+   "sec": 0.11,
+   "extra": {
+    "alphas": [
+     0.1,
+     0.1,
+     0.1,
+     0.1,
+     0.1
+    ],
+    "note": "placeholder weights, NOT real functional priors"
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L3_wRidge",
+   "protocol": "group",
+   "trait": "env1",
+   "seed": 2,
+   "r": 0.18278566863265544,
+   "bias_slope": 0.4229750604145834,
+   "top10": 0.11666666666666667,
+   "n_eval": 599,
+   "sec": 0.12,
+   "extra": {
+    "alphas": [
+     0.1,
+     0.1,
+     0.1,
+     0.1,
+     0.1
+    ],
+    "note": "placeholder weights, NOT real functional priors"
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L3_wRidge",
+   "protocol": "group",
+   "trait": "env2",
+   "seed": 0,
+   "r": 0.3091871578977046,
+   "bias_slope": 0.7647446726178592,
+   "top10": 0.11666666666666667,
+   "n_eval": 599,
+   "sec": 0.11,
+   "extra": {
+    "alphas": [
+     0.1,
+     0.3,
+     0.1,
+     0.3,
+     0.1
+    ],
+    "note": "placeholder weights, NOT real functional priors"
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L3_wRidge",
+   "protocol": "group",
+   "trait": "env2",
+   "seed": 1,
+   "r": 0.3299229033350879,
+   "bias_slope": 0.8272740423040404,
+   "top10": 0.21666666666666667,
+   "n_eval": 599,
+   "sec": 0.12,
+   "extra": {
+    "alphas": [
+     0.1,
+     0.3,
+     0.3,
+     0.1,
+     0.1
+    ],
+    "note": "placeholder weights, NOT real functional priors"
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L3_wRidge",
+   "protocol": "group",
+   "trait": "env2",
+   "seed": 2,
+   "r": 0.3134323370510935,
+   "bias_slope": 0.7660302432203572,
+   "top10": 0.16666666666666666,
+   "n_eval": 599,
+   "sec": 0.11,
+   "extra": {
+    "alphas": [
+     0.1,
+     0.3,
+     0.1,
+     0.3,
+     0.1
+    ],
+    "note": "placeholder weights, NOT real functional priors"
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L3_wRidge",
+   "protocol": "group",
+   "trait": "env4",
+   "seed": 0,
+   "r": 0.1982722175819323,
+   "bias_slope": 0.5417508790263093,
+   "top10": 0.15,
+   "n_eval": 599,
+   "sec": 0.11,
+   "extra": {
+    "alphas": [
+     0.1,
+     1.0,
+     0.3,
+     0.3,
+     0.3
+    ],
+    "note": "placeholder weights, NOT real functional priors"
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L3_wRidge",
+   "protocol": "group",
+   "trait": "env4",
+   "seed": 1,
+   "r": 0.20959240660652875,
+   "bias_slope": 0.5228624665062439,
+   "top10": 0.18333333333333332,
+   "n_eval": 599,
+   "sec": 0.11,
+   "extra": {
+    "alphas": [
+     0.1,
+     0.3,
+     0.3,
+     0.3,
+     0.1
+    ],
+    "note": "placeholder weights, NOT real functional priors"
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L3_wRidge",
+   "protocol": "group",
+   "trait": "env4",
+   "seed": 2,
+   "r": 0.20586208485438026,
+   "bias_slope": 0.580518121850512,
+   "top10": 0.18333333333333332,
+   "n_eval": 599,
+   "sec": 0.11,
+   "extra": {
+    "alphas": [
+     0.1,
+     1.0,
+     0.3,
+     1.0,
+     0.3
+    ],
+    "note": "placeholder weights, NOT real functional priors"
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L3_wRidge",
+   "protocol": "group",
+   "trait": "env5",
+   "seed": 0,
+   "r": 0.17884513753396153,
+   "bias_slope": 0.4584542407020612,
+   "top10": 0.2,
+   "n_eval": 599,
+   "sec": 0.12,
+   "extra": {
+    "alphas": [
+     0.1,
+     0.3,
+     0.3,
+     0.3,
+     0.1
+    ],
+    "note": "placeholder weights, NOT real functional priors"
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L3_wRidge",
+   "protocol": "group",
+   "trait": "env5",
+   "seed": 1,
+   "r": 0.1721078907459756,
+   "bias_slope": 0.4445350336384476,
+   "top10": 0.2,
+   "n_eval": 599,
+   "sec": 0.11,
+   "extra": {
+    "alphas": [
+     0.1,
+     0.3,
+     0.3,
+     0.3,
+     0.1
+    ],
+    "note": "placeholder weights, NOT real functional priors"
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L3_wRidge",
+   "protocol": "group",
+   "trait": "env5",
+   "seed": 2,
+   "r": 0.17229076689961847,
+   "bias_slope": 0.41148326275476604,
+   "top10": 0.23333333333333334,
+   "n_eval": 599,
+   "sec": 0.11,
+   "extra": {
+    "alphas": [
+     0.1,
+     0.1,
+     0.3,
+     0.3,
+     0.1
+    ],
+    "note": "placeholder weights, NOT real functional priors"
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L3_wRidge",
+   "protocol": "random",
+   "trait": "env1",
+   "seed": 0,
+   "r": 0.518472577307529,
+   "bias_slope": 0.9447345134108565,
+   "top10": 0.2,
+   "n_eval": 599,
+   "sec": 0.13,
+   "extra": {
+    "alphas": [
+     0.1,
+     0.1,
+     0.1,
+     0.1,
+     0.1
+    ],
+    "note": "placeholder weights, NOT real functional priors"
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L3_wRidge",
+   "protocol": "random",
+   "trait": "env1",
+   "seed": 1,
+   "r": 0.5009415210244968,
+   "bias_slope": 0.9438442890242646,
+   "top10": 0.23333333333333334,
+   "n_eval": 599,
+   "sec": 0.13,
+   "extra": {
+    "alphas": [
+     0.1,
+     0.3,
+     0.1,
+     0.1,
+     0.1
+    ],
+    "note": "placeholder weights, NOT real functional priors"
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L3_wRidge",
+   "protocol": "random",
+   "trait": "env1",
+   "seed": 2,
+   "r": 0.49744064843031327,
+   "bias_slope": 1.024254128400442,
+   "top10": 0.13333333333333333,
+   "n_eval": 599,
+   "sec": 0.13,
+   "extra": {
+    "alphas": [
+     0.3,
+     0.3,
+     0.1,
+     0.1,
+     0.1
+    ],
+    "note": "placeholder weights, NOT real functional priors"
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L3_wRidge",
+   "protocol": "random",
+   "trait": "env2",
+   "seed": 0,
+   "r": 0.48926270162304275,
+   "bias_slope": 1.065932671689822,
+   "top10": 0.31666666666666665,
+   "n_eval": 599,
+   "sec": 0.11,
+   "extra": {
+    "alphas": [
+     0.1,
+     0.1,
+     0.3,
+     0.3,
+     0.3
+    ],
+    "note": "placeholder weights, NOT real functional priors"
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L3_wRidge",
+   "protocol": "random",
+   "trait": "env2",
+   "seed": 1,
+   "r": 0.43708005550290385,
+   "bias_slope": 0.8415273677083005,
+   "top10": 0.3,
+   "n_eval": 599,
+   "sec": 0.11,
+   "extra": {
+    "alphas": [
+     0.1,
+     0.3,
+     0.1,
+     0.1,
+     0.1
+    ],
+    "note": "placeholder weights, NOT real functional priors"
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L3_wRidge",
+   "protocol": "random",
+   "trait": "env2",
+   "seed": 2,
+   "r": 0.4941857559863125,
+   "bias_slope": 0.9460134398119538,
+   "top10": 0.31666666666666665,
+   "n_eval": 599,
+   "sec": 0.11,
+   "extra": {
+    "alphas": [
+     0.1,
+     0.1,
+     0.1,
+     0.1,
+     0.1
+    ],
+    "note": "placeholder weights, NOT real functional priors"
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L3_wRidge",
+   "protocol": "random",
+   "trait": "env4",
+   "seed": 0,
+   "r": 0.3067523971821643,
+   "bias_slope": 0.8376763164887364,
+   "top10": 0.2833333333333333,
+   "n_eval": 599,
+   "sec": 0.12,
+   "extra": {
+    "alphas": [
+     1.0,
+     1.0,
+     0.3,
+     0.1,
+     1.0
+    ],
+    "note": "placeholder weights, NOT real functional priors"
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L3_wRidge",
+   "protocol": "random",
+   "trait": "env4",
+   "seed": 1,
+   "r": 0.35475667768461894,
+   "bias_slope": 0.8891400092152685,
+   "top10": 0.31666666666666665,
+   "n_eval": 599,
+   "sec": 0.11,
+   "extra": {
+    "alphas": [
+     0.3,
+     0.3,
+     0.3,
+     0.3,
+     0.3
+    ],
+    "note": "placeholder weights, NOT real functional priors"
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L3_wRidge",
+   "protocol": "random",
+   "trait": "env4",
+   "seed": 2,
+   "r": 0.33865878355001877,
+   "bias_slope": 1.0016562839682999,
+   "top10": 0.2833333333333333,
+   "n_eval": 599,
+   "sec": 0.11,
+   "extra": {
+    "alphas": [
+     0.3,
+     0.3,
+     0.3,
+     1.0,
+     1.0
+    ],
+    "note": "placeholder weights, NOT real functional priors"
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L3_wRidge",
+   "protocol": "random",
+   "trait": "env5",
+   "seed": 0,
+   "r": 0.4380337097655658,
+   "bias_slope": 0.9136231373317361,
+   "top10": 0.38333333333333336,
+   "n_eval": 599,
+   "sec": 0.11,
+   "extra": {
+    "alphas": [
+     0.1,
+     0.3,
+     0.3,
+     0.1,
+     0.3
+    ],
+    "note": "placeholder weights, NOT real functional priors"
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L3_wRidge",
+   "protocol": "random",
+   "trait": "env5",
+   "seed": 1,
+   "r": 0.40995408038142467,
+   "bias_slope": 0.8630467297380194,
+   "top10": 0.36666666666666664,
+   "n_eval": 599,
+   "sec": 0.11,
+   "extra": {
+    "alphas": [
+     0.1,
+     0.3,
+     0.3,
+     0.3,
+     0.1
+    ],
+    "note": "placeholder weights, NOT real functional priors"
+   }
+  },
+  {
+   "dataset": "wheat",
+   "model": "L3_wRidge",
+   "protocol": "random",
+   "trait": "env5",
+   "seed": 2,
+   "r": 0.4452324713996319,
+   "bias_slope": 0.9068606744521199,
+   "top10": 0.36666666666666664,
+   "n_eval": 599,
+   "sec": 0.11,
+   "extra": {
+    "alphas": [
+     0.3,
+     0.3,
+     0.1,
+     0.1,
+     0.1
+    ],
+    "note": "placeholder weights, NOT real functional priors"
+   }
+  }
+ ]
+}
