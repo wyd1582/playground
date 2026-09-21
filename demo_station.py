@@ -102,7 +102,7 @@ def discover_artifacts():
     found = {
         "results_json": [], "summary_md": [], "taska_figs": [],
         "refpop_pkg": [], "defects_md": [], "reports_html": [],
-        "cost_png": [], "imput_csv": [], "brief_md": [], "all_csv": [],
+        "cost_png": [], "imput_csv": [], "cost_csv": [], "brief_md": [], "all_csv": [],
     }
     visited = 0
     for root in _search_roots():
@@ -136,6 +136,8 @@ def discover_artifacts():
                     found["cost_png"].append(p)
                 elif low.endswith(".csv") and "imput" in low:
                     found["imput_csv"].append(p)
+                elif low.endswith(".csv") and "cost" in low:
+                    found["cost_csv"].append(p)
                 elif low.endswith(".md") and low.startswith("brief"):
                     found["brief_md"].append(p)
                 if low.endswith(".csv") and len(found["all_csv"]) < 200:
@@ -431,25 +433,67 @@ def _node_line(current: int, running: bool, ok=None) -> str:
     return "　→　".join(parts)
 
 
+def _help_of(pkg_dir: Path, extra_args) -> str:
+    try:
+        out = subprocess.run(
+            [sys.executable, "-m", "refpop_agent.cli"] + extra_args + ["--help"],
+            cwd=str(pkg_dir.parent), capture_output=True, text=True, timeout=30,
+            env={**os.environ, "PYTHONIOENCODING": "utf-8"})
+        return (out.stdout or "") + (out.stderr or "")
+    except Exception as e:
+        return f"(探测 CLI 用法失败：{e})"
+
+
+_RUN_SUB = re.compile(r"(?<![\w-])run(?![\w-])")
+
+
 def _probe_cli(pkg_dir: Path) -> str:
     key = f"bhelp::{pkg_dir}"
     if key not in st.session_state:
-        try:
-            out = subprocess.run(
-                [sys.executable, "-m", "refpop_agent.cli", "--help"],
-                cwd=str(pkg_dir.parent), capture_output=True, text=True, timeout=30,
-                env={**os.environ, "PYTHONIOENCODING": "utf-8"})
-            st.session_state[key] = (out.stdout or "") + (out.stderr or "")
-        except Exception as e:
-            st.session_state[key] = f"(探测 CLI 用法失败：{e})"
+        text = _help_of(pkg_dir, [])
+        if _RUN_SUB.search(text) and "--batch" not in text and "--generation" not in text:
+            text += "\n\n[run 子命令 --help]\n" + _help_of(pkg_dir, ["run"])
+        st.session_state[key] = text
     return st.session_state[key]
 
 
 def _default_cmd(help_text: str) -> str:
-    for flag in ["--generation", "--batch", "--gen"]:
+    sub = "run " if _RUN_SUB.search(help_text) else ""
+    for flag in ["--batch", "--generation", "--gen"]:
         if flag in help_text:
-            return f"{{python}} -m refpop_agent.cli {flag} {{gen}}"
-    return "{python} -m refpop_agent.cli {gen}"
+            return "{python} -m refpop_agent.cli " + sub + flag + " {gen}"
+    return "{python} -m refpop_agent.cli " + sub + "{gen}"
+
+
+def _batch_choices(help_text: str):
+    m = re.search(r"--batch\s+\{([^}]+)\}", help_text)
+    if m:
+        return [c.strip() for c in m.group(1).split(",") if c.strip()]
+    return ["G0", "G1", "G2"]
+
+
+def _merged_batches(pkg_parent: Path):
+    reg = pkg_parent / "artifacts" / "refpop" / "registry.json"
+    try:
+        data = json.loads(read_text(reg))
+        return [str(x.get("batch_id")) for x in data if isinstance(x, dict) and x.get("batch_id")]
+    except Exception:
+        return []
+
+
+def _batch_line(batches, done, current, running, ok=None) -> str:
+    parts = []
+    for b in batches:
+        if b in done:
+            icon = "✅"
+        elif running and b == current:
+            icon = "🔄"
+        elif not running and not ok and b == current:
+            icon = "❌"
+        else:
+            icon = "⚪"
+        parts.append(f"{icon} 批次 {b}")
+    return "　→　".join(parts)
 
 
 def _embed_report(path: Path):
@@ -474,12 +518,15 @@ def _embed_report(path: Path):
         pass
 
 
-def _run_pipeline(cmd: str, workdir: Path, gen: str):
-    st.markdown("##### 节点进度")
+def _run_pipeline(cmd: str, workdir: Path, gen: str, runall: bool, batches):
+    st.markdown("##### 批次进度" if runall else "##### 节点进度")
     prog_ph, log_ph = st.empty(), st.empty()
-    current, lines, timed_out = -1, [], False
+    current, done, lines, timed_out = -1, [], [], False
     t0 = time.time()
-    prog_ph.markdown(_node_line(-1, running=True))
+    if runall:
+        prog_ph.markdown(_batch_line(batches, done, batches[0], running=True))
+    else:
+        prog_ph.markdown(_node_line(-1, running=True))
     try:
         proc = subprocess.Popen(
             shlex.split(cmd), cwd=str(workdir),
@@ -495,8 +542,15 @@ def _run_pipeline(cmd: str, workdir: Path, gen: str):
         if line:
             line = _ANSI.sub("", line.rstrip("\n"))
             lines.append(line)
-            current = _detect_node(line, current)
-            prog_ph.markdown(_node_line(current, running=True))
+            if runall:
+                m = re.search(r"\[(G\d+)\]", line)
+                if m and m.group(1) not in done:
+                    done.append(m.group(1))  # 每批完成时打印一行摘要
+                nxt = next((b for b in batches if b not in done), None)
+                prog_ph.markdown(_batch_line(batches, done, nxt, running=True))
+            else:
+                current = _detect_node(line, current)
+                prog_ph.markdown(_node_line(current, running=True))
             log_ph.code("\n".join(lines[-22:]) or "…", language=None)
         if time.time() - t0 > 1500:
             proc.kill()
@@ -506,6 +560,7 @@ def _run_pipeline(cmd: str, workdir: Path, gen: str):
     st.session_state["b_last"] = {
         "gen": gen, "cmd": cmd, "rc": rc, "timed_out": timed_out,
         "t0": t0, "sec": time.time() - t0, "lines": lines[-800:], "current": current,
+        "runall": runall, "batches": list(batches), "done": done,
     }
     prog_ph.empty()
     log_ph.empty()
@@ -516,29 +571,48 @@ def _render_b_result(art):
     if not res:
         return
     ok = (res["rc"] == 0) and not res["timed_out"]
-    st.markdown(_node_line(res["current"], running=False, ok=ok))
-    if ok:
-        st.success(f"代际批次 **{res['gen']}** 运行完成（耗时 {res['sec']:.0f} 秒，退出码 0）。")
+    if res.get("runall"):
+        nxt = next((b for b in res["batches"] if b not in res["done"]), None)
+        st.markdown(_batch_line(res["batches"], res["done"], nxt, running=False, ok=ok))
+    else:
+        st.markdown(_node_line(res["current"], running=False, ok=ok))
+    summary_lines = [l for l in res["lines"] if re.match(r"\[G\d+\]", l)]
+    halted = any("中止" in l for l in summary_lines)
+    what = "全流程（重置后 G0→G2）" if res.get("runall") else f"代际批次 **{res['gen']}**"
+    if ok and halted:
+        st.warning(f"{what} 运行结束（退出码 0），但本批被 QC 门禁**整批拦截、流程中止**——"
+                   "通常因为该批个体已在参考群中（防重复合并保护）。拦截原因见下方明细与报告；"
+                   "要看“放行→重训→验证”的完整过程，请选“全流程 run-all”。")
+    elif ok:
+        st.success(f"{what} 运行完成（耗时 {res['sec']:.0f} 秒，退出码 0）。")
     elif res["timed_out"]:
         st.error("运行超时（>25 分钟）已终止——请检查命令或直接在终端排查后重试。")
     else:
         st.error(f"运行失败（退出码 {res['rc']}）。日志最后几行：")
         st.code("\n".join(res["lines"][-12:]) or "(无输出)", language=None)
-    qc_lines = [l for l in res["lines"] if _QC_LINE.search(l)]
+    if summary_lines:
+        st.markdown("##### 各批次摘要（管线原始输出）")
+        st.code("\n".join(summary_lines), language=None)
+    qc_lines = [l for l in res["lines"]
+                if _QC_LINE.search(l) and not re.match(r"\[G\d+\]", l)]
     if qc_lines:
         st.markdown("##### QC 拦截明细（来自管线日志）")
         st.code("\n".join(qc_lines[:80]), language=None)
-    fresh_qc = [p for p in discover_artifacts()["all_csv"]
+    prefer = res["batches"][-1] if (res.get("runall") and res.get("batches")) else res["gen"]
+    art_now = discover_artifacts()
+    fresh_qc = [p for p in art_now["all_csv"]
                 if "qc" in p.name.lower() and p.stat().st_mtime >= res["t0"] - 1]
+    fresh_qc.sort(key=lambda p: prefer.lower() not in str(p).lower())
     if fresh_qc:
         try:
-            st.markdown(f"##### QC 结构化产物：`{_rel(fresh_qc[0])}`")
-            st.dataframe(pd.read_csv(fresh_qc[0]), width="stretch")
+            df_qc = pd.read_csv(fresh_qc[0])
+            st.markdown(f"##### QC 结构化产物：`{_rel(fresh_qc[0])}`（{len(df_qc)} 行）")
+            st.dataframe(df_qc, width="stretch", height=280)
         except Exception:
             pass
     if ok:
-        reports = [p for p in discover_artifacts()["reports_html"] if res["gen"].lower() in p.name.lower()]
-        reports = reports or discover_artifacts()["reports_html"]
+        reports = [p for p in art_now["reports_html"] if prefer.lower() in p.name.lower()]
+        reports = reports or art_now["reports_html"]
         if reports:
             _embed_report(reports[0])
         else:
@@ -556,16 +630,38 @@ def render_tab2(art):
         pkg = pkgs[0]
         st.caption(f"管线包：`{_rel(pkg)}`（新一代数据到达 → QC门禁 → 合并参考群 → 重训GBLUP → 验证 → 选配建议 → 报告）")
         help_text = _probe_cli(pkg)
+        batches = _batch_choices(help_text)
+        merged = _merged_batches(pkg.parent)
+        has_runall = "run-all" in help_text
+        all_merged = bool(merged) and all(b in merged for b in batches)
+        if merged:
+            st.caption(f"参考群当前已合并批次：{', '.join(merged)}。"
+                       "重复 run 已合并的单批时，QC 会把整批判为重复个体拦下（防重复合并保护）。")
+        runall = False
+        if has_runall:
+            mode = st.radio(
+                "运行方式",
+                ["单批次（跑一个代际批次）", "全流程 run-all（重置产物后 G0→G2 全新跑，约 20 秒）"],
+                index=1 if all_merged else 0, horizontal=True)
+            runall = mode.startswith("全流程")
         c1, c2 = st.columns([1, 3])
-        gen = c1.selectbox("代际批次", ["G1", "G2"])
-        tmpl = c2.text_input("运行命令（可改；{python}/{gen} 会被替换）",
-                             value=_default_cmd(help_text))
+        first_unmerged = next((b for b in batches if b not in merged), batches[0])
+        gen = c1.selectbox("代际批次", batches, index=batches.index(first_unmerged),
+                           disabled=runall)
+        if runall:
+            gen = batches[-1]
+            tmpl = c2.text_input("运行命令（可改；{python} 会被替换）",
+                                 value="{python} -m refpop_agent.cli run-all", key="b_cmd_all")
+        else:
+            tmpl = c2.text_input("运行命令（可改；{python}/{gen} 会被替换）",
+                                 value=_default_cmd(help_text), key="b_cmd_one")
         cmd = tmpl.replace("{python}", shlex.quote(sys.executable)).replace("{gen}", gen)
         st.caption(f"实际执行：`{cmd}`　·　工作目录：`{_rel(pkg.parent)}`")
         with st.expander("CLI 用法探测（--help 原文）"):
             st.code(help_text or "(无输出)", language=None)
-        if st.button(f"▶ 运行代际批次 {gen}", type="primary"):
-            _run_pipeline(cmd, pkg.parent, gen)
+        label = "▶ 运行全流程 G0→G2" if runall else f"▶ 运行代际批次 {gen}"
+        if st.button(label, type="primary"):
+            _run_pipeline(cmd, pkg.parent, gen, runall, batches)
         _render_b_result(art)
         if art["defects_md"]:
             with st.expander("对照：DEFECTS.md 注入缺陷清单（验收=QC 100% 拦截）"):
@@ -677,6 +773,22 @@ def sniff_density_curve(df: pd.DataFrame):
     return out.sort_values("density_num", na_position="last").reset_index(drop=True)
 
 
+def load_cost_table(art):
+    """成本对比表：优先 *cost*.csv，退而在 BRIEF.md 里找带“成本/cost”的表。"""
+    for p in art["cost_csv"]:
+        try:
+            return pd.read_csv(p), f"`{_rel(p)}`"
+        except Exception:
+            continue
+    for p in art["brief_md"][:1]:
+        for t in parse_md_tables(read_text(p)):
+            head = " ".join(map(str, t.columns))
+            first_col = " ".join(map(str, t.iloc[:, 0].tolist())) if len(t) else ""
+            if re.search(r"成本|cost|价格|price", head + " " + first_col, re.I):
+                return t, f"BRIEF 表格：`{_rel(p)}`"
+    return None, None
+
+
 def load_density_curve(art):
     """依次尝试：名字像密度曲线的 csv → 任意 csv 嗅探 → BRIEF.md 里的 markdown 表。"""
     named = [p for p in art["all_csv"] if re.search(r"densit|curve|e1", p.name, re.I)]
@@ -766,23 +878,22 @@ def render_tab3(art):
 
     st.markdown("#### 成本与填补明细")
     shown_tables = 0
-    for p in art["brief_md"][:1]:
-        for t in parse_md_tables(read_text(p)):
-            names = " ".join(map(str, t.columns))
-            is_cost = re.search(r"成本|cost|价格|price|sku|每单位", names, re.I)
-            st.dataframe(t, width="stretch")
-            st.caption(("成本对比表（成本为假设占位值，真实价格待客户数据）—— " if is_cost else "BRIEF 表格 —— ")
-                       + f"来自 `{_rel(p)}`")
-            shown_tables += 1
-    if art["imput_csv"]:
+    cost_df, cost_src = load_cost_table(art)
+    if cost_df is not None:
+        st.dataframe(cost_df, width="stretch")
+        st.caption(f"E3 成本对比表（成本为假设占位值，真实价格待客户数据）—— {cost_src}")
+        shown_tables += 1
+    imputs = sorted(art["imput_csv"],
+                    key=lambda p: p.name.lower() != "imputation_table.csv")
+    if imputs:
         try:
-            st.dataframe(pd.read_csv(art["imput_csv"][0]), width="stretch")
-            st.caption(f"E2 填补实验结果 —— `{_rel(art['imput_csv'][0])}`")
+            st.dataframe(pd.read_csv(imputs[0]), width="stretch")
+            st.caption(f"E2 填补实验结果（KNN 应显著优于均值填补）—— `{_rel(imputs[0])}`")
             shown_tables += 1
         except Exception as e:
-            st.warning(f"imputation_table.csv 读取失败：{e}")
+            st.warning(f"填补结果表读取失败：{e}")
     if not shown_tables:
-        missing_box("Task C 的表格", "imputation_table.csv / BRIEF.md 内表格",
+        missing_box("Task C 的表格", "cost_table.csv / imputation_table.csv / BRIEF.md 内表格",
                     "确认 Task C 产物路径后重新扫描。")
     if art["brief_md"]:
         with st.expander("《低密度SKU可行性简报》BRIEF.md 全文"):
@@ -811,6 +922,8 @@ def _sidebar(art):
             art["cost_png"][0] if art["cost_png"] else None)
         row(bool(art["imput_csv"]), "Task C imputation_table.csv",
             art["imput_csv"][0] if art["imput_csv"] else None)
+        row(bool(art["cost_csv"]), "Task C cost_table.csv",
+            art["cost_csv"][0] if art["cost_csv"] else None)
         row(bool(art["brief_md"]), "Task C BRIEF.md",
             art["brief_md"][0] if art["brief_md"] else None)
         if st.button("🔄 重新扫描产物"):
