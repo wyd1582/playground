@@ -1,0 +1,310 @@
+{
+  "batch_id": "G2",
+  "n_arrived": 531,
+  "n_admitted": 500,
+  "n_rejected": 31,
+  "reason_counts": {
+    "DUP_ID": 1,
+    "DUP_GENO_REF": 3,
+    "DUP_GENO_BATCH": 2,
+    "LOW_CALL_RATE": 15,
+    "PHENO_UNIT": 6,
+    "PED_GENERATION": 1,
+    "PED_PARENT_UNKNOWN": 1,
+    "PED_SEX": 1,
+    "PED_MENDEL": 4
+  },
+  "rejected": [
+    {
+      "id": "G2_0006",
+      "reasons": [
+        "PED_SEX"
+      ],
+      "detail": "登记父本 G1_0502 在系谱中性别为 F，与父本角色矛盾；登记母本 G1_0246 在系谱中性别为 M，与母本角色矛盾",
+      "call_rate": 1.0,
+      "bw42_g": 3079.79
+    },
+    {
+      "id": "G2_0031",
+      "reasons": [
+        "LOW_CALL_RATE"
+      ],
+      "detail": "基因型检出率 0.880 < 阈值 0.90",
+      "call_rate": 0.88,
+      "bw42_g": 2895.98
+    },
+    {
+      "id": "G2_0051",
+      "reasons": [
+        "LOW_CALL_RATE"
+      ],
+      "detail": "基因型检出率 0.760 < 阈值 0.90",
+      "call_rate": 0.76,
+      "bw42_g": 2881.12
+    },
+    {
+      "id": "G2_0067",
+      "reasons": [
+        "PHENO_UNIT"
+      ],
+      "detail": "bw42_g=3233546.221 超界 [800,6000]；÷1000 后 = 3233.546221 落入正常范围，疑似千倍误录（单位换算错误）",
+      "call_rate": 1.0,
+      "bw42_g": 3233546.22
+    },
+    {
+      "id": "G2_0069",
+      "reasons": [
+        "PHENO_UNIT"
+      ],
+      "detail": "bw42_g=2.974 超界 [800,6000]；×1000 后 = 2974 落入正常范围，疑似 kg 误录为 g",
+      "call_rate": 1.0,
+      "bw42_g": 2.97
+    },
+    {
+      "id": "G2_0075",
+      "reasons": [
+        "DUP_GENO_BATCH"
+      ],
+      "detail": "与本批次 G2_0468 基因型一致率 1.0000，保留先送检样本 G2_0468，本样本判为重复",
+      "call_rate": 1.0,
+      "bw42_g": 2998.92
+    },
+    {
+      "id": "G2_0082",
+      "reasons": [
+        "LOW_CALL_RATE"
+      ],
+      "detail": "基因型检出率 0.860 < 阈值 0.90",
+      "call_rate": 0.86,
+      "bw42_g": 3299.01
+    },
+    {
+      "id": "G2_0091",
+      "reasons": [
+        "PED_PARENT_UNKNOWN"
+      ],
+      "detail": "登记母本 G1_99999 不在参考群系谱登记中",
+      "call_rate": 1.0,
+      "bw42_g": 3054.19
+    },
+    {
+      "id": "G2_0098",
+      "reasons": [
+        "PED_MENDEL"
+      ],
+      "detail": "与登记父本 G1_0163 对立纯合率 7.68%（5000 个可比位点）> 阈值 1%",
+      "call_rate": 1.0,
+      "bw42_g": 3053.82
+    },
+    {
+      "id": "G2_0127",
+      "reasons": [
+        "PED_GENERATION"
+      ],
+      "detail": "登记母本 G2_0523 属于本到货批次，不可能是上代亲本（代际矛盾）",
+      "call_rate": 1.0,
+      "bw42_g": 2998.97
+    },
+    {
+      "id": "G2_0141",
+      "reasons": [
+        "PHENO_UNIT"
+      ],
+      "detail": "bw42_g=3492163.233 超界 [800,6000]；÷1000 后 = 3492.163233 落入正常范围，疑似千倍误录（单位换算错误）",
+      "call_rate": 1.0,
+      "bw42_g": 3492163.23
+    },
+    {
+      "id": "G2_0179",
+      "reasons": [
+        "DUP_GENO_REF",
+        "PED_MENDEL"
+      ],
+      "detail": "与登记父本 G1_0010 对立纯合率 10.06%（5000 个可比位点）> 阈值 1%；与登记母本 G1_0319 对立纯合率 9.54%（5000 个可比位点）> 阈值 1%；与参考群个体 G0_1034 基因型一致率 1.0000 ≥ 0.995，疑似同一样本/串样",
+      "call_rate": 1.0,
+      "bw42_g": 2295.21
+    },
+    {
+      "id": "G2_0181",
+      "reasons": [
+        "LOW_CALL_RATE"
+      ],
+      "detail": "基因型检出率 0.030 < 阈值 0.90",
+      "call_rate": 0.03,
+      "bw42_g": 3362.82
+    },
+    {
+      "id": "G2_0196",
+      "reasons": [
+        "LOW_CALL_RATE"
+      ],
+      "detail": "基因型检出率 0.890 < 阈值 0.90",
+      "call_rate": 0.89,
+      "bw42_g": 3630.37
+    },
+    {
+      "id": "G2_0208",
+      "reasons": [
+        "LOW_CALL_RATE"
+      ],
+      "detail": "基因型检出率 0.720 < 阈值 0.90",
+      "call_rate": 0.72,
+      "bw42_g": 2971.97
+    },
+    {
+      "id": "G2_0214",
+      "reasons": [
+        "LOW_CALL_RATE"
+      ],
+      "detail": "基因型检出率 0.870 < 阈值 0.90",
+      "call_rate": 0.87,
+      "bw42_g": 2725.35
+    },
+    {
+      "id": "G2_0224",
+      "reasons": [
+        "LOW_CALL_RATE"
+      ],
+      "detail": "基因型检出率 0.850 < 阈值 0.90",
+      "call_rate": 0.85,
+      "bw42_g": 3401.69
+    },
+    {
+      "id": "G2_0230",
+      "reasons": [
+        "PHENO_UNIT"
+      ],
+      "detail": "bw42_g=2.966 超界 [800,6000]；×1000 后 = 2966 落入正常范围，疑似 kg 误录为 g",
+      "call_rate": 1.0,
+      "bw42_g": 2.97
+    },
+    {
+      "id": "G2_0236",
+      "reasons": [
+        "LOW_CALL_RATE"
+      ],
+      "detail": "基因型检出率 0.450 < 阈值 0.90",
+      "call_rate": 0.45,
+      "bw42_g": 3257.95
+    },
+    {
+      "id": "G2_0251",
+      "reasons": [
+        "LOW_CALL_RATE"
+      ],
+      "detail": "基因型检出率 0.830 < 阈值 0.90",
+      "call_rate": 0.83,
+      "bw42_g": 3214.63
+    },
+    {
+      "id": "G2_0280",
+      "reasons": [
+        "DUP_GENO_BATCH"
+      ],
+      "detail": "与本批次 G2_0048 基因型一致率 1.0000，保留先送检样本 G2_0048，本样本判为重复",
+      "call_rate": 1.0,
+      "bw42_g": 3061.72
+    },
+    {
+      "id": "G2_0292",
+      "reasons": [
+        "PED_MENDEL"
+      ],
+      "detail": "与登记父本 G1_0140 对立纯合率 8.16%（5000 个可比位点）> 阈值 1%",
+      "call_rate": 1.0,
+      "bw42_g": 2792.81
+    },
+    {
+      "id": "G2_0340",
+      "reasons": [
+        "LOW_CALL_RATE"
+      ],
+      "detail": "基因型检出率 0.550 < 阈值 0.90",
+      "call_rate": 0.55,
+      "bw42_g": 3072.82
+    },
+    {
+      "id": "G2_0355",
+      "reasons": [
+        "PHENO_UNIT"
+      ],
+      "detail": "bw42_g=2.945 超界 [800,6000]；×1000 后 = 2945 落入正常范围，疑似 kg 误录为 g",
+      "call_rate": 1.0,
+      "bw42_g": 2.94
+    },
+    {
+      "id": "G2_0395",
+      "reasons": [
+        "LOW_CALL_RATE"
+      ],
+      "detail": "基因型检出率 0.680 < 阈值 0.90",
+      "call_rate": 0.68,
+      "bw42_g": 2395.94
+    },
+    {
+      "id": "G2_0423",
+      "reasons": [
+        "LOW_CALL_RATE"
+      ],
+      "detail": "基因型检出率 0.800 < 阈值 0.90",
+      "call_rate": 0.8,
+      "bw42_g": 2724.36
+    },
+    {
+      "id": "G2_0450",
+      "reasons": [
+        "LOW_CALL_RATE"
+      ],
+      "detail": "基因型检出率 0.030 < 阈值 0.90",
+      "call_rate": 0.03,
+      "bw42_g": 2874.64
+    },
+    {
+      "id": "G2_0477",
+      "reasons": [
+        "PHENO_UNIT"
+      ],
+      "detail": "bw42_g=2.969 超界 [800,6000]；×1000 后 = 2969 落入正常范围，疑似 kg 误录为 g",
+      "call_rate": 1.0,
+      "bw42_g": 2.97
+    },
+    {
+      "id": "G1_0397",
+      "reasons": [
+        "DUP_ID",
+        "DUP_GENO_REF"
+      ],
+      "detail": "ID G1_0397 已存在于参考群登记，疑似同一个体重复送检；与参考群个体 G1_0397 基因型一致率 1.0000 ≥ 0.995，疑似同一样本/串样",
+      "call_rate": 1.0,
+      "bw42_g": 2752.32
+    },
+    {
+      "id": "G2_0488",
+      "reasons": [
+        "LOW_CALL_RATE"
+      ],
+      "detail": "基因型检出率 0.620 < 阈值 0.90",
+      "call_rate": 0.62,
+      "bw42_g": 3136.76
+    },
+    {
+      "id": "G2_0494",
+      "reasons": [
+        "DUP_GENO_REF",
+        "PED_MENDEL"
+      ],
+      "detail": "与登记父本 G1_0152 对立纯合率 7.60%（5000 个可比位点）> 阈值 1%；与登记母本 G1_0239 对立纯合率 5.70%（5000 个可比位点）> 阈值 1%；与参考群个体 G0_0927 基因型一致率 0.9984 ≥ 0.995，疑似同一样本/串样",
+      "call_rate": 1.0,
+      "bw42_g": 2691.84
+    }
+  ],
+  "thresholds": {
+    "min_call_rate": 0.9,
+    "dup_concordance": 0.995,
+    "max_oh_rate": 0.01,
+    "pheno_bounds": [
+      800.0,
+      6000.0
+    ]
+  }
+}

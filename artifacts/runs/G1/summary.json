@@ -1,0 +1,114 @@
+{
+  "batch_id": "G1",
+  "generated_at": "2026-09-21T17:53:09Z",
+  "qc": {
+    "n_arrived": 531,
+    "n_admitted": 500,
+    "n_rejected": 31,
+    "reason_counts": {
+      "DUP_ID": 1,
+      "DUP_GENO_REF": 3,
+      "DUP_GENO_BATCH": 2,
+      "LOW_CALL_RATE": 15,
+      "PHENO_UNIT": 6,
+      "PED_GENERATION": 1,
+      "PED_PARENT_UNKNOWN": 1,
+      "PED_SEX": 1,
+      "PED_MENDEL": 4
+    }
+  },
+  "merge": {
+    "batch_id": "G1",
+    "n_before": 2000,
+    "n_added": 500,
+    "n_after": 2500,
+    "by_batch_after": {
+      "G0": 2000,
+      "G1": 500
+    }
+  },
+  "retrain": {
+    "batch_id": "G1",
+    "n_train": 2500,
+    "m_markers": 5000,
+    "h2_assumed": 0.3,
+    "lambda": 4607.34,
+    "sum2pq": 1974.58,
+    "mu": 2825.26,
+    "gebv_sd": 108.13,
+    "model_path": "artifacts/models/model_G1.npz"
+  },
+  "validation": {
+    "batch_id": "G1",
+    "mode": "forward",
+    "mode_label": "前向验证：用 G0 为止训练的模型预测本批真实表型",
+    "r": 0.3269,
+    "slope": 1.067,
+    "n_val": 500,
+    "train_model": {
+      "batch": "G0",
+      "n_train": 2000
+    },
+    "r_tbv_sim": 0.6195,
+    "r_tbv_note": "GEBV 与真实育种值 TBV 的相关 —— 仅模拟环境可得，生产中无此指标"
+  },
+  "mating": {
+    "batch_id": "G1",
+    "n_candidates": 500,
+    "n_affected_excluded": 0,
+    "n_sires_pool": 30,
+    "n_dams_pool": 150,
+    "n_pairs": 150,
+    "n_sires_used": 19,
+    "blocked_kinship_attempts": 12,
+    "blocked_carrier_attempts": 4,
+    "unassigned_dams": [],
+    "carrier_rates": {
+      "LR1": {
+        "index": 777,
+        "n_carriers": 41,
+        "rate": 0.082
+      },
+      "LR2": {
+        "index": 3333,
+        "n_carriers": 45,
+        "rate": 0.09
+      }
+    },
+    "rules": {
+      "max_progeny_inbreeding": 0.0625,
+      "max_dams_per_sire": 8,
+      "carrier_rule": "隐性致死位点 携带者×携带者 禁配；携带者×正常 允许并标注"
+    }
+  },
+  "facts": {
+    "batch_id": "G1",
+    "n_arrived": 531,
+    "n_admitted": 500,
+    "n_rejected": 31,
+    "qc_category_counts": {
+      "低检出率": 15,
+      "表型异常": 6,
+      "系谱冲突": 5,
+      "重复送检": 5
+    },
+    "n_before": 2000,
+    "n_after": 2500,
+    "h2": 0.3,
+    "val_mode": "forward",
+    "r": 0.3269,
+    "n_val": 500,
+    "prev_r": 0.3186,
+    "delta_r": 0.0083,
+    "n_pairs": 150,
+    "blocked_kinship": 12,
+    "blocked_carrier": 4,
+    "max_F": 0.0625
+  },
+  "llm": {
+    "mode": "mock",
+    "model": null,
+    "note": "默认 Mock 模式（REFPOP_LLM=anthropic 可切换真模型）",
+    "text": "本批次（G1）到货 531 个个体，QC 门禁拦截 31 个、放行 500 个（拦截构成：低检出率 15 例、表型异常 6 例、系谱冲突 5 例、重复送检 5 例）。合并后参考群规模由 2000 增至 2500，并已在全量参考群上重训 GBLUP（假设 h²=0.3）。用上一代模型做前向验证，对本批真实表型的预测相关 r = 0.3269（验证个体 500 只），上一轮为 0.3186，变化 +0.0083。选配建议在近交约束（预期后代 F ≤ 0.0625）与隐性致死携带者规则下生成 150 组配对；配对搜索中 12 次尝试因近交超标被跳过、4 次因携带者×携带者禁配被跳过。建议人工复核全部拦截样本后归档，并按 GEBV Top-20 清单复核留种候选。"
+  }
+}

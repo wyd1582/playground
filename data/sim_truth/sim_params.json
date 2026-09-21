@@ -1,0 +1,84 @@
+{
+  "note": "演示用模拟数据；遗传参数均为假设值",
+  "config": {
+    "seed": 15,
+    "n_markers": 5000,
+    "n_chromosomes": 10,
+    "pool_haplotypes": 16,
+    "c_ancestral": 0.005,
+    "c_meiosis": 0.001,
+    "marker_freq_lo": 0.15,
+    "marker_freq_hi": 0.5,
+    "n_qtl": 500,
+    "qtl_maf_min": 0.1,
+    "n_g0": 2000,
+    "n_batch": 500,
+    "h2": 0.3,
+    "pheno_mean": 2800.0,
+    "pheno_sd": 250.0,
+    "top_frac": 0.3,
+    "n_sires": {
+      "G1": 40,
+      "G2": 35
+    },
+    "n_dams": {
+      "G1": 200,
+      "G2": 70
+    },
+    "lethal": [
+      [
+        "LR1",
+        777,
+        1
+      ],
+      [
+        "LR2",
+        3333,
+        1
+      ]
+    ],
+    "lowcall_rates": [
+      0.03,
+      0.03,
+      0.45,
+      0.55,
+      0.62,
+      0.68,
+      0.72,
+      0.76,
+      0.8,
+      0.83,
+      0.85,
+      0.86,
+      0.87,
+      0.88,
+      0.89
+    ],
+    "n_unit": 6,
+    "n_ped": 5,
+    "arrival_dates": {
+      "G0": "2026-02-10",
+      "G1": "2026-05-19",
+      "G2": "2026-08-25"
+    }
+  },
+  "sigma_a2_target": 18750.0,
+  "sigma_e": 209.16500663351889,
+  "realized_by_generation": {
+    "G0": {
+      "var_tbv": 18750.000000000007,
+      "mean_pheno": 2803.9450572796427,
+      "h2_realized": 0.3
+    },
+    "G1": {
+      "var_tbv": 13578.246814933036,
+      "mean_pheno": 2910.49403422838,
+      "h2_realized": 0.2369
+    },
+    "G2": {
+      "var_tbv": 13657.704100875557,
+      "mean_pheno": 3042.4251278445213,
+      "h2_realized": 0.2379
+    }
+  }
+}

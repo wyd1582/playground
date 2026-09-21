@@ -1,0 +1,32 @@
+[
+  {
+    "batch_id": "G0",
+    "mode": "cv",
+    "r": 0.3186,
+    "r_tbv_sim": 0.6512,
+    "n_val": 2000,
+    "refpop_n_after": 2000,
+    "train_n": null,
+    "at": "2026-09-21T17:53:06Z"
+  },
+  {
+    "batch_id": "G1",
+    "mode": "forward",
+    "r": 0.3269,
+    "r_tbv_sim": 0.6195,
+    "n_val": 500,
+    "refpop_n_after": 2500,
+    "train_n": 2000,
+    "at": "2026-09-21T17:53:09Z"
+  },
+  {
+    "batch_id": "G2",
+    "mode": "forward",
+    "r": 0.3608,
+    "r_tbv_sim": 0.624,
+    "n_val": 500,
+    "refpop_n_after": 3000,
+    "train_n": 2500,
+    "at": "2026-09-21T17:53:12Z"
+  }
+]

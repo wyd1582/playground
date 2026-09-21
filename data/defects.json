@@ -1,0 +1,436 @@
+[
+  {
+    "batch": "G1",
+    "id": "G1_0450",
+    "type": "low_call_rate",
+    "expect_code": "LOW_CALL_RATE",
+    "detail": "随机抹除 4850 个位点，call rate 注入为 0.030"
+  },
+  {
+    "batch": "G1",
+    "id": "G1_0240",
+    "type": "low_call_rate",
+    "expect_code": "LOW_CALL_RATE",
+    "detail": "随机抹除 4850 个位点，call rate 注入为 0.030"
+  },
+  {
+    "batch": "G1",
+    "id": "G1_0457",
+    "type": "low_call_rate",
+    "expect_code": "LOW_CALL_RATE",
+    "detail": "随机抹除 2750 个位点，call rate 注入为 0.450"
+  },
+  {
+    "batch": "G1",
+    "id": "G1_0396",
+    "type": "low_call_rate",
+    "expect_code": "LOW_CALL_RATE",
+    "detail": "随机抹除 2250 个位点，call rate 注入为 0.550"
+  },
+  {
+    "batch": "G1",
+    "id": "G1_0491",
+    "type": "low_call_rate",
+    "expect_code": "LOW_CALL_RATE",
+    "detail": "随机抹除 1900 个位点，call rate 注入为 0.620"
+  },
+  {
+    "batch": "G1",
+    "id": "G1_0486",
+    "type": "low_call_rate",
+    "expect_code": "LOW_CALL_RATE",
+    "detail": "随机抹除 1600 个位点，call rate 注入为 0.680"
+  },
+  {
+    "batch": "G1",
+    "id": "G1_0470",
+    "type": "low_call_rate",
+    "expect_code": "LOW_CALL_RATE",
+    "detail": "随机抹除 1400 个位点，call rate 注入为 0.720"
+  },
+  {
+    "batch": "G1",
+    "id": "G1_0446",
+    "type": "low_call_rate",
+    "expect_code": "LOW_CALL_RATE",
+    "detail": "随机抹除 1200 个位点，call rate 注入为 0.760"
+  },
+  {
+    "batch": "G1",
+    "id": "G1_0164",
+    "type": "low_call_rate",
+    "expect_code": "LOW_CALL_RATE",
+    "detail": "随机抹除 1000 个位点，call rate 注入为 0.800"
+  },
+  {
+    "batch": "G1",
+    "id": "G1_0225",
+    "type": "low_call_rate",
+    "expect_code": "LOW_CALL_RATE",
+    "detail": "随机抹除 850 个位点，call rate 注入为 0.830"
+  },
+  {
+    "batch": "G1",
+    "id": "G1_0471",
+    "type": "low_call_rate",
+    "expect_code": "LOW_CALL_RATE",
+    "detail": "随机抹除 750 个位点，call rate 注入为 0.850"
+  },
+  {
+    "batch": "G1",
+    "id": "G1_0320",
+    "type": "low_call_rate",
+    "expect_code": "LOW_CALL_RATE",
+    "detail": "随机抹除 700 个位点，call rate 注入为 0.860"
+  },
+  {
+    "batch": "G1",
+    "id": "G1_0097",
+    "type": "low_call_rate",
+    "expect_code": "LOW_CALL_RATE",
+    "detail": "随机抹除 650 个位点，call rate 注入为 0.870"
+  },
+  {
+    "batch": "G1",
+    "id": "G1_0195",
+    "type": "low_call_rate",
+    "expect_code": "LOW_CALL_RATE",
+    "detail": "随机抹除 600 个位点，call rate 注入为 0.880"
+  },
+  {
+    "batch": "G1",
+    "id": "G1_0028",
+    "type": "low_call_rate",
+    "expect_code": "LOW_CALL_RATE",
+    "detail": "随机抹除 550 个位点，call rate 注入为 0.890"
+  },
+  {
+    "batch": "G1",
+    "id": "G1_0039",
+    "type": "pheno_unit_error",
+    "expect_code": "PHENO_UNIT",
+    "detail": "体重按 kg 误录（真值 ÷1000），登记值 2.807"
+  },
+  {
+    "batch": "G1",
+    "id": "G1_0466",
+    "type": "pheno_unit_error",
+    "expect_code": "PHENO_UNIT",
+    "detail": "体重按 kg 误录（真值 ÷1000），登记值 3.312"
+  },
+  {
+    "batch": "G1",
+    "id": "G1_0428",
+    "type": "pheno_unit_error",
+    "expect_code": "PHENO_UNIT",
+    "detail": "体重按 kg 误录（真值 ÷1000），登记值 2.851"
+  },
+  {
+    "batch": "G1",
+    "id": "G1_0199",
+    "type": "pheno_unit_error",
+    "expect_code": "PHENO_UNIT",
+    "detail": "体重按 kg 误录（真值 ÷1000），登记值 2.495"
+  },
+  {
+    "batch": "G1",
+    "id": "G1_0126",
+    "type": "pheno_unit_error",
+    "expect_code": "PHENO_UNIT",
+    "detail": "体重千倍误录（真值 ×1000，如单位换算错误），登记值 2869279.772"
+  },
+  {
+    "batch": "G1",
+    "id": "G1_0278",
+    "type": "pheno_unit_error",
+    "expect_code": "PHENO_UNIT",
+    "detail": "体重千倍误录（真值 ×1000，如单位换算错误），登记值 3180311.420"
+  },
+  {
+    "batch": "G1",
+    "id": "G1_0079",
+    "type": "pedigree_conflict",
+    "expect_code": "PED_MENDEL",
+    "detail": "父本由 G0_0166 错记为 G0_0120（孟德尔不一致）"
+  },
+  {
+    "batch": "G1",
+    "id": "G1_0058",
+    "type": "pedigree_conflict",
+    "expect_code": "PED_MENDEL",
+    "detail": "父本由 G0_1051 错记为 G0_0198（孟德尔不一致）"
+  },
+  {
+    "batch": "G1",
+    "id": "G1_0040",
+    "type": "pedigree_conflict",
+    "expect_code": "PED_PARENT_UNKNOWN",
+    "detail": "母本由 G0_0762 错记为不存在的 G0_99999"
+  },
+  {
+    "batch": "G1",
+    "id": "G1_0381",
+    "type": "pedigree_conflict",
+    "expect_code": "PED_SEX",
+    "detail": "父本/母本登记互换（父本栏为母鸡 ID）"
+  },
+  {
+    "batch": "G1",
+    "id": "G1_0293",
+    "type": "pedigree_conflict",
+    "expect_code": "PED_GENERATION",
+    "detail": "母本错记为同批次个体 G1_0018（代际矛盾）"
+  },
+  {
+    "batch": "G1",
+    "id": "G1_0064",
+    "type": "duplicate",
+    "expect_code": "DUP_GENO_BATCH",
+    "detail": "同批个体 G1_0069 的样本重复送检（送检时间晚 45 分钟）"
+  },
+  {
+    "batch": "G1",
+    "id": "G1_0260",
+    "type": "duplicate",
+    "expect_code": "DUP_GENO_BATCH",
+    "detail": "同批个体 G1_0406 的样本重复送检（送检时间晚 45 分钟）"
+  },
+  {
+    "batch": "G1",
+    "id": "G0_0607",
+    "type": "duplicate",
+    "expect_code": "DUP_ID",
+    "detail": "参考群个体 G0_0607 原 ID 重复送检（ID 冲突）"
+  },
+  {
+    "batch": "G1",
+    "id": "G1_0444",
+    "type": "duplicate",
+    "expect_code": "DUP_GENO_REF",
+    "detail": "以新 ID 重复送检参考群个体 G0_0023：基因型复制并随机翻转 8 个位点（一致率≈0.998）"
+  },
+  {
+    "batch": "G1",
+    "id": "G1_0508",
+    "type": "duplicate",
+    "expect_code": "DUP_GENO_REF",
+    "detail": "以新 ID 重复送检参考群个体 G0_0068：基因型逐位复制"
+  },
+  {
+    "batch": "G2",
+    "id": "G2_0450",
+    "type": "low_call_rate",
+    "expect_code": "LOW_CALL_RATE",
+    "detail": "随机抹除 4850 个位点，call rate 注入为 0.030"
+  },
+  {
+    "batch": "G2",
+    "id": "G2_0181",
+    "type": "low_call_rate",
+    "expect_code": "LOW_CALL_RATE",
+    "detail": "随机抹除 4850 个位点，call rate 注入为 0.030"
+  },
+  {
+    "batch": "G2",
+    "id": "G2_0236",
+    "type": "low_call_rate",
+    "expect_code": "LOW_CALL_RATE",
+    "detail": "随机抹除 2750 个位点，call rate 注入为 0.450"
+  },
+  {
+    "batch": "G2",
+    "id": "G2_0340",
+    "type": "low_call_rate",
+    "expect_code": "LOW_CALL_RATE",
+    "detail": "随机抹除 2250 个位点，call rate 注入为 0.550"
+  },
+  {
+    "batch": "G2",
+    "id": "G2_0488",
+    "type": "low_call_rate",
+    "expect_code": "LOW_CALL_RATE",
+    "detail": "随机抹除 1900 个位点，call rate 注入为 0.620"
+  },
+  {
+    "batch": "G2",
+    "id": "G2_0395",
+    "type": "low_call_rate",
+    "expect_code": "LOW_CALL_RATE",
+    "detail": "随机抹除 1600 个位点，call rate 注入为 0.680"
+  },
+  {
+    "batch": "G2",
+    "id": "G2_0208",
+    "type": "low_call_rate",
+    "expect_code": "LOW_CALL_RATE",
+    "detail": "随机抹除 1400 个位点，call rate 注入为 0.720"
+  },
+  {
+    "batch": "G2",
+    "id": "G2_0051",
+    "type": "low_call_rate",
+    "expect_code": "LOW_CALL_RATE",
+    "detail": "随机抹除 1200 个位点，call rate 注入为 0.760"
+  },
+  {
+    "batch": "G2",
+    "id": "G2_0423",
+    "type": "low_call_rate",
+    "expect_code": "LOW_CALL_RATE",
+    "detail": "随机抹除 1000 个位点，call rate 注入为 0.800"
+  },
+  {
+    "batch": "G2",
+    "id": "G2_0251",
+    "type": "low_call_rate",
+    "expect_code": "LOW_CALL_RATE",
+    "detail": "随机抹除 850 个位点，call rate 注入为 0.830"
+  },
+  {
+    "batch": "G2",
+    "id": "G2_0224",
+    "type": "low_call_rate",
+    "expect_code": "LOW_CALL_RATE",
+    "detail": "随机抹除 750 个位点，call rate 注入为 0.850"
+  },
+  {
+    "batch": "G2",
+    "id": "G2_0082",
+    "type": "low_call_rate",
+    "expect_code": "LOW_CALL_RATE",
+    "detail": "随机抹除 700 个位点，call rate 注入为 0.860"
+  },
+  {
+    "batch": "G2",
+    "id": "G2_0214",
+    "type": "low_call_rate",
+    "expect_code": "LOW_CALL_RATE",
+    "detail": "随机抹除 650 个位点，call rate 注入为 0.870"
+  },
+  {
+    "batch": "G2",
+    "id": "G2_0031",
+    "type": "low_call_rate",
+    "expect_code": "LOW_CALL_RATE",
+    "detail": "随机抹除 600 个位点，call rate 注入为 0.880"
+  },
+  {
+    "batch": "G2",
+    "id": "G2_0196",
+    "type": "low_call_rate",
+    "expect_code": "LOW_CALL_RATE",
+    "detail": "随机抹除 550 个位点，call rate 注入为 0.890"
+  },
+  {
+    "batch": "G2",
+    "id": "G2_0477",
+    "type": "pheno_unit_error",
+    "expect_code": "PHENO_UNIT",
+    "detail": "体重按 kg 误录（真值 ÷1000），登记值 2.969"
+  },
+  {
+    "batch": "G2",
+    "id": "G2_0355",
+    "type": "pheno_unit_error",
+    "expect_code": "PHENO_UNIT",
+    "detail": "体重按 kg 误录（真值 ÷1000），登记值 2.945"
+  },
+  {
+    "batch": "G2",
+    "id": "G2_0069",
+    "type": "pheno_unit_error",
+    "expect_code": "PHENO_UNIT",
+    "detail": "体重按 kg 误录（真值 ÷1000），登记值 2.974"
+  },
+  {
+    "batch": "G2",
+    "id": "G2_0230",
+    "type": "pheno_unit_error",
+    "expect_code": "PHENO_UNIT",
+    "detail": "体重按 kg 误录（真值 ÷1000），登记值 2.966"
+  },
+  {
+    "batch": "G2",
+    "id": "G2_0141",
+    "type": "pheno_unit_error",
+    "expect_code": "PHENO_UNIT",
+    "detail": "体重千倍误录（真值 ×1000，如单位换算错误），登记值 3492163.233"
+  },
+  {
+    "batch": "G2",
+    "id": "G2_0067",
+    "type": "pheno_unit_error",
+    "expect_code": "PHENO_UNIT",
+    "detail": "体重千倍误录（真值 ×1000，如单位换算错误），登记值 3233546.221"
+  },
+  {
+    "batch": "G2",
+    "id": "G2_0292",
+    "type": "pedigree_conflict",
+    "expect_code": "PED_MENDEL",
+    "detail": "父本由 G1_0285 错记为 G1_0140（孟德尔不一致）"
+  },
+  {
+    "batch": "G2",
+    "id": "G2_0098",
+    "type": "pedigree_conflict",
+    "expect_code": "PED_MENDEL",
+    "detail": "父本由 G1_0178 错记为 G1_0163（孟德尔不一致）"
+  },
+  {
+    "batch": "G2",
+    "id": "G2_0091",
+    "type": "pedigree_conflict",
+    "expect_code": "PED_PARENT_UNKNOWN",
+    "detail": "母本由 G1_0387 错记为不存在的 G1_99999"
+  },
+  {
+    "batch": "G2",
+    "id": "G2_0006",
+    "type": "pedigree_conflict",
+    "expect_code": "PED_SEX",
+    "detail": "父本/母本登记互换（父本栏为母鸡 ID）"
+  },
+  {
+    "batch": "G2",
+    "id": "G2_0127",
+    "type": "pedigree_conflict",
+    "expect_code": "PED_GENERATION",
+    "detail": "母本错记为同批次个体 G2_0523（代际矛盾）"
+  },
+  {
+    "batch": "G2",
+    "id": "G2_0075",
+    "type": "duplicate",
+    "expect_code": "DUP_GENO_BATCH",
+    "detail": "同批个体 G2_0468 的样本重复送检（送检时间晚 45 分钟）"
+  },
+  {
+    "batch": "G2",
+    "id": "G2_0179",
+    "type": "duplicate",
+    "expect_code": "DUP_GENO_REF",
+    "detail": "以新 ID 重复送检参考群个体 G0_1034：基因型逐位复制"
+  },
+  {
+    "batch": "G2",
+    "id": "G2_0280",
+    "type": "duplicate",
+    "expect_code": "DUP_GENO_BATCH",
+    "detail": "同批个体 G2_0048 的样本重复送检（送检时间晚 45 分钟）"
+  },
+  {
+    "batch": "G2",
+    "id": "G1_0397",
+    "type": "duplicate",
+    "expect_code": "DUP_ID",
+    "detail": "参考群个体 G1_0397 原 ID 重复送检（ID 冲突）"
+  },
+  {
+    "batch": "G2",
+    "id": "G2_0494",
+    "type": "duplicate",
+    "expect_code": "DUP_GENO_REF",
+    "detail": "以新 ID 重复送检参考群个体 G0_0927：基因型复制并随机翻转 8 个位点（一致率≈0.998）"
+  }
+]

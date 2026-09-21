@@ -1,0 +1,9 @@
+{
+  "batch_id": "G0",
+  "n_before": 0,
+  "n_added": 2000,
+  "n_after": 2000,
+  "by_batch_after": {
+    "G0": 2000
+  }
+}

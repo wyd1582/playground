@@ -1,0 +1,11 @@
+{
+  "batch_id": "G0",
+  "n_train": 2000,
+  "m_markers": 5000,
+  "h2_assumed": 0.3,
+  "lambda": 4609.21,
+  "sum2pq": 1975.38,
+  "mu": 2803.95,
+  "gebv_sd": 98.98,
+  "model_path": "artifacts/models/model_G0.npz"
+}

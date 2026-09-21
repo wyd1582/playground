@@ -1,0 +1,9 @@
+{
+  "batch_id": "G2",
+  "simulated": true,
+  "note": "演示用模拟数据：到货批次，内含故意注入的缺陷样本（见 DEFECTS.md）",
+  "n_individuals": 531,
+  "n_markers": 5000,
+  "trait": "bw42_g",
+  "arrival_date": "2026-08-25"
+}

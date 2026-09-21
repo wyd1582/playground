@@ -1,0 +1,261 @@
+<meta charset="utf-8">
+<title>参考群更新 · G0</title>
+<style>
+:root{
+  --bg:#f9f9f7; --surface:#fcfcfb; --surface-2:#f0efec;
+  --ink:#0b0b0b; --ink-2:#52514e; --muted:#898781;
+  --grid:#e1e0d9; --axis:#c3c2b7; --border:rgba(11,11,11,.10);
+  --series-1:#2a78d6; --series-2:#eb6834;
+  --good:#0ca30c; --good-text:#006300; --warn:#fab219; --crit:#d03b3b;
+  --accent:#2a78d6;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0d0d0d; --surface:#1a1a19; --surface-2:#262624;
+    --ink:#ffffff; --ink-2:#c3c2b7; --muted:#898781;
+    --grid:#2c2c2a; --axis:#383835; --border:rgba(255,255,255,.10);
+    --series-1:#3987e5; --series-2:#d95926;
+    --good-text:#0ca30c; --accent:#3987e5;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0d0d0d; --surface:#1a1a19; --surface-2:#262624;
+  --ink:#ffffff; --ink-2:#c3c2b7; --muted:#898781;
+  --grid:#2c2c2a; --axis:#383835; --border:rgba(255,255,255,.10);
+  --series-1:#3987e5; --series-2:#d95926;
+  --good-text:#0ca30c; --accent:#3987e5;
+}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font:15px/1.7 system-ui,-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;}
+.wrap{max-width:1040px;margin-inline:auto;padding-inline:16px;padding-block:28px 56px;}
+header .eyebrow{font-size:12.5px;letter-spacing:.14em;color:var(--muted);text-transform:uppercase;}
+h1{font-size:clamp(24px,4vw,32px);line-height:1.25;margin:.25em 0 .2em;text-wrap:balance;}
+h2{font-size:19px;margin:0 0 4px;}
+.hmeta{color:var(--ink-2);font-size:13.5px;}
+.simnote{display:inline-flex;gap:7px;align-items:center;margin-top:12px;padding:5px 12px;
+  border:1px solid var(--border);border-radius:999px;background:var(--surface);
+  color:var(--ink-2);font-size:12.5px;}
+.simnote .dot{width:8px;height:8px;border-radius:50%;background:var(--warn);}
+section{margin-top:34px;}
+.sechead{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;margin-bottom:12px;}
+.sechead .sub{color:var(--muted);font-size:13px;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px 20px;}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));gap:10px;}
+.tile{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 15px;}
+.tile .k{font-size:12.5px;color:var(--muted);}
+.tile .v{font-size:25px;font-weight:650;line-height:1.25;margin-top:2px;}
+.tile .s{font-size:12.5px;color:var(--ink-2);margin-top:2px;}
+.tile .s.up{color:var(--good-text);}
+.tile .s.down{color:var(--crit);}
+.scroll{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:13.5px;}
+th{font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);
+  text-align:left;font-weight:600;padding:7px 10px;border-bottom:1px solid var(--axis);white-space:nowrap;}
+td{padding:7px 10px;border-bottom:1px solid var(--grid);vertical-align:top;}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;}
+tr:hover td{background:var(--surface-2);}
+.code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;
+  background:var(--surface-2);border-radius:5px;padding:1px 6px;white-space:nowrap;}
+.badge{display:inline-block;font-size:11.5px;border:1px solid var(--border);
+  border-radius:999px;padding:1px 9px;color:var(--ink-2);background:var(--surface-2);}
+.chip{display:inline-flex;gap:6px;align-items:center;font-size:12.5px;color:var(--ink-2);}
+.chip .sw{width:10px;height:10px;border-radius:3px;}
+.chip .sw.s1{background:var(--series-1);} .chip .sw.s2{background:var(--series-2);}
+.status{display:inline-flex;gap:6px;align-items:center;font-size:12.5px;font-weight:600;}
+.status .dot{width:8px;height:8px;border-radius:50%;}
+.status.reject{color:var(--crit);} .status.reject .dot{background:var(--crit);}
+.status.pass{color:var(--good-text);} .status.pass .dot{background:var(--good);}
+.llm{border-left:3px solid var(--accent);}
+.llm p{margin:8px 0 0;color:var(--ink);}
+.llm .src{font-size:12.5px;color:var(--muted);}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;align-items:start;}
+.note{font-size:12.5px;color:var(--muted);margin-top:6px;}
+.legend{display:flex;gap:16px;margin-bottom:6px;}
+footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--grid);
+  color:var(--muted);font-size:12.5px;}
+svg .grid{stroke:var(--grid);stroke-width:1;}
+svg .axis{stroke:var(--axis);stroke-width:1.2;}
+svg .ax{font-size:11px;fill:var(--muted);}
+svg .lbl{font-size:11.5px;fill:var(--ink-2);font-variant-numeric:tabular-nums;}
+svg .trend{fill:none;stroke:var(--series-1);stroke-width:2;}
+svg .pt{fill:var(--series-1);}
+svg .pt-cv{fill:var(--surface);stroke:var(--series-1);stroke-width:2;}
+svg .bar{transition:opacity .12s;} svg .bar:hover{opacity:.8;}
+svg .b1{fill:var(--series-1);} svg .b2{fill:var(--series-2);}
+.tip{position:fixed;background:var(--ink);color:var(--bg);font-size:12.5px;
+  padding:5px 10px;border-radius:7px;pointer-events:none;z-index:20;max-width:320px;}
+@media (prefers-reduced-motion: reduce){ svg .bar{transition:none;} }
+</style>
+<div class="wrap">
+<header>
+<div class="eyebrow">白羽肉鸡育种数字化 · 参考群更新管线</div>
+<h1>G0 批次运行报告</h1>
+<div class="hmeta">到货日期 2026-02-10 · 报告生成 2026-09-21T17:53:06Z · 性状：42日龄体重 BW42（g）</div>
+<div class="simnote"><span class="dot"></span>演示原型 —— 全部数据为模拟生成（种子 15），遗传参数为假设值，注入缺陷清单见 data/DEFECTS.md</div>
+</header>
+<section id="sec-llm"><div class="card llm">
+<div class="src">运行摘要 · <span class="badge">Mock（模板生成，非真实 LLM）</span> · 默认 Mock 模式（REFPOP_LLM=anthropic 可切换真模型）</div>
+<p id="llm-text">本批次（G0）到货 2000 个个体，QC 门禁拦截 0 个、放行 2000 个。合并后参考群规模由 0 增至 2000，并已在全量参考群上重训 GBLUP（假设 h²=0.3）。本批为初始参考群，采用 5 折交叉验证给出基线 r = 0.3186（口径与前向验证不同，仅作参照）。选配建议在近交约束（预期后代 F ≤ 0.0625）与隐性致死携带者规则下生成 150 组配对；配对搜索中 5 次尝试因近交超标被跳过、0 次因携带者×携带者禁配被跳过。建议人工复核全部拦截样本后归档，并按 GEBV Top-20 清单复核留种候选。</p>
+</div></section>
+<section><div class="tiles">
+<div class="tile"><div class="k">到货个体</div><div class="v"><span id="metric-arrived">2000</span></div></div>
+<div class="tile"><div class="k">QC 拦截</div><div class="v"><span id="metric-rejected">0</span></div><div class="s ">拦截率 0.0%</div></div>
+<div class="tile"><div class="k">放行合格</div><div class="v"><span id="metric-admitted">2000</span></div></div>
+<div class="tile"><div class="k">合并后参考群</div><div class="v"><span id="metric-refpop-after">2000</span></div><div class="s up">较更新前 +2000</div></div>
+<div class="tile"><div class="k">交叉验证 r（基线）</div><div class="v"><span id="metric-r">0.319</span></div></div>
+<div class="tile"><div class="k">选配建议</div><div class="v"><span id="metric-pairs">150</span></div><div class="s ">候选 2000 只</div></div>
+</div></section>
+<section id="sec-qc">
+<div class="sechead"><h2>① QC 门禁 —— 拦截明细</h2><span class="sub">谁被拦、为什么 · 阈值见 qc_report.json</span></div>
+<div class="card"><span class="status pass"><span class="dot"></span>本批全部个体通过 QC，无拦截</span><div class="note">该批为经人工整理的历史参考群（模拟设定），未注入缺陷。</div></div>
+</section>
+<section id="sec-merge">
+<div class="sechead"><h2>② 参考群合并</h2><span class="sub">merge_summary.json</span></div>
+<div class="tiles">
+<div class="tile"><div class="k">更新前</div><div class="v"><span id="metric-n-before">0</span></div></div>
+<div class="tile"><div class="k">本批并入</div><div class="v"><span id="metric-n-added">+2000</span></div></div>
+<div class="tile"><div class="k">更新后</div><div class="v"><span>2000</span></div></div>
+</div>
+<div class="note">合并后构成：G0: 2000（个体数按来源批次）</div>
+</section>
+<section id="sec-model">
+<div class="sechead"><h2>③ GBLUP 重训与前向验证</h2><span class="sub">retrain_summary.json · validation.json · predictions.csv</span></div>
+<div class="grid2">
+<div class="card">
+<div class="note" style="margin:0 0 6px">验证 r 跨代趋势 —— 实心点为前向验证（上一代模型 → 本批真实表型），空心点为 G0 交叉验证基线（口径不同，仅作参照）</div>
+<svg viewBox="0 0 560 236" role="img" aria-label="验证 r 趋势" style="width:100%;max-width:620px;height:auto"><line x1="48" y1="196.0" x2="542" y2="196.0" class="grid"/><text x="40" y="199.5" text-anchor="end" class="ax">0.0</text><line x1="48" y1="136.0" x2="542" y2="136.0" class="grid"/><text x="40" y="139.5" text-anchor="end" class="ax">0.2</text><line x1="48" y1="76.0" x2="542" y2="76.0" class="grid"/><text x="40" y="79.5" text-anchor="end" class="ax">0.4</text><line x1="48" y1="16.0" x2="542" y2="16.0" class="grid"/><text x="40" y="19.5" text-anchor="end" class="ax">0.6</text><line x1="48" y1="196.0" x2="542" y2="196.0" class="axis"/><circle cx="295.0" cy="100.4" r="4.5" class="pt-cv"/><circle cx="295.0" cy="100.4" r="14" fill="transparent" data-tip="G0 · 5折交叉验证基线 · r=0.319 · 验证 n=2000"/><text x="295.0" y="90.4" text-anchor="middle" class="lbl">0.319</text><text x="295.0" y="214" text-anchor="middle" class="ax">G0</text><text x="295.0" y="228" text-anchor="middle" class="ax">参考群 2000</text></svg>
+</div>
+<div class="card"><div class="scroll"><table>
+<tr><th>项</th><th>值</th></tr>
+<tr><td style="color:var(--ink-2)">训练个体数</td><td>2000</td></tr>
+<tr><td style="color:var(--ink-2)">标记数</td><td>5000</td></tr>
+<tr><td style="color:var(--ink-2)">遗传力 h²</td><td>0.3　<span class="badge">假设值（生产应 REML 估计）</span></td></tr>
+<tr><td style="color:var(--ink-2)">岭参数 λ = 2Σpq·(1-h²)/h²</td><td>4609.21</td></tr>
+<tr><td style="color:var(--ink-2)">验证口径</td><td>5 折交叉验证（G0 基线，口径与前向验证不同）</td></tr>
+<tr><td style="color:var(--ink-2)">验证 r</td><td><b>0.3186</b>（n=2000）</td></tr>
+<tr><td style="color:var(--ink-2)">回归斜率 b(y,GEBV)</td><td>0.892（≈1 为无偏）</td></tr>
+<tr><td style="color:var(--ink-2)">r(GEBV, 真实TBV)</td><td>0.6512　<span class="badge">仅模拟环境可得</span></td></tr>
+</table></div></div>
+</div>
+<div class="scroll" style="margin-top:14px"><table id="history-table">
+<tr><th>批次</th><th>口径</th><th class="num">验证 r</th><th class="num">验证 n</th><th class="num">训练 n</th><th class="num">参考群规模</th><th class="num">Δr（较上一行）</th></tr>
+<tr><td>G0</td><td>5折CV</td><td class="num"><b>0.3186</b></td><td class="num">2000</td><td class="num">—</td><td class="num">2000</td><td class="num">—</td></tr>
+</table></div>
+<div class="note">前向验证 r 的合理区间为 0.3～0.7，且应随参考群扩大呈非降趋势（Δr 混合了参考群扩大(+)与代际选择降低验证群方差(−)两种效应）。每个 r 均可由 predictions.csv 逐个体复算。</div>
+</section>
+<section id="sec-top">
+<div class="sechead"><h2>④ 本批次 GEBV Top-20 清单</h2><span class="sub">candidates.csv（重训后模型对当代合格个体的排名）</span></div>
+<div class="grid2">
+<div class="card">
+<div class="legend"><span class="chip"><span class="sw s1"></span>本批次（当代候选）</span><span class="chip"><span class="sw s2"></span>参考群全体</span></div>
+<svg viewBox="0 0 560 226" role="img" aria-label="GEBV 分布对比" style="width:100%;max-width:620px;height:auto"><line x1="44" y1="192.0" x2="546" y2="192.0" class="grid"/><text x="38" y="195.5" text-anchor="end" class="ax">0%</text><line x1="44" y1="156.0" x2="546" y2="156.0" class="grid"/><text x="38" y="159.5" text-anchor="end" class="ax">5%</text><line x1="44" y1="120.0" x2="546" y2="120.0" class="grid"/><text x="38" y="123.5" text-anchor="end" class="ax">10%</text><line x1="44" y1="84.0" x2="546" y2="84.0" class="grid"/><text x="38" y="87.5" text-anchor="end" class="ax">15%</text><line x1="44" y1="48.0" x2="546" y2="48.0" class="grid"/><text x="38" y="51.5" text-anchor="end" class="ax">20%</text><line x1="44" y1="12.0" x2="546" y2="12.0" class="grid"/><text x="38" y="15.5" text-anchor="end" class="ax">25%</text><path d="M45.0,192.0 L45.0,192.0 Q45.0,191.3 45.7,191.3 L59.2,191.3 Q59.9,191.3 59.9,192.0 L59.9,192.0 Z" class="bar b1" data-tip="本批次 · GEBV [-344, -295) g · 0.1%"/><path d="M61.9,192.0 L61.9,192.0 Q61.9,191.3 62.6,191.3 L76.1,191.3 Q76.9,191.3 76.9,192.0 L76.9,192.0 Z" class="bar b2" data-tip="参考群全体 · GEBV [-344, -295) g · 0.1%"/><path d="M80.9,192.0 L80.9,192.0 Q80.9,189.5 83.4,189.5 L93.3,189.5 Q95.8,189.5 95.8,192.0 L95.8,192.0 Z" class="bar b1" data-tip="本批次 · GEBV [-295, -246) g · 0.4%"/><path d="M97.8,192.0 L97.8,192.0 Q97.8,189.5 100.3,189.5 L110.2,189.5 Q112.7,189.5 112.7,192.0 L112.7,192.0 Z" class="bar b2" data-tip="参考群全体 · GEBV [-295, -246) g · 0.4%"/><path d="M116.7,192.0 L116.7,181.7 Q116.7,178.7 119.7,178.7 L128.6,178.7 Q131.6,178.7 131.6,181.7 L131.6,192.0 Z" class="bar b1" data-tip="本批次 · GEBV [-246, -197) g · 1.8%"/><path d="M133.6,192.0 L133.6,181.7 Q133.6,178.7 136.6,178.7 L145.6,178.7 Q148.6,178.7 148.6,181.7 L148.6,192.0 Z" class="bar b2" data-tip="参考群全体 · GEBV [-246, -197) g · 1.8%"/><path d="M152.6,192.0 L152.6,165.8 Q152.6,162.8 155.6,162.8 L164.5,162.8 Q167.5,162.8 167.5,165.8 L167.5,192.0 Z" class="bar b1" data-tip="本批次 · GEBV [-197, -149) g · 4.0%"/><path d="M169.5,192.0 L169.5,165.8 Q169.5,162.8 172.5,162.8 L181.4,162.8 Q184.4,162.8 184.4,165.8 L184.4,192.0 Z" class="bar b2" data-tip="参考群全体 · GEBV [-197, -149) g · 4.0%"/><path d="M188.4,192.0 L188.4,125.5 Q188.4,122.5 191.4,122.5 L200.4,122.5 Q203.4,122.5 203.4,125.5 L203.4,192.0 Z" class="bar b1" data-tip="本批次 · GEBV [-149, -100) g · 9.7%"/><path d="M205.4,192.0 L205.4,125.5 Q205.4,122.5 208.4,122.5 L217.3,122.5 Q220.3,122.5 220.3,125.5 L220.3,192.0 Z" class="bar b2" data-tip="参考群全体 · GEBV [-149, -100) g · 9.7%"/><path d="M224.3,192.0 L224.3,92.4 Q224.3,89.4 227.3,89.4 L236.2,89.4 Q239.2,89.4 239.2,92.4 L239.2,192.0 Z" class="bar b1" data-tip="本批次 · GEBV [-100, -51) g · 14.2%"/><path d="M241.2,192.0 L241.2,92.4 Q241.2,89.4 244.2,89.4 L253.1,89.4 Q256.1,89.4 256.1,92.4 L256.1,192.0 Z" class="bar b2" data-tip="参考群全体 · GEBV [-100, -51) g · 14.2%"/><path d="M260.1,192.0 L260.1,58.9 Q260.1,55.9 263.1,55.9 L272.1,55.9 Q275.1,55.9 275.1,58.9 L275.1,192.0 Z" class="bar b1" data-tip="本批次 · GEBV [-51, -2) g · 18.9%"/><path d="M277.1,192.0 L277.1,58.9 Q277.1,55.9 280.1,55.9 L289.0,55.9 Q292.0,55.9 292.0,58.9 L292.0,192.0 Z" class="bar b2" data-tip="参考群全体 · GEBV [-51, -2) g · 18.9%"/><path d="M296.0,192.0 L296.0,50.3 Q296.0,47.3 299.0,47.3 L307.9,47.3 Q310.9,47.3 310.9,50.3 L310.9,192.0 Z" class="bar b1" data-tip="本批次 · GEBV [-2, 47) g · 20.1%"/><path d="M312.9,192.0 L312.9,50.3 Q312.9,47.3 315.9,47.3 L324.9,47.3 Q327.9,47.3 327.9,50.3 L327.9,192.0 Z" class="bar b2" data-tip="参考群全体 · GEBV [-2, 47) g · 20.1%"/><path d="M331.9,192.0 L331.9,99.6 Q331.9,96.6 334.9,96.6 L343.8,96.6 Q346.8,96.6 346.8,99.6 L346.8,192.0 Z" class="bar b1" data-tip="本批次 · GEBV [47, 95) g · 13.2%"/><path d="M348.8,192.0 L348.8,99.6 Q348.8,96.6 351.8,96.6 L360.7,96.6 Q363.7,96.6 363.7,99.6 L363.7,192.0 Z" class="bar b2" data-tip="参考群全体 · GEBV [47, 95) g · 13.2%"/><path d="M367.7,192.0 L367.7,122.6 Q367.7,119.6 370.7,119.6 L379.6,119.6 Q382.6,119.6 382.6,122.6 L382.6,192.0 Z" class="bar b1" data-tip="本批次 · GEBV [95, 144) g · 10.1%"/><path d="M384.6,192.0 L384.6,122.6 Q384.6,119.6 387.6,119.6 L396.6,119.6 Q399.6,119.6 399.6,122.6 L399.6,192.0 Z" class="bar b2" data-tip="参考群全体 · GEBV [95, 144) g · 10.1%"/><path d="M403.6,192.0 L403.6,163.0 Q403.6,160.0 406.6,160.0 L415.5,160.0 Q418.5,160.0 418.5,163.0 L418.5,192.0 Z" class="bar b1" data-tip="本批次 · GEBV [144, 193) g · 4.5%"/><path d="M420.5,192.0 L420.5,163.0 Q420.5,160.0 423.5,160.0 L432.4,160.0 Q435.4,160.0 435.4,163.0 L435.4,192.0 Z" class="bar b2" data-tip="参考群全体 · GEBV [144, 193) g · 4.5%"/><path d="M439.4,192.0 L439.4,177.7 Q439.4,174.7 442.4,174.7 L451.4,174.7 Q454.4,174.7 454.4,177.7 L454.4,192.0 Z" class="bar b1" data-tip="本批次 · GEBV [193, 242) g · 2.4%"/><path d="M456.4,192.0 L456.4,177.7 Q456.4,174.7 459.4,174.7 L468.3,174.7 Q471.3,174.7 471.3,177.7 L471.3,192.0 Z" class="bar b2" data-tip="参考群全体 · GEBV [193, 242) g · 2.4%"/><path d="M475.3,192.0 L475.3,191.8 Q475.3,188.8 478.3,188.8 L487.2,188.8 Q490.2,188.8 490.2,191.8 L490.2,192.0 Z" class="bar b1" data-tip="本批次 · GEBV [242, 291) g · 0.4%"/><path d="M492.2,192.0 L492.2,191.8 Q492.2,188.8 495.2,188.8 L504.1,188.8 Q507.1,188.8 507.1,191.8 L507.1,192.0 Z" class="bar b2" data-tip="参考群全体 · GEBV [242, 291) g · 0.4%"/><path d="M511.1,192.0 L511.1,192.0 Q511.1,190.9 512.2,190.9 L525.0,190.9 Q526.1,190.9 526.1,192.0 L526.1,192.0 Z" class="bar b1" data-tip="本批次 · GEBV [291, 339) g · 0.1%"/><path d="M528.1,192.0 L528.1,192.0 Q528.1,190.9 529.2,190.9 L541.9,190.9 Q543.0,190.9 543.0,192.0 L543.0,192.0 Z" class="bar b2" data-tip="参考群全体 · GEBV [291, 339) g · 0.1%"/><line x1="44" y1="192.0" x2="546" y2="192.0" class="axis"/><text x="44.0" y="218" text-anchor="middle" class="ax">-344</text><text x="295.0" y="218" text-anchor="middle" class="ax">-2</text><text x="546.0" y="218" text-anchor="middle" class="ax">339</text><text x="546" y="218" text-anchor="end" class="ax">GEBV（g）</text></svg>
+<div class="note">按占比归一（两组个体数不同）。当代候选分布整体右移即为代际遗传进展。</div>
+</div>
+<div class="card" style="padding:8px 6px"><div class="scroll"><table id="top20-table">
+<tr><th class="num">#</th><th>个体</th><th>性别</th><th class="num">GEBV(g)</th><th class="num">百分位</th><th>LR1</th><th>LR2</th><th>父</th><th>母</th></tr>
+<tr><td class="num">1</td><td><span class="code">G0_0780</span></td><td>母</td><td class="num"><b>+339.4</b></td><td class="num">100.0%</td><td>—</td><td>—</td><td><span class="code">—</span></td><td><span class="code">—</span></td></tr>
+<tr><td class="num">2</td><td><span class="code">G0_0181</span></td><td>公</td><td class="num"><b>+331.1</b></td><td class="num">100.0%</td><td>—</td><td>—</td><td><span class="code">—</span></td><td><span class="code">—</span></td></tr>
+<tr><td class="num">3</td><td><span class="code">G0_0034</span></td><td>母</td><td class="num"><b>+294.1</b></td><td class="num">99.9%</td><td>—</td><td>—</td><td><span class="code">—</span></td><td><span class="code">—</span></td></tr>
+<tr><td class="num">4</td><td><span class="code">G0_1080</span></td><td>母</td><td class="num"><b>+282.0</b></td><td class="num">99.8%</td><td>—</td><td>—</td><td><span class="code">—</span></td><td><span class="code">—</span></td></tr>
+<tr><td class="num">5</td><td><span class="code">G0_1120</span></td><td>母</td><td class="num"><b>+276.8</b></td><td class="num">99.8%</td><td>—</td><td>—</td><td><span class="code">—</span></td><td><span class="code">—</span></td></tr>
+<tr><td class="num">6</td><td><span class="code">G0_1651</span></td><td>母</td><td class="num"><b>+266.1</b></td><td class="num">99.8%</td><td>—</td><td>—</td><td><span class="code">—</span></td><td><span class="code">—</span></td></tr>
+<tr><td class="num">7</td><td><span class="code">G0_1239</span></td><td>母</td><td class="num"><b>+263.3</b></td><td class="num">99.7%</td><td>—</td><td>—</td><td><span class="code">—</span></td><td><span class="code">—</span></td></tr>
+<tr><td class="num">8</td><td><span class="code">G0_1803</span></td><td>母</td><td class="num"><b>+255.4</b></td><td class="num">99.6%</td><td>—</td><td>—</td><td><span class="code">—</span></td><td><span class="code">—</span></td></tr>
+<tr><td class="num">9</td><td><span class="code">G0_1894</span></td><td>公</td><td class="num"><b>+255.2</b></td><td class="num">99.6%</td><td>—</td><td>—</td><td><span class="code">—</span></td><td><span class="code">—</span></td></tr>
+<tr><td class="num">10</td><td><span class="code">G0_0631</span></td><td>母</td><td class="num"><b>+253.3</b></td><td class="num">99.6%</td><td>—</td><td>—</td><td><span class="code">—</span></td><td><span class="code">—</span></td></tr>
+<tr><td class="num">11</td><td><span class="code">G0_0413</span></td><td>公</td><td class="num"><b>+244.6</b></td><td class="num">99.5%</td><td>—</td><td>—</td><td><span class="code">—</span></td><td><span class="code">—</span></td></tr>
+<tr><td class="num">12</td><td><span class="code">G0_0260</span></td><td>公</td><td class="num"><b>+242.1</b></td><td class="num">99.4%</td><td>—</td><td>—</td><td><span class="code">—</span></td><td><span class="code">—</span></td></tr>
+<tr><td class="num">13</td><td><span class="code">G0_0394</span></td><td>母</td><td class="num"><b>+241.1</b></td><td class="num">99.4%</td><td>—</td><td>—</td><td><span class="code">—</span></td><td><span class="code">—</span></td></tr>
+<tr><td class="num">14</td><td><span class="code">G0_1333</span></td><td>母</td><td class="num"><b>+240.6</b></td><td class="num">99.4%</td><td>—</td><td>—</td><td><span class="code">—</span></td><td><span class="code">—</span></td></tr>
+<tr><td class="num">15</td><td><span class="code">G0_1312</span></td><td>公</td><td class="num"><b>+239.4</b></td><td class="num">99.3%</td><td>⚠ 携带</td><td>—</td><td><span class="code">—</span></td><td><span class="code">—</span></td></tr>
+<tr><td class="num">16</td><td><span class="code">G0_1561</span></td><td>母</td><td class="num"><b>+236.8</b></td><td class="num">99.2%</td><td>—</td><td>⚠ 携带</td><td><span class="code">—</span></td><td><span class="code">—</span></td></tr>
+<tr><td class="num">17</td><td><span class="code">G0_1193</span></td><td>母</td><td class="num"><b>+236.4</b></td><td class="num">99.2%</td><td>—</td><td>—</td><td><span class="code">—</span></td><td><span class="code">—</span></td></tr>
+<tr><td class="num">18</td><td><span class="code">G0_0435</span></td><td>母</td><td class="num"><b>+227.3</b></td><td class="num">99.2%</td><td>⚠ 携带</td><td>—</td><td><span class="code">—</span></td><td><span class="code">—</span></td></tr>
+<tr><td class="num">19</td><td><span class="code">G0_1571</span></td><td>母</td><td class="num"><b>+225.5</b></td><td class="num">99.1%</td><td>⚠ 携带</td><td>—</td><td><span class="code">—</span></td><td><span class="code">—</span></td></tr>
+<tr><td class="num">20</td><td><span class="code">G0_1298</span></td><td>母</td><td class="num"><b>+223.9</b></td><td class="num">99.0%</td><td>—</td><td>—</td><td><span class="code">—</span></td><td><span class="code">—</span></td></tr>
+</table></div></div>
+</div>
+</section>
+<section id="sec-mating">
+<div class="sechead"><h2>⑤ 选配建议 —— 近交约束 + 携带者规则</h2><span class="sub">mating_pairs.csv · mating_summary.json</span></div>
+<div class="tiles">
+<div class="tile"><div class="k">建议配对</div><div class="v"><span>150</span></div></div>
+<div class="tile"><div class="k">启用公鸡</div><div class="v"><span>19/30</span></div></div>
+<div class="tile"><div class="k">近交拦截(次)</div><div class="v"><span>5</span></div><div class="s ">预期后代 F ≤ 0.0625</div></div>
+<div class="tile"><div class="k">携带者拦截(次)</div><div class="v"><span>0</span></div><div class="s ">携带者×携带者禁配</div></div>
+<div class="tile"><div class="k">未能配对母鸡</div><div class="v"><span>0</span></div></div>
+</div>
+<div class="note">当代携带者频率 —— LR1: 247 只（12.3%） · LR2: 234 只（11.7%）（隐性致死位点，见 data/markers.json）；规则：隐性致死位点 携带者×携带者 禁配；携带者×正常 允许并标注；每只公鸡至多配 8 只母鸡。</div>
+<div class="scroll" style="margin-top:12px"><table id="pairs-table">
+<tr><th class="num">#</th><th>父本</th><th class="num">父GEBV</th><th>母本</th><th class="num">母GEBV</th><th class="num">后代期望GEBV</th><th class="num">预期后代F</th><th>携带者标注</th></tr>
+<tr><td class="num">1</td><td><span class="code">G0_0181</span></td><td class="num">+331.1</td><td><span class="code">G0_0780</span></td><td class="num">+339.4</td><td class="num"><b>+335.3</b></td><td class="num">-0.0020</td><td>—</td></tr>
+<tr><td class="num">2</td><td><span class="code">G0_0181</span></td><td class="num">+331.1</td><td><span class="code">G0_0034</span></td><td class="num">+294.1</td><td class="num"><b>+312.6</b></td><td class="num">0.0208</td><td>—</td></tr>
+<tr><td class="num">3</td><td><span class="code">G0_0181</span></td><td class="num">+331.1</td><td><span class="code">G0_1080</span></td><td class="num">+281.9</td><td class="num"><b>+306.5</b></td><td class="num">0.0414</td><td>—</td></tr>
+<tr><td class="num">4</td><td><span class="code">G0_0181</span></td><td class="num">+331.1</td><td><span class="code">G0_1120</span></td><td class="num">+276.8</td><td class="num"><b>+304.0</b></td><td class="num">0.0280</td><td>—</td></tr>
+<tr><td class="num">5</td><td><span class="code">G0_0181</span></td><td class="num">+331.1</td><td><span class="code">G0_1651</span></td><td class="num">+266.1</td><td class="num"><b>+298.6</b></td><td class="num">0.0448</td><td>—</td></tr>
+<tr><td class="num">6</td><td><span class="code">G0_0181</span></td><td class="num">+331.1</td><td><span class="code">G0_1239</span></td><td class="num">+263.2</td><td class="num"><b>+297.2</b></td><td class="num">-0.0189</td><td>—</td></tr>
+<tr><td class="num">7</td><td><span class="code">G0_0181</span></td><td class="num">+331.1</td><td><span class="code">G0_1803</span></td><td class="num">+255.4</td><td class="num"><b>+293.3</b></td><td class="num">0.0146</td><td>—</td></tr>
+<tr><td class="num">8</td><td><span class="code">G0_0181</span></td><td class="num">+331.1</td><td><span class="code">G0_0631</span></td><td class="num">+253.3</td><td class="num"><b>+292.2</b></td><td class="num">0.0474</td><td>—</td></tr>
+<tr><td class="num">9</td><td><span class="code">G0_1894</span></td><td class="num">+255.2</td><td><span class="code">G0_0394</span></td><td class="num">+241.1</td><td class="num"><b>+248.1</b></td><td class="num">-0.0048</td><td>—</td></tr>
+<tr><td class="num">10</td><td><span class="code">G0_1894</span></td><td class="num">+255.2</td><td><span class="code">G0_1333</span></td><td class="num">+240.6</td><td class="num"><b>+247.9</b></td><td class="num">-0.0058</td><td>—</td></tr>
+<tr><td class="num">11</td><td><span class="code">G0_1894</span></td><td class="num">+255.2</td><td><span class="code">G0_1561</span></td><td class="num">+236.8</td><td class="num"><b>+246.0</b></td><td class="num">-0.0029</td><td>母本LR2携带</td></tr>
+<tr><td class="num">12</td><td><span class="code">G0_1894</span></td><td class="num">+255.2</td><td><span class="code">G0_1193</span></td><td class="num">+236.4</td><td class="num"><b>+245.8</b></td><td class="num">-0.0190</td><td>—</td></tr>
+<tr><td class="num">13</td><td><span class="code">G0_1894</span></td><td class="num">+255.2</td><td><span class="code">G0_0435</span></td><td class="num">+227.3</td><td class="num"><b>+241.2</b></td><td class="num">-0.0196</td><td>母本LR1携带</td></tr>
+<tr><td class="num">14</td><td><span class="code">G0_1894</span></td><td class="num">+255.2</td><td><span class="code">G0_1571</span></td><td class="num">+225.5</td><td class="num"><b>+240.3</b></td><td class="num">0.0046</td><td>母本LR1携带</td></tr>
+<tr><td class="num">15</td><td><span class="code">G0_1894</span></td><td class="num">+255.2</td><td><span class="code">G0_1298</span></td><td class="num">+223.9</td><td class="num"><b>+239.6</b></td><td class="num">0.0143</td><td>—</td></tr>
+<tr><td class="num">16</td><td><span class="code">G0_1894</span></td><td class="num">+255.2</td><td><span class="code">G0_1991</span></td><td class="num">+222.0</td><td class="num"><b>+238.6</b></td><td class="num">-0.0138</td><td>—</td></tr>
+<tr><td class="num">17</td><td><span class="code">G0_0413</span></td><td class="num">+244.7</td><td><span class="code">G0_1457</span></td><td class="num">+221.8</td><td class="num"><b>+233.2</b></td><td class="num">0.0096</td><td>母本LR2携带</td></tr>
+<tr><td class="num">18</td><td><span class="code">G0_0413</span></td><td class="num">+244.7</td><td><span class="code">G0_1950</span></td><td class="num">+220.7</td><td class="num"><b>+232.7</b></td><td class="num">0.0074</td><td>母本LR2携带</td></tr>
+<tr><td class="num">19</td><td><span class="code">G0_0413</span></td><td class="num">+244.7</td><td><span class="code">G0_0980</span></td><td class="num">+220.1</td><td class="num"><b>+232.4</b></td><td class="num">0.0288</td><td>—</td></tr>
+<tr><td class="num">20</td><td><span class="code">G0_0413</span></td><td class="num">+244.7</td><td><span class="code">G0_0590</span></td><td class="num">+219.6</td><td class="num"><b>+232.1</b></td><td class="num">0.0261</td><td>—</td></tr>
+<tr><td class="num">21</td><td><span class="code">G0_0413</span></td><td class="num">+244.7</td><td><span class="code">G0_0708</span></td><td class="num">+218.4</td><td class="num"><b>+231.6</b></td><td class="num">0.0146</td><td>—</td></tr>
+<tr><td class="num">22</td><td><span class="code">G0_0413</span></td><td class="num">+244.7</td><td><span class="code">G0_0842</span></td><td class="num">+216.9</td><td class="num"><b>+230.8</b></td><td class="num">-0.0249</td><td>—</td></tr>
+<tr><td class="num">23</td><td><span class="code">G0_0413</span></td><td class="num">+244.7</td><td><span class="code">G0_0100</span></td><td class="num">+215.7</td><td class="num"><b>+230.2</b></td><td class="num">-0.0139</td><td>母本LR2携带</td></tr>
+<tr><td class="num">24</td><td><span class="code">G0_0413</span></td><td class="num">+244.7</td><td><span class="code">G0_0065</span></td><td class="num">+213.7</td><td class="num"><b>+229.2</b></td><td class="num">0.0551</td><td>—</td></tr>
+<tr><td class="num">25</td><td><span class="code">G0_0260</span></td><td class="num">+242.1</td><td><span class="code">G0_0207</span></td><td class="num">+210.5</td><td class="num"><b>+226.3</b></td><td class="num">0.0326</td><td>母本LR2携带</td></tr>
+<tr><td class="num">26</td><td><span class="code">G0_0260</span></td><td class="num">+242.1</td><td><span class="code">G0_0676</span></td><td class="num">+208.6</td><td class="num"><b>+225.4</b></td><td class="num">0.0029</td><td>母本LR2携带</td></tr>
+<tr><td class="num">27</td><td><span class="code">G0_0260</span></td><td class="num">+242.1</td><td><span class="code">G0_1136</span></td><td class="num">+205.2</td><td class="num"><b>+223.7</b></td><td class="num">-0.0117</td><td>—</td></tr>
+<tr><td class="num">28</td><td><span class="code">G0_0260</span></td><td class="num">+242.1</td><td><span class="code">G0_1605</span></td><td class="num">+202.8</td><td class="num"><b>+222.4</b></td><td class="num">0.0177</td><td>—</td></tr>
+<tr><td class="num">29</td><td><span class="code">G0_0260</span></td><td class="num">+242.1</td><td><span class="code">G0_1666</span></td><td class="num">+200.9</td><td class="num"><b>+221.5</b></td><td class="num">-0.0269</td><td>母本LR2携带</td></tr>
+<tr><td class="num">30</td><td><span class="code">G0_0260</span></td><td class="num">+242.1</td><td><span class="code">G0_0502</span></td><td class="num">+195.0</td><td class="num"><b>+218.6</b></td><td class="num">-0.0148</td><td>—</td></tr>
+<tr><td class="num">31</td><td><span class="code">G0_0260</span></td><td class="num">+242.1</td><td><span class="code">G0_1899</span></td><td class="num">+194.8</td><td class="num"><b>+218.5</b></td><td class="num">-0.0084</td><td>—</td></tr>
+<tr><td class="num">32</td><td><span class="code">G0_0260</span></td><td class="num">+242.1</td><td><span class="code">G0_0061</span></td><td class="num">+192.1</td><td class="num"><b>+217.1</b></td><td class="num">0.0049</td><td>母本LR2携带</td></tr>
+<tr><td class="num">33</td><td><span class="code">G0_1312</span></td><td class="num">+239.3</td><td><span class="code">G0_0364</span></td><td class="num">+190.8</td><td class="num"><b>+215.1</b></td><td class="num">-0.0130</td><td>父本LR1携带</td></tr>
+<tr><td class="num">34</td><td><span class="code">G0_1312</span></td><td class="num">+239.3</td><td><span class="code">G0_1995</span></td><td class="num">+188.5</td><td class="num"><b>+213.9</b></td><td class="num">0.0295</td><td>父本LR1携带</td></tr>
+<tr><td class="num">35</td><td><span class="code">G0_1312</span></td><td class="num">+239.3</td><td><span class="code">G0_0567</span></td><td class="num">+185.3</td><td class="num"><b>+212.3</b></td><td class="num">0.0069</td><td>父本LR1携带</td></tr>
+<tr><td class="num">36</td><td><span class="code">G0_1312</span></td><td class="num">+239.3</td><td><span class="code">G0_1888</span></td><td class="num">+182.1</td><td class="num"><b>+210.7</b></td><td class="num">-0.0504</td><td>父本LR1携带</td></tr>
+<tr><td class="num">37</td><td><span class="code">G0_1312</span></td><td class="num">+239.3</td><td><span class="code">G0_1800</span></td><td class="num">+181.9</td><td class="num"><b>+210.6</b></td><td class="num">-0.0330</td><td>父本LR1携带</td></tr>
+<tr><td class="num">38</td><td><span class="code">G0_1312</span></td><td class="num">+239.3</td><td><span class="code">G0_1375</span></td><td class="num">+181.1</td><td class="num"><b>+210.2</b></td><td class="num">0.0021</td><td>父本LR1携带</td></tr>
+<tr><td class="num">39</td><td><span class="code">G0_1312</span></td><td class="num">+239.3</td><td><span class="code">G0_1364</span></td><td class="num">+179.0</td><td class="num"><b>+209.2</b></td><td class="num">-0.0119</td><td>父本LR1携带</td></tr>
+<tr><td class="num">40</td><td><span class="code">G0_1312</span></td><td class="num">+239.3</td><td><span class="code">G0_0989</span></td><td class="num">+177.8</td><td class="num"><b>+208.6</b></td><td class="num">0.0603</td><td>父本LR1携带</td></tr>
+</table></div>
+<div class="note">仅展示前 40 组（按后代期望 GEBV 排序），完整 150 组见 mating_pairs.csv。</div>
+</section>
+<footer>
+<b>数字可复算</b> —— 本报告不做任何计算，仅汇总以下磁盘产物；逐条核对路径（相对仓库根目录）：
+<ul style="margin:6px 0 0;padding-left:18px">
+<li>QC 拦截明细：<span class="code">artifacts/runs/G0/qc_report.json 与 qc_report.csv</span></li>
+<li>参考群规模：<span class="code">artifacts/runs/G0/merge_summary.json 与 artifacts/refpop/registry.json</span></li>
+<li>模型参数：<span class="code">artifacts/models/model_G0.json</span></li>
+<li>验证 r（逐个体预测值）：<span class="code">artifacts/runs/G0/validation.json 与 predictions.csv</span></li>
+<li>GEBV 排名/Top-20：<span class="code">artifacts/runs/G0/candidates.csv 与 gebv_refpop.csv</span></li>
+<li>选配建议：<span class="code">artifacts/runs/G0/mating_pairs.csv 与 mating_summary.json</span></li>
+<li>本页全部数字的汇总：<span class="code">artifacts/runs/G0/summary.json</span></li>
+</ul>
+<div style="margin-top:10px">复现：<span class="code">python -m refpop_agent.cli run-all</span>（数据种子 15，全流程确定性）。再次声明：演示用模拟数据，遗传参数为假设值，不构成任何真实群体的评估结论。</div>
+</footer>
+</div>
+
+<div class="tip" id="tip" hidden></div>
+<script>
+(function(){
+  var tip=document.getElementById('tip');
+  document.querySelectorAll('[data-tip]').forEach(function(el){
+    el.addEventListener('mousemove',function(e){
+      tip.textContent=el.getAttribute('data-tip');tip.hidden=false;
+      var x=Math.min(e.clientX+14,window.innerWidth-330), y=e.clientY+14;
+      tip.style.left=x+'px';tip.style.top=y+'px';});
+    el.addEventListener('mouseleave',function(){tip.hidden=true;});
+  });
+})();
+</script>

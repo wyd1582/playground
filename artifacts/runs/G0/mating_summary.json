@@ -1,0 +1,29 @@
+{
+  "batch_id": "G0",
+  "n_candidates": 2000,
+  "n_affected_excluded": 0,
+  "n_sires_pool": 30,
+  "n_dams_pool": 150,
+  "n_pairs": 150,
+  "n_sires_used": 19,
+  "blocked_kinship_attempts": 5,
+  "blocked_carrier_attempts": 0,
+  "unassigned_dams": [],
+  "carrier_rates": {
+    "LR1": {
+      "index": 777,
+      "n_carriers": 247,
+      "rate": 0.1235
+    },
+    "LR2": {
+      "index": 3333,
+      "n_carriers": 234,
+      "rate": 0.117
+    }
+  },
+  "rules": {
+    "max_progeny_inbreeding": 0.0625,
+    "max_dams_per_sire": 8,
+    "carrier_rule": "隐性致死位点 携带者×携带者 禁配；携带者×正常 允许并标注"
+  }
+}

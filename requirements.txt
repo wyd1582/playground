@@ -1,0 +1,6 @@
+numpy>=1.26
+pandas>=2.0
+langgraph>=0.2
+pytest>=8
+# 可选：真实 LLM 摘要（默认 Mock，不装也能跑全流程）
+# anthropic>=0.40

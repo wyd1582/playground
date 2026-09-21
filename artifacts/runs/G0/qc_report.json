@@ -1,0 +1,17 @@
+{
+  "batch_id": "G0",
+  "n_arrived": 2000,
+  "n_admitted": 2000,
+  "n_rejected": 0,
+  "reason_counts": {},
+  "rejected": [],
+  "thresholds": {
+    "min_call_rate": 0.9,
+    "dup_concordance": 0.995,
+    "max_oh_rate": 0.01,
+    "pheno_bounds": [
+      800.0,
+      6000.0
+    ]
+  }
+}

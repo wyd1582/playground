@@ -1,0 +1,20 @@
+{
+  "simulated": true,
+  "n_markers": 5000,
+  "n_chromosomes": 10,
+  "lethal_loci": [
+    {
+      "name": "LR1",
+      "index": 777,
+      "pool_carrier_haplotypes": 1,
+      "note": "已知隐性致死位点（模拟；对表型无效应的简化）"
+    },
+    {
+      "name": "LR2",
+      "index": 3333,
+      "pool_carrier_haplotypes": 1,
+      "note": "已知隐性致死位点（模拟；对表型无效应的简化）"
+    }
+  ],
+  "qtl_note": "QTL 效应真值见 sim_truth/qtl_effects.csv（仅模拟环境可得）"
+}

@@ -1,0 +1,9 @@
+{
+  "batch_id": "G0",
+  "simulated": true,
+  "note": "演示用模拟数据：经人工整理的历史参考群（未注入缺陷）",
+  "n_individuals": 2000,
+  "n_markers": 5000,
+  "trait": "bw42_g",
+  "arrival_date": "2026-02-10"
+}

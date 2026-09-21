@@ -1,0 +1,14 @@
+{
+  "batch_id": "G1",
+  "mode": "forward",
+  "mode_label": "前向验证：用 G0 为止训练的模型预测本批真实表型",
+  "r": 0.3269,
+  "slope": 1.067,
+  "n_val": 500,
+  "train_model": {
+    "batch": "G0",
+    "n_train": 2000
+  },
+  "r_tbv_sim": 0.6195,
+  "r_tbv_note": "GEBV 与真实育种值 TBV 的相关 —— 仅模拟环境可得，生产中无此指标"
+}

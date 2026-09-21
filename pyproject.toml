@@ -1,0 +1,27 @@
+[project]
+name = "refpop-agent"
+version = "0.1.0"
+description = "参考群更新 Agent 管线 —— 白羽肉鸡育种数字化演示原型（模拟数据）"
+requires-python = ">=3.10"
+dependencies = [
+    "numpy>=1.26",
+    "pandas>=2.0",
+    "langgraph>=0.2",
+]
+
+[project.optional-dependencies]
+llm = ["anthropic>=0.40"]
+dev = ["pytest>=8"]
+
+[project.scripts]
+refpop = "refpop_agent.cli:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["refpop_agent", "refpop_agent.nodes"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
