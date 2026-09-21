@@ -1,0 +1,234 @@
+{
+  "dataset": "BGLR wheat (599 x 1279 DArT, trait=grain yield ENV1)",
+  "downgrade": "Cleveland pig 源不可达(网络策略), 无Task A缓存, 降级 BGLR wheat",
+  "spec_grid_note": "任务网格{200,500,1000,2000,5000,全量}中 2000/5000 超出wheat总标记数1279, 不适用; 另补充小密度点[50, 100, 300, 800]",
+  "n": 599,
+  "p": 1279,
+  "seeds": [
+    1,
+    2,
+    3
+  ],
+  "n_folds": 5,
+  "model": "RidgeCV (5-fold outer CV, GCV选alpha, alpha∈logspace(-1,6))",
+  "full_r_mean": 0.4989039266698974,
+  "saturation_95pct_markers": 800,
+  "saturation_90pct_markers": 500,
+  "ld_panel_size": 500,
+  "knn_k": 20,
+  "cost_assumption": {
+    "HD": 100.0,
+    "LD": 30.0,
+    "note": "假设占位值, 真实价格留待客户数据"
+  },
+  "e1": [
+    {
+      "n_markers": 50,
+      "is_full": false,
+      "in_spec_grid": false,
+      "r_mean": 0.2493319743,
+      "r_std": 0.0186599839,
+      "r_per_seed": "0.2298;0.2669;0.2513",
+      "pct_of_full": 49.9759494672
+    },
+    {
+      "n_markers": 100,
+      "is_full": false,
+      "in_spec_grid": false,
+      "r_mean": 0.3403305543,
+      "r_std": 0.0204887764,
+      "r_per_seed": "0.3629;0.3353;0.3228",
+      "pct_of_full": 68.2156495682
+    },
+    {
+      "n_markers": 200,
+      "is_full": false,
+      "in_spec_grid": true,
+      "r_mean": 0.4444585755,
+      "r_std": 0.0634587771,
+      "r_per_seed": "0.4599;0.4988;0.3747",
+      "pct_of_full": 89.0870068816
+    },
+    {
+      "n_markers": 300,
+      "is_full": false,
+      "in_spec_grid": false,
+      "r_mean": 0.4214140745,
+      "r_std": 0.0050860553,
+      "r_per_seed": "0.4271;0.4174;0.4197",
+      "pct_of_full": 84.4679810979
+    },
+    {
+      "n_markers": 500,
+      "is_full": false,
+      "in_spec_grid": true,
+      "r_mean": 0.4703352875,
+      "r_std": 0.017372996,
+      "r_per_seed": "0.4902;0.4625;0.4582",
+      "pct_of_full": 94.2737193263
+    },
+    {
+      "n_markers": 800,
+      "is_full": false,
+      "in_spec_grid": false,
+      "r_mean": 0.4896587265,
+      "r_std": 0.0170088843,
+      "r_per_seed": "0.4882;0.5074;0.4734",
+      "pct_of_full": 98.1468977021
+    },
+    {
+      "n_markers": 1000,
+      "is_full": false,
+      "in_spec_grid": true,
+      "r_mean": 0.4970940583,
+      "r_std": 0.0283624571,
+      "r_per_seed": "0.5177;0.5088;0.4648",
+      "pct_of_full": 99.6372310851
+    },
+    {
+      "n_markers": 1279,
+      "is_full": true,
+      "in_spec_grid": true,
+      "r_mean": 0.4989039267,
+      "r_std": 0.0228232782,
+      "r_per_seed": "0.5089;0.5150;0.4728",
+      "pct_of_full": 100.0
+    }
+  ],
+  "e2": [
+    {
+      "mask_share": 0.3,
+      "method": "col_mean",
+      "geno_accuracy_mean": 0.7483525888,
+      "geno_accuracy_std": 0.0012414194,
+      "geno_dosage_r_mean": 0.5644913508,
+      "pred_r_mean": 0.4644449155,
+      "pred_r_std": 0.0060951642,
+      "pred_r_loss_mean": 0.0344590112
+    },
+    {
+      "mask_share": 0.3,
+      "method": "knn_k20",
+      "geno_accuracy_mean": 0.8508748158,
+      "geno_accuracy_std": 0.000821668,
+      "geno_dosage_r_mean": 0.7501370791,
+      "pred_r_mean": 0.4724151868,
+      "pred_r_std": 0.008718157,
+      "pred_r_loss_mean": 0.0264887398
+    },
+    {
+      "mask_share": 0.5,
+      "method": "col_mean",
+      "geno_accuracy_mean": 0.7461531878,
+      "geno_accuracy_std": 0.0028506265,
+      "geno_dosage_r_mean": 0.562858356,
+      "pred_r_mean": 0.4536943388,
+      "pred_r_std": 0.0330462298,
+      "pred_r_loss_mean": 0.0452095879
+    },
+    {
+      "mask_share": 0.5,
+      "method": "knn_k20",
+      "geno_accuracy_mean": 0.8429453716,
+      "geno_accuracy_std": 0.0007520845,
+      "geno_dosage_r_mean": 0.7365627889,
+      "pred_r_mean": 0.478435067,
+      "pred_r_std": 0.0352607668,
+      "pred_r_loss_mean": 0.0204688597
+    },
+    {
+      "mask_share": 0.7,
+      "method": "col_mean",
+      "geno_accuracy_mean": 0.7446116893,
+      "geno_accuracy_std": 0.0009394325,
+      "geno_dosage_r_mean": 0.5599294833,
+      "pred_r_mean": 0.4701889826,
+      "pred_r_std": 0.018366808,
+      "pred_r_loss_mean": 0.028714944
+    },
+    {
+      "mask_share": 0.7,
+      "method": "knn_k20",
+      "geno_accuracy_mean": 0.8311095861,
+      "geno_accuracy_std": 0.0044261092,
+      "geno_dosage_r_mean": 0.7163974146,
+      "pred_r_mean": 0.4828334361,
+      "pred_r_std": 0.0080537171,
+      "pred_r_loss_mean": 0.0160704906
+    }
+  ],
+  "e3": [
+    {
+      "scheme": "全体高密度(全量1279标记)",
+      "cost_per_ind": 100.0,
+      "r": 0.4989039267,
+      "pct_of_full_r": 100.0,
+      "cost_saving_pct": 0.0,
+      "cost_per_unit_r": 200.4393925449,
+      "cost_note": "成本为假设占位值(HD=100, LD=30, 归一化)"
+    },
+    {
+      "scheme": "全体低密度(500标记, 不填补)",
+      "cost_per_ind": 30.0,
+      "r": 0.4703352875,
+      "pct_of_full_r": 94.2737193263,
+      "cost_saving_pct": 70.0,
+      "cost_per_unit_r": 63.7842849452,
+      "cost_note": "成本为假设占位值(HD=100, LD=30, 归一化)"
+    },
+    {
+      "scheme": "30%个体低密度+KNN填补",
+      "cost_per_ind": 79.0,
+      "r": 0.4724151868,
+      "pct_of_full_r": 94.6906130799,
+      "cost_saving_pct": 21.0,
+      "cost_per_unit_r": 167.225784014,
+      "cost_note": "成本为假设占位值(HD=100, LD=30, 归一化)"
+    },
+    {
+      "scheme": "30%个体低密度+均值填补",
+      "cost_per_ind": 79.0,
+      "r": 0.4644449155,
+      "pct_of_full_r": 93.0930567335,
+      "cost_saving_pct": 21.0,
+      "cost_per_unit_r": 170.095521263,
+      "cost_note": "成本为假设占位值(HD=100, LD=30, 归一化)"
+    },
+    {
+      "scheme": "50%个体低密度+KNN填补",
+      "cost_per_ind": 65.0,
+      "r": 0.478435067,
+      "pct_of_full_r": 95.8972341943,
+      "cost_saving_pct": 35.0,
+      "cost_per_unit_r": 135.8596066392,
+      "cost_note": "成本为假设占位值(HD=100, LD=30, 归一化)"
+    },
+    {
+      "scheme": "50%个体低密度+均值填补",
+      "cost_per_ind": 65.0,
+      "r": 0.4536943388,
+      "pct_of_full_r": 90.9382176618,
+      "cost_saving_pct": 35.0,
+      "cost_per_unit_r": 143.2682633376,
+      "cost_note": "成本为假设占位值(HD=100, LD=30, 归一化)"
+    },
+    {
+      "scheme": "70%个体低密度+KNN填补",
+      "cost_per_ind": 51.0,
+      "r": 0.4828334361,
+      "pct_of_full_r": 96.7788406313,
+      "cost_saving_pct": 49.0,
+      "cost_per_unit_r": 105.6264877024,
+      "cost_note": "成本为假设占位值(HD=100, LD=30, 归一化)"
+    },
+    {
+      "scheme": "70%个体低密度+均值填补",
+      "cost_per_ind": 51.0,
+      "r": 0.4701889826,
+      "pct_of_full_r": 94.244394058,
+      "cost_saving_pct": 49.0,
+      "cost_per_unit_r": 108.4670247176,
+      "cost_note": "成本为假设占位值(HD=100, LD=30, 归一化)"
+    }
+  ]
+}
