@@ -42,7 +42,8 @@
 | 70% | 列均值 | 74.5% | 0.560 | 0.470±0.018 | 0.029 | 94.2% |
 | 70% | KNN(k=20) | **83.1%** | 0.716 | 0.483±0.008 | 0.016 | 96.8% |
 
-自检通过：三个占比下 KNN 的还原准确率与预测精度均优于均值填补。
+自检通过（逐种子配对比较）：KNN 的基因型还原准确率 9/9 全胜（+8.1～+10.3 个百分点）；
+填补后预测精度 8/9 胜、1 例持平（差 −0.001）。
 注意：各占比之间的 r 差异多在 ±1 SD 内（n=599 的小样本噪声），排序勿过度解读。
 
 ## E3 · 经济学合成（`cost_table.csv`，图右下）
@@ -63,6 +64,14 @@
 3.2%（70% + KNN）同时仍省近一半成本——**在这些假设成本下**，帕累托前沿由
 "全员低密度"与"70% 低密度 + KNN 填补"构成。
 
+## 稳健性附录（wheat 其余 3 个环境）
+
+用 ENV2–4 复核主结论（`robustness_envs.csv`，脚本 `robustness.py`）：各环境全量 r 分别为
+0.469 / 0.349 / 0.448；**500 标记保留该环境全量精度的 91–98%，800 标记保留 96–99%**
+（4 个环境全部在 800 附近饱和）；E2 中 KNN 在全部 12 个"环境 × 占比"组合上的精度保留率
+均高于均值填补（KNN 85–100% vs 均值 84–94%）。两条主结论——密度饱和与"KNN 优于均值"——
+在 4 个环境上定性一致；具体百分比随性状而变。
+
 ## 诚实性核对清单
 
 - [x] 所有成本数字标注为假设占位，真实价格留待客户数据（本页与图中均已标注）
@@ -78,6 +87,7 @@ wheat 仅 1279 个标记、599 个体，密度曲线的绝对数值（如"500 �
 `experiments.py` → `make_figure.py` 可原样重跑出同一页简报。
 
 ---
-*复现：`python3 experiments.py wheat_X.npy wheat_Y.npy . && python3 make_figure.py .`
+*复现：`python3 experiments.py wheat_X.npy wheat_Y.npy . && python3 make_figure.py .`；
+稳健性附录：`python3 robustness.py wheat_X.npy wheat_Y.npy .`
 （wheat 数据取自 github.com/gdlc/BGLR-R 的 `data/wheat.RData`）。
-辅助文件：`density_curve.csv`、`imputation_table_per_seed.csv`、`results.json`。*
+辅助文件：`density_curve.csv`、`imputation_table_per_seed.csv`、`robustness_envs.csv`、`results.json`。*
