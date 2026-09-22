@@ -17,8 +17,11 @@ from __future__ import annotations
 
 import json
 import os
+import re
 
 DEFAULT_MODEL = "claude-opus-5"
+
+_NUM_RE = re.compile(r"\d+(?:\.\d+)?")
 
 _SYSTEM_PROMPT = (
     "你是育种数据分析助手。仅依据用户提供的 JSON 事实，撰写一段 120～220 字的"
@@ -48,6 +51,45 @@ def summarize(facts: dict) -> dict:
             "note": "默认 Mock 模式（REFPOP_LLM=anthropic 可切换真模型）"}
 
 
+def _allowed_number_tokens(facts: dict) -> set[str]:
+    """从事实 JSON 构造"允许出现的数字"白名单（含常见的四舍五入变体）。"""
+    tokens = set(_NUM_RE.findall(json.dumps(facts, ensure_ascii=False)))
+
+    def walk(v):
+        if isinstance(v, bool):
+            return
+        if isinstance(v, (int, float)):
+            variants = {str(v), f"{v:g}"}
+            if isinstance(v, float):
+                for fmt in (".1f", ".2f", ".3f", ".4f"):
+                    variants.add(format(v, fmt))
+                if float(v).is_integer():
+                    variants.add(str(int(v)))
+            for s in variants:
+                tokens.update(_NUM_RE.findall(s))
+        elif isinstance(v, dict):
+            for x in v.values():
+                walk(x)
+        elif isinstance(v, (list, tuple)):
+            for x in v:
+                walk(x)
+
+    walk(facts)
+    return tokens
+
+
+def check_numbers(text: str, facts: dict) -> list[str]:
+    """诚实性守卫：返回文本中"不在事实白名单里"的数字 token。
+
+    LLM 被要求只引用事实数字、不做计算；任何多位数字若无法在事实（或其常见
+    四舍五入形式）中找到，即视为编造/自行计算，调用方应放弃该输出回退 Mock。
+    单个数字（0-9）豁免（"第2点"这类序数噪声）。
+    """
+    allowed = _allowed_number_tokens(facts)
+    bad = [t for t in _NUM_RE.findall(text) if len(t) > 1 and t not in allowed]
+    return sorted(set(bad))
+
+
 def _anthropic_summary(facts: dict) -> dict:
     import anthropic  # 可选依赖，仅真模型模式需要
 
@@ -67,8 +109,11 @@ def _anthropic_summary(facts: dict) -> dict:
     text = "".join(b.text for b in resp.content if b.type == "text").strip()
     if not text:
         raise RuntimeError("模型未返回文本内容")
+    bad = check_numbers(text, facts)
+    if bad:
+        raise RuntimeError(f"输出包含事实之外的数字 {bad[:5]}（疑似编造或自行计算），按诚实性规则拒用")
     return {"text": text, "mode": "anthropic", "model": model,
-            "note": "摘要由 LLM 起草；所有数字以下方表格与磁盘产物为准"}
+            "note": "摘要由 LLM 起草（已通过数字白名单校验）；所有数字以下方表格与磁盘产物为准"}
 
 
 def _mock_summary(facts: dict) -> str:
@@ -82,10 +127,14 @@ def _mock_summary(facts: dict) -> str:
     ]
     if f.get("n_rejected"):
         parts.append(f"（拦截构成：{cat_txt}）")
-    parts.append(
-        f"。合并后参考群规模由 {f['n_before']} 增至 {f['n_after']}，"
-        f"并已在全量参考群上重训 GBLUP（假设 h²={f['h2']}）。"
-    )
+    if f.get("n_after") is not None:
+        parts.append(
+            f"。合并后参考群规模由 {f['n_before']} 增至 {f['n_after']}，"
+            f"并已在全量参考群上重训 GBLUP（假设 h²={f['h2']}）。"
+        )
+    else:
+        parts.append("。本批 QC 后无合格个体，合并/重训/验证/选配均未执行，"
+                     "流程在门禁处中止，请人工复核拦截明细后重新送样。")
     if f.get("val_mode") == "forward":
         seg = (f"用上一代模型做前向验证，对本批真实表型的预测相关 r = {f['r']}"
                f"（验证个体 {f['n_val']} 只）")
@@ -101,5 +150,6 @@ def _mock_summary(facts: dict) -> str:
             f"选配建议在近交约束（预期后代 F ≤ {f['max_F']}）与隐性致死携带者规则下"
             f"生成 {f['n_pairs']} 组配对；配对搜索中 {f['blocked_kinship']} 次尝试因近交"
             f"超标被跳过、{f['blocked_carrier']} 次因携带者×携带者禁配被跳过。")
-    parts.append("建议人工复核全部拦截样本后归档，并按 GEBV Top-20 清单复核留种候选。")
+    if f.get("n_after") is not None:
+        parts.append("建议人工复核全部拦截样本后归档，并按 GEBV Top-20 清单复核留种候选。")
     return "".join(parts)
