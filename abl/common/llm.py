@@ -14,13 +14,16 @@ import json
 import os
 import time
 from dataclasses import dataclass, field
-from typing import Any, Callable, Protocol
+from typing import Any, Callable, Optional, Protocol
 
 DEFAULT_MODEL = "claude-opus-5"
 # USD per million tokens (input, output) — kept next to the model id so cost rows stay honest
 PRICES = {"claude-opus-5": (5.0, 25.0), "stub": (0.0, 0.0)}
 
-Handler = Callable[[str, str, dict | None, int], dict]   # (system, user, schema, seed) -> parsed dict
+# module-level type alias: evaluated eagerly at import time (unlike annotations, which
+# `from __future__ import annotations` defers), so it must use typing.Optional, not the
+# PEP 604 "X | Y" syntax, to stay importable on Python 3.9 as well as 3.10+.
+Handler = Callable[[str, str, Optional[dict], int], dict]   # (system, user, schema, seed) -> parsed dict
 
 
 @dataclass
