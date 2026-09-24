@@ -58,6 +58,10 @@ the one-page argument and the operator's map.
 
 ## Run it
 
+Operator's manual: `docs/USER_MANUAL.md` (English) · `docs/USER_MANUAL.zh.md`（中文）. The dashboard,
+`make status` and `make digest` speak Chinese by default; switch with the sidebar or `ABL_LANG=en`.
+
+
 ```bash
 cd abl
 python3 -m venv .venv && . .venv/bin/activate && pip install -r requirements.txt

@@ -1,6 +1,6 @@
 # ABL — Agentic Breeding-value Loop
 Read docs/DESIGN.md (contract, roles, gates, prompts) and docs/OPS.md (registry schema,
-dashboard, data sources) before any change. Non-negotiables:
+dashboard, data sources) before any change; docs/USER_MANUAL.md / USER_MANUAL.zh.md is the operator guide. Non-negotiables:
 1. Nothing under holdout/ is ever read by agent code; tests grep for it.
 2. Only gates/ may change a candidate's state; agents return recommendations only.
 3. Every agent call appends one line to registry/events.jsonl (schema in OPS.md A.2 / D.2).
