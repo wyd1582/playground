@@ -69,19 +69,22 @@ class Orchestrator:
 
     def _budget_ok(self, need_full_eval: bool) -> bool:
         if self.ctx.tokens_used > self.cfg.budget_tokens:
-            self._flag_budget("tokens")
+            self._flag_budget("tokens", overrun=True)
             return False
         if need_full_eval and self.gates.n_full_evaluations >= self.cfg.budget_full_evals:
-            self._flag_budget("full_evaluations")
+            self._flag_budget("full_evaluations", overrun=self.gates.n_full_evaluations > self.cfg.budget_full_evals)
             return False
         return True
 
-    def _flag_budget(self, what: str) -> None:
+    def _flag_budget(self, what: str, overrun: bool = False) -> None:
+        """Reaching the planned budget is normal and logged without a policy flag; only a genuine
+        overrun (tokens above cap, or more full evaluations than allowed) raises budget_exceeded."""
         if not self.state["budget_exhausted"]:
             self.state["budget_exhausted"] = True
             append_event(agent="orchestrator", action="budget", campaign_id=self.cfg.campaign_id, input_obj=what,
-                         output_obj={"tokens": self.ctx.tokens_used, "full_evals": self.gates.n_full_evaluations},
-                         summary=f"Budget exhausted: {what}", policy_flags=["budget_exceeded"], registry=self.reg)
+                         output_obj={"tokens": self.ctx.tokens_used, "full_evals": self.gates.n_full_evaluations, "overrun": overrun},
+                         summary=(f"Budget OVERRUN: {what}" if overrun else f"Budget reached as planned: {what}"),
+                         policy_flags=["budget_exceeded"] if overrun else [], registry=self.reg)
 
     def _log(self, msg: str) -> None:
         self.state["log"].append(msg)
@@ -192,7 +195,7 @@ class Orchestrator:
         cluster = str(hyp.get("mechanism_cluster", "unknown"))
         remaining = self.cfg.budget_full_evals - self.gates.n_full_evaluations
         if remaining <= 0:
-            self._flag_budget("full_evaluations")
+            self._flag_budget("full_evaluations", overrun=remaining < 0)
             append_event(agent="orchestrator", action="defer", campaign_id=cid_camp, candidate_id=cand, input_obj=cluster, output_obj={},
                          summary=f"{cand} validated but no full-evaluation budget left", registry=self.reg)
             return
