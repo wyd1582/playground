@@ -95,6 +95,19 @@ def _gate_feed(limit: int) -> list[dict]:
     return registry_gate_events(_reader(), None, limit)
 
 
+# full-width buttons: `width="stretch"` (1.46+) or the older `use_container_width=True`
+_FULL_WIDTH = ({"width": "stretch"} if "width" in __import__("inspect").signature(st.button).parameters
+               else {"use_container_width": True})
+
+
+def _bar_chart(data, **kwargs) -> None:
+    """st.bar_chart with only the keyword arguments this Streamlit release supports
+    (horizontal/stack/sort/x_label/y_label arrived between 1.36 and 1.41)."""
+    import inspect
+    allowed = set(inspect.signature(st.bar_chart).parameters)
+    st.bar_chart(data, **{k: v for k, v in kwargs.items() if k in allowed})
+
+
 @st.fragment(run_every=REFRESH)
 def feed_panel() -> None:
     _apply_lang()
@@ -137,9 +150,9 @@ def mechanism_panel(campaign: str | None) -> None:
     legend = {"promoted": t("app_series_promoted"), "rejected": t("app_series_rejected"),
               "in_progress": t("app_series_in_progress")}
     chart = top.set_index("mechanism_cluster")[list(SERIES)].rename(columns=legend)
-    st.bar_chart(chart, horizontal=True, stack=True, sort=False, color=list(SERIES.values()),
-                 x_label=t("app_axis_proposals"), y_label=t("app_axis_cluster"),
-                 height=max(160, 34 * len(top) + 60))
+    _bar_chart(chart, horizontal=True, stack=True, sort=False, color=list(SERIES.values()),
+               x_label=t("app_axis_proposals"), y_label=t("app_axis_cluster"),
+               height=max(160, 34 * len(top) + 60))
     with st.expander(t("app_table_view")):
         st.dataframe(mm, hide_index=True,
                      column_config={"share": st.column_config.NumberColumn(t("app_col_share"), format="percent")})
@@ -320,9 +333,9 @@ def control_panel() -> None:
         st.info(t("app_idle"), icon=":material/stop_circle:")
     c1, c2 = st.columns(2)
     # callbacks run before the rerun, so the state box above already shows the new state
-    c1.button(t("app_btn_pause"), type="primary", disabled=s["paused"], key="btn_pause", width="stretch",
+    c1.button(t("app_btn_pause"), type="primary", disabled=s["paused"], key="btn_pause", **_FULL_WIDTH,
               on_click=control.pause)
-    c2.button(t("app_btn_resume"), disabled=not s["paused"], key="btn_resume", width="stretch", on_click=control.resume)
+    c2.button(t("app_btn_resume"), disabled=not s["paused"], key="btn_resume", on_click=control.resume, **_FULL_WIDTH)
     st.caption(f"`{control.pause_file()}`")
 
 
@@ -355,10 +368,9 @@ def reliability_panel(campaign: str | None) -> None:
 def _lang_switch() -> None:
     """Sidebar 中文 / English switch; the value lives in st.session_state[LANG_KEY]."""
     label = t("app_lang_label")
-    if hasattr(st, "segmented_control"):
-        st.segmented_control(label, list(i18n.LANGS), required=True, format_func=i18n.lang_label, key=LANG_KEY)
-    else:
-        st.radio(label, list(i18n.LANGS), format_func=i18n.lang_label, horizontal=True, key=LANG_KEY)
+    # st.radio exists on every Streamlit release; segmented_control's keyword set changed across
+    # versions (e.g. 1.40 has no `required`), so the portable widget is used unconditionally.
+    st.radio(label, list(i18n.LANGS), format_func=i18n.lang_label, horizontal=True, key=LANG_KEY)
 
 
 def main() -> None:
