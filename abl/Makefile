@@ -46,6 +46,6 @@ digest:
 	$(PY) -m dashboard.digest
 
 clean-runtime:
-	rm -f registry/*.sqlite registry/events.jsonl registry/alarms.log registry/holdout_seal.json registry/digest_*.md
-	rm -rf registry/prompts data/snapshots/* dashboard/state.json
+	rm -f registry/*.sqlite registry/*.sqlite-* registry/status_*.json registry/events.jsonl registry/alarms.log registry/holdout_seal.json registry/digest_*.md
+	rm -rf registry/prompts registry/packages data/snapshots/* dashboard/state.json
 	chmod -R u+w holdout 2>/dev/null || true; find holdout -mindepth 1 ! -name README.md -delete

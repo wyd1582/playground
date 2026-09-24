@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import re
 
 import pandas as pd
 
@@ -23,9 +24,11 @@ def build_scorecard(reg: Registry) -> pd.DataFrame:
         n_prop = max(1, len(props))
         valid = int(cands.state.isin(["validated", "evaluated", "promoted"]).sum())
         promoted = int((cands.state == "promoted").sum())
-        arm = cid.split("_")[-2] if "_" in cid else "?"
+        m = re.search(r"^(.*)_([A-F])_s\d+", cid)
+        arm = m.group(2) if m else "?"
+        dataset = m.group(1) if m else cid
         rows.append({
-            "campaign_id": cid, "arm": arm, "proposals": len(props),
+            "campaign_id": cid, "dataset": dataset, "arm": arm, "proposals": len(props),
             "valid_per_100_proposals": round(100 * valid / n_prop, 1),
             "full_evaluations": len(ev), "promoted": promoted,
             "full_evals_per_promotion": (round(len(ev) / promoted, 2) if promoted else None),

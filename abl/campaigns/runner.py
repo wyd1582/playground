@@ -64,10 +64,12 @@ def _stats_row(ev: Evaluator, spec, splits, truth):
 class Campaign:
     def __init__(self, bundle: DatasetBundle, *, registry: Registry | None = None, seed: int = 0,
                  n_proposals: int = 100, budget_full_evals: int = 12, budget_tokens: int = 2_000_000,
-                 llm=None, probe_every: int = 10):
+                 llm=None, probe_every: int = 10, run_tag: str | None = None):
         self.b = bundle
         self.reg = registry or Registry()
         self.seed = seed
+        # the ledger is append-only: every run is a new set of campaigns, never an overwrite
+        self.run_tag = run_tag or utcnow_iso().replace("-", "").replace(":", "")[:13]
         self.n_proposals = n_proposals
         self.budget_full_evals = budget_full_evals
         self.budget_tokens = budget_tokens
@@ -94,13 +96,13 @@ class Campaign:
                         "n_animals": pub.n_animals, "n_markers": pub.n_markers, "cutoffs": [s.cutoff_t for s in self.splits],
                         "champion": self.champion.as_dict(), "null_rho": self.null, "dataset": bundle.name,
                         "calendar_source": pub.meta.get("calendar_source"), "map_source": pub.markers.map_source}
-        self.results: dict = {"dataset": bundle.name, "started_at": utcnow_iso(), "champion": self.champion.as_dict(),
+        self.results: dict = {"dataset": bundle.name, "run_tag": self.run_tag, "seed": seed, "started_at": utcnow_iso(), "champion": self.champion.as_dict(),
                               "null": self.null, "splits": [{"cutoff": s.cutoff_t, "n_train": len(s.train_ids), "n_test": len(s.test_ids), "purged": len(s.purged_ids)} for s in self.splits],
                               "arms": {}}
 
     # -- helpers -----------------------------------------------------------------------
     def _campaign_id(self, arm: str) -> str:
-        return f"{self.b.name}_{arm}_s{self.seed}"
+        return f"{self.b.name}_{arm}_s{self.seed}_r{self.run_tag}"
 
     def _new_registry_campaign(self, arm: str, n_prop: int, n_eval: int) -> str:
         cid = self._campaign_id(arm)
@@ -258,7 +260,7 @@ class Campaign:
         if "F" in arms: self.arm_F_random_snp()
         self.results["seconds"] = round(time.perf_counter() - t0, 1)
         self.results["ended_at"] = utcnow_iso()
-        out = paths.reports_dir() / f"campaign_{self.b.name}_s{self.seed}.json"
+        out = paths.reports_dir() / f"campaign_{self.b.name}.json"
         out.parent.mkdir(parents=True, exist_ok=True)
         out.write_text(json.dumps(self.results, indent=1, default=str))
         return self.results
