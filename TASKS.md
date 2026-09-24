@@ -71,3 +71,16 @@ Xw, Yw, Aw = (np.asarray(convw[k]) for k in ['wheat.X', 'wheat.Y', 'wheat.A'])
   产物合回 master 供他人读取。
 - 大文件纪律：`cache/`、`.venv/` 不入库；数据文件 <50MB 可入库（本仓库为演示性质）。
 - biotech-gene 独立仓库迁移计划暂缓，待四个 task 收官后执行（Task A 会话里已有步骤）。
+
+## ABL（Agentic Breeding-value Loop）— `abl/`（独立子项目，分支 `claude/affectionate-franklin-ttwudk`）
+
+按 `abl/docs/DESIGN.md`（v0.1 设计与 Prompt 包）与 `abl/docs/OPS.md`（v0.2 开干手册）建成的研究 harness：
+agents 提假设，确定性门槛决定谁存活。入口 `abl/README.md`；`cd abl && make help` 列出全部目标。
+
+- 目录严格按 DESIGN.md §P0：`genoframe/ dsl/ engine/ gates/ registry/ agents/ campaigns/ holdout/ sim/`，
+  外加 `dataio/`（公开数据加载）、`dashboard/`（只读独立进程）、`common/`（路径/哈希/种子/LLM 后端）。
+- 运行态（`registry/*.sqlite`、`events.jsonl`、`holdout/sim/`、`data/snapshots/`、`.venv/`）全部 gitignore；
+  可交付产物在 `abl/reports/`（记分卡、sim-controls 表、BreedingPackage、封存 holdout 最终表）。
+- 复用本仓库已入库的 `genomic-selection-pig/data/pig_cleveland_curated.rdata` 与 `wheat.RData`（无需联网）。
+- LLM 后端：有 `ANTHROPIC_API_KEY`（或 `ant auth login`）时走 `claude-opus-5` + 结构化输出；否则自动用
+  确定性 StubLLM，整条流水线、测试与面板离线可跑。`ABL_LLM=anthropic|stub` 可强制。
