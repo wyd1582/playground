@@ -21,7 +21,7 @@ import pandas as pd
 import pytest
 
 from dashboard import alarms as alarms_mod
-from dashboard import control, digest, reader, status
+from dashboard import control, digest, i18n, narrative, reader, status
 from dashboard.alarms import ALARM_KINDS, Alarm, compute_alarms, notify
 from dashboard.narrative import LEVELS, narrate
 from dashboard.reader import EventFeed, RegistryReader, load_events, tail_events
@@ -40,6 +40,22 @@ def ts(**delta) -> str:
 # --------------------------------------------------------------------------------------------
 # fixtures
 # --------------------------------------------------------------------------------------------
+@pytest.fixture(autouse=True)
+def _lang_reset(monkeypatch):
+    """Every test starts on the default language (zh) with no override; nothing leaks out."""
+    monkeypatch.delenv("ABL_LANG", raising=False)
+    i18n.set_lang(None)
+    yield
+    i18n.set_lang(None)
+
+
+@pytest.fixture()
+def en():
+    """Tests that assert the English wording."""
+    i18n.set_lang("en")
+    yield "en"
+
+
 @pytest.fixture()
 def root(tmp_path, monkeypatch):
     r = tmp_path / "abl"
@@ -386,7 +402,7 @@ def test_compute_alarms(world):
     assert "events_stalled" not in {a.kind for a in compute_alarms(fresh, RegistryReader(), NOW)}
 
 
-def test_budget_alarm_from_sql(world):
+def test_budget_alarm_from_sql(world, en):
     con = sqlite3.connect(world / "registry" / "abl.sqlite")
     con.execute("INSERT INTO agent_events (ts, campaign_id, agent, action, input_hash, output_hash, tokens) "
                 "VALUES (?, 'c01', 'builder', 'implement', 'x', 'y', 100000)", (ts(minutes=2),))
@@ -425,7 +441,7 @@ def test_notify_throttles_and_logs(world, monkeypatch):
 # --------------------------------------------------------------------------------------------
 # narrative
 # --------------------------------------------------------------------------------------------
-def test_narrate_every_event(world):
+def test_narrate_every_event(world, en):
     evs = load_events()
     out = [narrate(e) for e in evs]
     assert all(isinstance(t, str) and t and lvl in LEVELS for t, lvl in out)
@@ -459,7 +475,7 @@ def test_narrate_every_event(world):
     assert narrate({})[1] == "info"
 
 
-def test_gate_outcomes_reach_the_feed(world):
+def test_gate_outcomes_reach_the_feed(world, en):
     """Gates write SQL only (gates/runner.py); the feed synthesises their failures and promotions."""
     evs = reader.registry_gate_events(RegistryReader())
     assert evs and all(e["source"].startswith("registry:") and e["agent"] == "gate" for e in evs)
@@ -475,7 +491,7 @@ def test_gate_outcomes_reach_the_feed(world):
 # --------------------------------------------------------------------------------------------
 # status / digest / control
 # --------------------------------------------------------------------------------------------
-def test_status_main(world, capsys):
+def test_status_main(world, capsys, en):
     assert status.main(["--plain"]) == 0
     out = capsys.readouterr().out
     for s in ("Proposals", "Critic verdicts", "Gate results", "Promotions", "Tokens", "Evaluations vs cap",
@@ -486,7 +502,7 @@ def test_status_main(world, capsys):
     assert "Alarms" in capsys.readouterr().out
 
 
-def test_status_main_empty_root(tmp_path, monkeypatch, capsys):
+def test_status_main_empty_root(tmp_path, monkeypatch, capsys, en):
     monkeypatch.setenv("ABL_ROOT", str(tmp_path / "empty"))
     assert status.main(["--plain"]) == 0
     out = capsys.readouterr().out
@@ -494,7 +510,7 @@ def test_status_main_empty_root(tmp_path, monkeypatch, capsys):
     assert not (tmp_path / "empty").exists()                         # status writes nothing
 
 
-def test_digest_main(world, capsys):
+def test_digest_main(world, capsys, en):
     assert digest.main([]) == 0
     p = world / "registry" / f"digest_{datetime.now(timezone.utc).date().isoformat()}.md"
     assert p.exists() and str(p) in capsys.readouterr().out
@@ -509,7 +525,7 @@ def test_digest_main(world, capsys):
     assert "holdout_touch" in md and NEXT_EXPERIMENT in md and "stub" in md
 
 
-def test_digest_guard_keeps_numbers(world):
+def test_digest_guard_keeps_numbers(world, en):
     facts = digest.build_facts(NOW, RegistryReader(), load_events())
     det = digest.deterministic_bullets(facts)
     allowed = digest.numbers_in(json.dumps(facts, indent=1, sort_keys=True, ensure_ascii=False, default=str))
@@ -529,7 +545,7 @@ def test_digest_guard_keeps_numbers(world):
     assert "replaced" in note
 
 
-def test_digest_empty_root(tmp_path, monkeypatch):
+def test_digest_empty_root(tmp_path, monkeypatch, en):
     monkeypatch.setenv("ABL_ROOT", str(tmp_path / "empty"))
     monkeypatch.setenv("ABL_LLM", "stub")
     assert digest.main([]) == 0
@@ -643,12 +659,181 @@ def test_app_smoke_with_streamlit_apptest(world):
     st.cache_data.clear()
     st.cache_resource.clear()
     at = testing.AppTest.from_file(str(DASH / "app.py"), default_timeout=60)
-    at.run()
+    at.run()                                                         # default language: zh
     assert not at.exception, [e.value for e in at.exception]
+    assert at.session_state["abl_lang"] == "zh"
     text = " ".join(e.value for e in at.error)
     assert "holdout_touch" in text
-    assert any("Guardian" in h.value for h in at.header)
+    assert any("监护" in h.value for h in at.header)
+    assert any(_CJK.search(e.value) for e in at.error)                # alarm messages are in Chinese
     at.button(key="btn_pause").click().run()
     assert (world / "control" / "PAUSE").exists()
     at.button(key="btn_resume").click().run()
     assert not (world / "control" / "PAUSE").exists()
+
+    st.cache_data.clear()
+    st.cache_resource.clear()
+    at = testing.AppTest.from_file(str(DASH / "app.py"), default_timeout=60)
+    at.session_state["abl_lang"] = "en"
+    at.run()
+    assert not at.exception, [e.value for e in at.exception]
+    assert any("Guardian" in h.value for h in at.header)
+    assert not any(_CJK.search(h.value) for h in list(at.header) + list(at.subheader))
+    assert "holdout_touch" in " ".join(e.value for e in at.error)
+
+
+# --------------------------------------------------------------------------------------------
+# i18n (中文 / English)
+# --------------------------------------------------------------------------------------------
+_CJK = __import__("re").compile(r"[㐀-鿿豈-﫿　-〿＀-￯]")
+
+
+def _t_keys(path: Path) -> set[str]:
+    """Every string literal inside the first argument of a call to ``t(...)`` in ``path``."""
+    keys = set()
+
+    def collect(n):                  # "key" or  "a" if cond else "b"
+        if isinstance(n, ast.Constant) and isinstance(n.value, str):
+            keys.add(n.value)
+        elif isinstance(n, ast.IfExp):
+            collect(n.body)
+            collect(n.orelse)
+
+    for node in ast.walk(ast.parse(path.read_text(encoding="utf-8"))):
+        if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == "t" and node.args:
+            collect(node.args[0])
+    return keys
+
+
+def test_i18n_every_used_key_exists_in_both_languages():
+    used: dict[str, set[str]] = {}
+    for f in _dashboard_files():
+        if "tests" in f.relative_to(DASH).parts:
+            continue
+        for k in _t_keys(f):
+            used.setdefault(k, set()).add(f.name)
+    for name in ("app.py", "status.py", "digest.py", "narrative.py", "alarms.py"):
+        assert any(name in files for files in used.values()), f"{name} uses no t() keys"
+    # keys chosen at runtime from lookup tables
+    for table in (narrative.AGENT_KEYS, narrative.VERB_KEYS, narrative.FLAG_KEYS):
+        for k in table.values():
+            used.setdefault(k, set()).add("narrative.py")
+    missing = sorted(k for k in used if k not in i18n.STRINGS)
+    assert not missing, missing
+    for k, v in i18n.STRINGS.items():
+        assert set(v) == set(i18n.LANGS), k
+        assert all(isinstance(v[lang], str) and v[lang].strip() for lang in i18n.LANGS), k
+    unused = sorted(set(i18n.STRINGS) - set(used))
+    assert not unused, unused                                        # no dead strings either
+
+
+def test_i18n_placeholders_match_between_languages():
+    import string
+    for k, v in i18n.STRINGS.items():
+        fields = {lang: {f for _, f, _, _ in string.Formatter().parse(v[lang]) if f} for lang in i18n.LANGS}
+        assert fields["zh"] == fields["en"], (k, fields)
+
+
+def test_i18n_resolution(monkeypatch):
+    assert i18n.DEFAULT_LANG == "zh" and i18n.current_lang() == "zh"
+    monkeypatch.setenv("ABL_LANG", "en")
+    assert i18n.current_lang() == "en" and i18n.t("st_proposals") == "Proposals"
+    monkeypatch.setenv("ABL_LANG", "fr")                             # invalid -> default
+    assert i18n.current_lang() == "zh" and i18n.t("st_proposals") == "提案"
+    monkeypatch.setenv("ABL_LANG", "en")
+    i18n.set_lang("zh")                                              # explicit override beats the env
+    assert i18n.current_lang() == "zh"
+    with i18n.using_lang("en"):
+        assert i18n.current_lang() == "en"
+    assert i18n.current_lang() == "zh"
+    i18n.set_lang(None)
+    assert i18n.current_lang() == "en"
+    with pytest.raises(ValueError):
+        i18n.set_lang("de")
+    assert i18n.lang_label("zh") == "中文" and i18n.lang_label("en") == "English"
+
+
+def test_i18n_t_is_strict():
+    with pytest.raises(KeyError):
+        i18n.t("no_such_key")
+    with pytest.raises(KeyError):
+        i18n.t("narr_promoted")                                      # placeholder {cand} not given
+    assert i18n.t("narr_promoted", cand="k0001") == "候选 k0001 已晋级（PROMOTED）"
+
+
+def test_narrate_both_languages(world):
+    evs = load_events() + reader.registry_gate_events(RegistryReader()) + ["nope", {}]
+    out = {}
+    for lang in i18n.LANGS:
+        i18n.set_lang(lang)
+        out[lang] = [narrate(e) for e in evs]
+    for (zt, zl), (et, el), ev in zip(out["zh"], out["en"], evs):
+        assert zt and et and zl == el and zl in LEVELS, ev
+        assert not _CJK.search(et), et
+    assert sum(bool(_CJK.search(zt)) for zt, _ in out["zh"]) == len(evs)
+    i18n.set_lang("zh")
+    by = {(e["agent"], e["action"], e.get("candidate_id")): narrate(e) for e in load_events()}
+    assert by[("critic", "review", "k0002")] == (
+        "评审者将候选 k0002 退回构建者：lookback uses phenotype available_at > selection_date (field: litter_size)", "warn")
+    assert by[("gate", "accuracy", "k0002")] == ("候选 k0002 未通过 accuracy 门（FAILED）：rho 0.031 < min_rho 0.05", "fail")
+    assert by[("geneticist", "hypothesize", "k0006")][0].startswith("遗传学家提出了候选 k0006 [qtl_prior]")
+
+
+def test_alarms_both_languages(world):
+    events = load_events()
+    msgs = {}
+    for lang in i18n.LANGS:
+        i18n.set_lang(lang)
+        msgs[lang] = {a.kind: a.message for a in compute_alarms(events, RegistryReader(), NOW)}
+    assert set(msgs["zh"]) == set(msgs["en"]) and msgs["zh"]
+    for kind in msgs["zh"]:
+        assert _CJK.search(msgs["zh"][kind]) and not _CJK.search(msgs["en"][kind]), kind
+    assert "k0004" in msgs["zh"]["retry_limit"] and "region_weighted_grm" in msgs["zh"]["cluster_concentration"]
+
+
+@pytest.mark.parametrize("lang", ["zh", "en"])
+def test_status_lang_flag(world, capsys, lang):
+    assert status.main(["--plain", "--lang", lang]) == 0
+    out = capsys.readouterr().out
+    assert bool(_CJK.search(out)) == (lang == "zh")
+    assert "holdout_touch" in out and "c01" in out
+    assert i18n.current_lang() == "zh"                               # --lang does not leak past the run
+    assert status.main(["--lang", lang]) == 0                        # rich renderer
+    assert bool(_CJK.search(capsys.readouterr().out)) == (lang == "zh")
+
+
+@pytest.mark.parametrize("lang", ["zh", "en"])
+def test_digest_lang_flag(world, capsys, lang):
+    assert digest.main(["--lang", lang]) == 0
+    capsys.readouterr()
+    p = world / "registry" / f"digest_{datetime.now(timezone.utc).date().isoformat()}.md"
+    md = p.read_text(encoding="utf-8")
+    assert bool(_CJK.search(md)) == (lang == "zh")
+    heads = [l for l in md.splitlines() if l.startswith("## ")]
+    assert len(heads) == 5
+    body = md.split("\n## ")
+    assert len([l for l in body[1].splitlines() if l.startswith("- ")]) == 5
+    assert len([l for l in body[2].splitlines() if l.startswith("- ")]) == 3
+    assert "holdout_touch" in md and NEXT_EXPERIMENT in md
+
+
+def test_digest_zh_bullets_keep_numbers(world):
+    i18n.set_lang("zh")
+    facts = digest.build_facts(NOW, RegistryReader(), load_events())
+    det = digest.deterministic_bullets(facts)
+    allowed = digest.numbers_in(json.dumps(facts, indent=1, sort_keys=True, ensure_ascii=False, default=str))
+    assert all(_CJK.search(b) for b in det["learned"] + det["rejected"])
+    assert all(digest.numbers_in(b) <= allowed for b in det["learned"] + det["rejected"])
+    seen = {}
+
+    class FakeLLM:
+        def complete(self, **kw):
+            seen.update(kw)
+            return type("R", (), {"parsed": {"learned": ["共 999 个提案。"], "rejected": []}, "model": "fake"})()
+
+    bullets, note = digest.narrative_bullets(facts, FakeLLM())
+    assert "Simplified Chinese" in seen["system"] and bullets["learned"][0] == det["learned"][0]
+    assert "fake" in note and _CJK.search(note)
+    i18n.set_lang("en")
+    digest.narrative_bullets(facts, FakeLLM())
+    assert "Write every bullet in English." in seen["system"]

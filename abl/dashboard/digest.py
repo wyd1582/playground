@@ -7,7 +7,7 @@ the deterministic StubLLM handler below; with Anthropic credentials it is the re
 LLM bullet quoting a number that is not in the SQL facts is replaced by the deterministic
 bullet, so the LLM can reword but never change a number.
 
-    PYTHONPATH=. .venv/bin/python -m dashboard.digest [--print]
+    PYTHONPATH=. .venv/bin/python -m dashboard.digest [--print] [--lang zh|en]
 """
 from __future__ import annotations
 
@@ -24,6 +24,7 @@ from common import paths
 from common.llm import get_llm
 from common.seeds import derive_seed
 from dashboard.alarms import compute_alarms
+from dashboard.i18n import LANGS, t, using_lang
 from dashboard.narrative import strip_verdict
 from dashboard.reader import (RegistryReader, as_utc, events_since, iso, load_events, parse_ts,
                               read_prompt_output, window_row)
@@ -37,6 +38,11 @@ SYSTEM = (
     f"Return JSON: learned = exactly {N_LEARNED} bullets on what was learned, rejected = exactly {N_REJECTED} "
     "bullets on what the harness rejected and why."
 )
+
+
+def system_prompt() -> str:
+    """SYSTEM plus the output-language instruction for the current i18n language."""
+    return SYSTEM + " " + t("dg_llm_lang")
 SCHEMA = {
     "type": "object",
     "properties": {"learned": {"type": "array", "items": {"type": "string"}},
@@ -177,65 +183,63 @@ def build_facts(now: Any = None, reader: RegistryReader | None = None, events: l
 # deterministic bullets (the StubLLM "digest" handler) and the number guard
 # --------------------------------------------------------------------------------------------
 def deterministic_bullets(f: dict) -> dict[str, list[str]]:
+    """Bullets in the current i18n language; every number is copied from the facts."""
     c, h = f["last_24h"], f["window_hours"]
     h = int(h) if float(h).is_integer() else h
     learned = [
-        f"In the last {h}h the loop produced {c['proposals']} proposals; the Critic passed {c['critic_pass']}, "
-        f"returned {c['critic_return']} and rejected {c['critic_reject']}; {c['evaluations']} candidates got a full "
-        f"evaluation and {c['promotions']} were promoted.",
+        t("dg_b_summary", h=h, proposals=c["proposals"], passed=c["critic_pass"], returned=c["critic_return"],
+          rejected=c["critic_reject"], evals=c["evaluations"], promoted=c["promotions"]),
     ]
     cl = f["mechanism_clusters"]
     if cl:
-        t = cl[0]
-        learned.append(f"Most explored mechanism cluster: '{t['cluster']}' with {t['proposals']} proposals "
-                       f"({t['share_pct']}% of non-control proposals), {t['promoted']} promoted and {t['rejected']} rejected.")
+        x = cl[0]
+        learned.append(t("dg_b_cluster", cluster=x["cluster"], proposals=x["proposals"], share=x["share_pct"],
+                         promoted=x["promoted"], rejected=x["rejected"]))
     else:
-        learned.append("No proposals are in the ledger yet, so there is no mechanism map to learn from.")
+        learned.append(t("dg_b_no_proposals"))
     b = f["best_evaluation"]
     if b:
-        ci = f" (CI low {b['delta_oos_ci_low']})" if b.get("delta_oos_ci_low") is not None else ""
-        learned.append(f"Best paired ΔOOS so far is {b['delta_oos']}{ci} for {b['candidate_id']} "
-                       f"in cluster '{b['cluster']}'.")
+        ci = t("dg_b_best_ci", lo=b["delta_oos_ci_low"]) if b.get("delta_oos_ci_low") is not None else ""
+        learned.append(t("dg_b_best", delta=b["delta_oos"], ci=ci, cand=b["candidate_id"], cluster=b["cluster"]))
     else:
-        learned.append("No full evaluation has been recorded yet, so there is no accuracy evidence either way.")
+        learned.append(t("dg_b_no_eval"))
     g = [x for x in f["gates_last_24h"] if x["failed"] > 0]
     if g:
-        t = g[0]
-        learned.append(f"The most limiting gate was {t['gate']}: {t['failed']} of {t['n']} checks failed in the last {h}h.")
+        x = g[0]
+        learned.append(t("dg_b_limiting_gate", gate=x["gate"], failed=x["failed"], n=x["n"], h=h))
     elif f["gates_last_24h"]:
-        learned.append(f"No gate check failed in the last {h}h.")
+        learned.append(t("dg_b_no_gate_fail", h=h))
     else:
-        learned.append(f"No gate results were recorded in the last {h}h.")
+        learned.append(t("dg_b_no_gate_results", h=h))
     nc = f["negative_controls"]
     if nc["reviews"] or nc["false_promotions"]:
-        learned.append(f"Harness reliability: the Critic rejected {nc['rejected']} of {nc['reviews']} negative-control "
-                       f"reviews, and {nc['false_promotions']} negative control(s) were falsely promoted.")
+        learned.append(t("dg_b_reliability", rejected=nc["rejected"], reviews=nc["reviews"],
+                         fp=nc["false_promotions"]))
     else:
-        learned.append("No negative-control candidates have been reviewed yet, so Critic reliability is untested.")
+        learned.append(t("dg_b_nc_untested"))
 
     rejected: list[str] = []
     for lt in f["critic_last_24h"]["leak_types"][:2]:
-        ex = f" — e.g. {lt['example'].rstrip('. ')}" if lt.get("example") else ""
-        rejected.append(f"The Critic returned or rejected {lt['n']} candidate(s) for {lt['leak_type']} leakage{ex}.")
+        eg = t("dg_r_leak_eg", example=lt["example"].rstrip(". ")) if lt.get("example") else ""
+        rejected.append(t("dg_r_leak", n=lt["n"], leak=lt["leak_type"], eg=eg))
     for gf in f["gate_failures_last_24h"]:
         if len(rejected) >= N_REJECTED:
             break
-        rejected.append(f"Gate {gf['gate']} failed {gf['n']} time(s); e.g. {gf['example_candidate']} had "
-                        f"{gf['metric']} = {gf['value']} against threshold {gf['threshold']}.")
+        rejected.append(t("dg_r_gate_fail", gate=gf["gate"], n=gf["n"], cand=gf["example_candidate"],
+                          metric=gf["metric"], value=gf["value"], threshold=gf["threshold"]))
     for rr in f["rejection_reasons_last_24h"]:
         if len(rejected) >= N_REJECTED:
             break
-        rejected.append(f"{rr['n']} candidate(s) were moved to rejected by {rr['gate']}: {rr['reason'].rstrip('. ')}.")
-    fillers = [f"Nothing else was rejected in the last {h}h.",
-               "No further rejections to report.",
-               "The rejection log is otherwise empty."]
+        rejected.append(t("dg_r_moved", n=rr["n"], gate=rr["gate"], reason=rr["reason"].rstrip(". ")))
+    fillers = [t("dg_r_fill_1", h=h), t("dg_r_fill_2"), t("dg_r_fill_3")]
     while len(rejected) < N_REJECTED:
-        rejected.append(fillers[len(rejected) % len(fillers)] if rejected else f"Nothing was rejected in the last {h}h.")
+        rejected.append(fillers[len(rejected) % len(fillers)] if rejected else t("dg_r_nothing", h=h))
     return {"learned": learned[:N_LEARNED], "rejected": rejected[:N_REJECTED]}
 
 
 def stub_digest_handler(system: str, user: str, schema: dict | None, seed: int) -> dict:
-    """StubLLM handler for role "digest": bullets built from the facts JSON in the prompt."""
+    """StubLLM handler for role "digest": bullets built from the facts JSON in the prompt, in the
+    current i18n language (the same one ``system_prompt`` asked for)."""
     start = user.find("{")
     facts = json.loads(user[start:]) if start >= 0 else {}
     return deterministic_bullets(facts)
@@ -265,16 +269,15 @@ def narrative_bullets(facts: dict, llm: Any = None) -> tuple[dict[str, list[str]
     allowed = numbers_in(facts_json)
     try:
         llm = llm if llm is not None else get_llm(stub_handlers={"digest": stub_digest_handler})
-        res = llm.complete(role="digest", system=SYSTEM, user="FACTS (JSON):\n" + facts_json, schema=SCHEMA,
+        res = llm.complete(role="digest", system=system_prompt(), user="FACTS (JSON):\n" + facts_json, schema=SCHEMA,
                            seed=derive_seed("digest", facts.get("date")))
         parsed = res.parsed if isinstance(res.parsed, dict) else {}
         model = getattr(res, "model", "?")
     except Exception as exc:  # network / credentials / refusal: the deterministic text is always there
-        return det, f"deterministic (LLM unavailable: {type(exc).__name__})"
+        return det, t("dg_backend_det", exc=type(exc).__name__)
     learned, r1 = guard_bullets(parsed.get("learned"), det["learned"], allowed, N_LEARNED)
     rejected, r2 = guard_bullets(parsed.get("rejected"), det["rejected"], allowed, N_REJECTED)
-    note = f"{model}" + (f"; {r1 + r2} bullet(s) replaced by deterministic text (numbers not in SQL facts)"
-                         if r1 + r2 else "")
+    note = t("dg_backend_replaced", model=model, n=r1 + r2) if r1 + r2 else f"{model}"
     return {"learned": learned, "rejected": rejected}, note
 
 
@@ -315,52 +318,51 @@ def _fmt_int(v: Any) -> str:
 
 
 def render_markdown(facts: dict, bullets: dict, alarms: list, nxt: dict | None, backend: str) -> str:
-    c, t = facts["last_24h"], facts["ledger_to_date"]
+    c, tt = facts["last_24h"], facts["ledger_to_date"]
     h = facts["window_hours"]
     h = int(h) if float(h).is_integer() else h
-    L = [f"# ABL daily digest — {facts['date']}", "",
-         f"_Window: last {h} h ({facts['since']} → {facts['until']}). Numbers come from the registry (SQL, "
-         f"read-only); narrative bullets: {backend}._", "",
-         "## What was learned", ""]
+    L = [t("dg_title", date=facts["date"]), "",
+         t("dg_window", h=h, since=facts["since"], until=facts["until"], backend=backend), "",
+         t("dg_h_learned"), ""]
     L += [f"- {b}" for b in bullets["learned"]]
-    L += ["", "## What was rejected and why", ""]
+    L += ["", t("dg_h_rejected"), ""]
     L += [f"- {b}" for b in bullets["rejected"]]
-    L += ["", "## Alarms", ""]
-    L += [f"- **RED `{a.kind}`** — {a.message}" for a in alarms] or ["- None. All policy checks are clear."]
-    L += ["", "## Cost", "",
-          f"| Metric | Last {h} h | Ledger to date |", "|---|---:|---:|",
-          f"| Tokens | {_fmt_int(c['tokens'])} | {_fmt_int(t['tokens'])} |",
-          f"| Cost (USD) | ${float(c['cost_usd']):.4f} | ${float(t['cost_usd']):.4f} |",
-          f"| Agent calls | {_fmt_int(c['agent_calls'])} | {_fmt_int(t['agent_calls'])} |",
-          f"| Full evaluations (distinct candidates) | {_fmt_int(c['evaluations'])} | {_fmt_int(t['evaluations'])} |",
-          f"| Evaluation compute (s) | {float(c['compute_seconds']):,.1f} | {float(t['compute_seconds']):,.1f} |", ""]
+    L += ["", t("dg_h_alarms"), ""]
+    L += [t("dg_alarm_line", kind=a.kind, msg=a.message) for a in alarms] or [t("dg_no_alarms")]
+    L += ["", t("dg_h_cost"), "",
+          t("dg_cost_header", h=h), "|---|---:|---:|",
+          f"| {t('dg_cost_tokens')} | {_fmt_int(c['tokens'])} | {_fmt_int(tt['tokens'])} |",
+          f"| {t('dg_cost_usd')} | ${float(c['cost_usd']):.4f} | ${float(tt['cost_usd']):.4f} |",
+          f"| {t('dg_cost_calls')} | {_fmt_int(c['agent_calls'])} | {_fmt_int(tt['agent_calls'])} |",
+          f"| {t('dg_cost_evals')} | {_fmt_int(c['evaluations'])} | {_fmt_int(tt['evaluations'])} |",
+          f"| {t('dg_cost_compute')} | {float(c['compute_seconds']):,.1f} | {float(tt['compute_seconds']):,.1f} |", ""]
     active = [b for b in facts["budget"] if b.get("active")]
     if active:
-        L += ["| Campaign | Tokens used / cap | Full evals used / cap | Burn (tokens/h) | Tokens run out |",
-              "|---|---:|---:|---:|---|"]
+        L += [t("dg_budget_header"), "|---|---:|---:|---:|---|"]
         for b in active:
+            out_at = b.get("tokens_exhaust_at") or "—"
             L.append(f"| {b['campaign_id']} | {_fmt_int(b['tokens_used'])} / {_fmt_int(b['budget_tokens'])} | "
                      f"{_i(b['evals_used'])} / {_i(b['budget_full_evals'])} | {float(b['tokens_per_hour'] or 0):,.0f} | "
-                     f"{b.get('tokens_exhaust_at') or '—'} |")
+                     f"{t('exhausted') if out_at == 'exhausted' else out_at} |")
         L.append("")
     if facts["cost_by_agent_last_24h"]:
-        L += [f"Where the tokens went (last {h} h): " + "; ".join(
-            f"{a['agent']} {a['tokens']:,} tokens / {a['calls']} call{'' if a['calls'] == 1 else 's'}"
+        L += [t("dg_where_tokens", h=h) + t("sep_list").join(
+            t("dg_agent_cost_one" if a["calls"] == 1 else "dg_agent_cost_many",
+              agent=a["agent"], tokens=f"{a['tokens']:,}", calls=a["calls"])
             for a in facts["cost_by_agent_last_24h"]), ""]
-    L += ["## Next experiment (Analyst)", ""]
+    L += [t("dg_h_next"), ""]
     if nxt and nxt.get("next_experiment"):
         ne = nxt["next_experiment"]
         if isinstance(ne, str):
             L.append("> " + " ".join(ne.split()))
         else:
             L += ["```json", json.dumps(ne, indent=2, ensure_ascii=False, sort_keys=True), "```"]
-        L += ["", f"_Source: Analyst call at {nxt.get('ts')} on {nxt.get('candidate_id') or 'n/a'} "
-                  f"(`{nxt.get('source')}`)._"]
+        L += ["", t("dg_next_source", ts=nxt.get("ts"), cand=nxt.get("candidate_id") or t("dg_na"),
+                    src=nxt.get("source"))]
     elif nxt:
-        L.append(f"The latest Analyst call ({nxt.get('ts')}) recorded no `next_experiment` "
-                 f"(`{nxt.get('source')}`).")
+        L.append(t("dg_next_missing", ts=nxt.get("ts"), src=nxt.get("source")))
     else:
-        L.append("No Analyst call has been recorded yet.")
+        L.append(t("dg_no_analyst"))
     return "\n".join(L) + "\n"
 
 
@@ -384,11 +386,13 @@ def write_digest(now: Any = None, reader: RegistryReader | None = None, events: 
 
 
 def main(argv: list[str] | None = None) -> int:
-    ap = argparse.ArgumentParser(description="Write registry/digest_YYYY-MM-DD.md (read-only on the ledger)")
-    ap.add_argument("--print", action="store_true", dest="show", help="also print the digest")
+    ap = argparse.ArgumentParser(description=t("dg_help"))
+    ap.add_argument("--print", action="store_true", dest="show", help=t("dg_help_print"))
+    ap.add_argument("--lang", choices=LANGS, default=None, help=t("cli_help_lang"))
     args = ap.parse_args(argv)
-    p = write_digest()
-    print(f"wrote {p}")
+    with using_lang(args.lang):                       # --lang overrides ABL_LANG for this run only
+        p = write_digest()
+        print(t("dg_wrote", path=p))
     if args.show:
         print(p.read_text(encoding="utf-8"))
     return 0

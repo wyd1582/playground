@@ -22,8 +22,9 @@ import pandas as pd  # noqa: E402
 import streamlit as st  # noqa: E402
 
 from common import paths  # noqa: E402
-from dashboard import control  # noqa: E402
+from dashboard import control, i18n  # noqa: E402
 from dashboard.alarms import compute_alarms, notify  # noqa: E402
+from dashboard.i18n import t  # noqa: E402
 from dashboard.narrative import narrate  # noqa: E402
 from dashboard.reader import (EventFeed, RegistryReader, load_package, parse_ts,  # noqa: E402
                               registry_gate_events, utcnow)
@@ -35,6 +36,8 @@ SERIES = {"promoted": "#2a78d6", "rejected": "#eb6834", "in_progress": "#1baf7a"
 LEVEL_STYLE = {"fail": (":material/error:", "red"), "warn": (":material/undo:", "orange"),
                "promote": (":material/star:", "green"), "info": (":material/info:", None)}
 _MD_SPECIAL = re.compile(r"([\\`*_{}\[\]()<>#+!|~$:])")
+LANG_KEY = "abl_lang"                     # session_state key of the 中文 / English switch
+ALL_CAMPAIGNS = ""                        # sentinel option: label comes from t() at render time
 
 
 # --------------------------------------------------------------------------------------------
@@ -62,6 +65,19 @@ class _CachedReader:
         return lambda *args, **kwargs: _q(name, *args, **kwargs)
 
 
+def _apply_lang() -> None:
+    """Point the i18n override at this session's choice. Called at the top of main() AND of every
+    fragment, because a fragment rerun does not re-execute main()."""
+    if LANG_KEY not in st.session_state:
+        st.session_state[LANG_KEY] = i18n.current_lang()          # honours ABL_LANG
+    lang = st.session_state[LANG_KEY]
+    i18n.set_lang(lang if lang in i18n.LANGS else i18n.DEFAULT_LANG)
+
+
+def _when(v) -> str:
+    return t("exhausted") if v == "exhausted" else (v or "—")
+
+
 def _md(text: str) -> str:
     return _MD_SPECIAL.sub(r"\\\1", str(text))
 
@@ -81,17 +97,18 @@ def _gate_feed(limit: int) -> list[dict]:
 
 @st.fragment(run_every=REFRESH)
 def feed_panel() -> None:
+    _apply_lang()
     feed = _feed()
     feed.poll()
     # gates record outcomes in SQL only, so their failures/promotions are merged in from the registry
     gate_evs = _gate_feed(FEED_ROWS)
     events = sorted(feed.snapshot()[-3 * FEED_ROWS:] + gate_evs, key=lambda e: str(e.get("ts") or ""))
-    st.subheader("Live narrative feed")
-    only = st.toggle("Only Critic returns, gate failures, promotions and policy flags", key="feed_only")
+    st.subheader(t("app_feed_title"))
+    only = st.toggle(t("app_feed_only"), key="feed_only")
     shown = 0
     with st.container(height=520):
         if not events:
-            st.caption(f"No events yet in `{feed.path}`.")
+            st.caption(t("app_feed_empty", path=feed.path))
         for ev in reversed(events):
             text, level = narrate(ev)
             if only and level == "info":
@@ -105,40 +122,48 @@ def feed_panel() -> None:
             shown += 1
             if shown >= FEED_ROWS:
                 break
-    st.caption(f"{feed.total} events read from events.jsonl + {len(gate_evs)} recent gate outcomes from the "
-               f"registry · newest first · showing {shown}")
+    st.caption(t("app_feed_caption", total=feed.total, gates=len(gate_evs), shown=shown))
 
 
 @st.fragment(run_every=REFRESH)
 def mechanism_panel(campaign: str | None) -> None:
-    st.subheader("Mechanism map")
+    _apply_lang()
+    st.subheader(t("app_mech_title"))
     mm = _q("mechanism_map", campaign)
     if mm.empty:
-        st.info("No proposals in the registry yet.")
+        st.info(t("app_no_proposals"))
         return
     top = mm.head(15)
-    chart = top.set_index("mechanism_cluster")[["promoted", "rejected", "in_progress"]]
+    legend = {"promoted": t("app_series_promoted"), "rejected": t("app_series_rejected"),
+              "in_progress": t("app_series_in_progress")}
+    chart = top.set_index("mechanism_cluster")[list(SERIES)].rename(columns=legend)
     st.bar_chart(chart, horizontal=True, stack=True, sort=False, color=list(SERIES.values()),
-                 x_label="proposals", y_label="mechanism cluster",
+                 x_label=t("app_axis_proposals"), y_label=t("app_axis_cluster"),
                  height=max(160, 34 * len(top) + 60))
-    with st.expander("Table view"):
+    with st.expander(t("app_table_view")):
         st.dataframe(mm, hide_index=True,
-                     column_config={"share": st.column_config.NumberColumn("share", format="percent")})
+                     column_config={"share": st.column_config.NumberColumn(t("app_col_share"), format="percent")})
 
 
 @st.fragment(run_every=REFRESH)
 def funnel_panel(campaign: str | None) -> None:
-    st.subheader("Funnel — today vs campaign-to-date")
+    _apply_lang()
+    st.subheader(t("app_funnel_title"))
     fc = _q("funnel_compare", campaign)
     top = int(fc["campaign_to_date"].max() or 0) if len(fc) else 0
+    stages = {"proposals": t("stage_proposals"), "reviewed": t("stage_reviewed"),
+              "implemented": t("stage_implemented"), "validated": t("stage_validated"),
+              "evaluated": t("stage_evaluated"), "promoted": t("stage_promoted")}
+    if len(fc):
+        fc = fc.assign(stage=fc["stage"].map(lambda s: stages.get(s, s)))
     st.dataframe(
         fc, hide_index=True,
         column_config={
-            "stage": st.column_config.TextColumn("stage"),
-            "today": st.column_config.NumberColumn("today (UTC)", format="%d"),
-            "campaign_to_date": st.column_config.ProgressColumn("campaign-to-date", format="%d",
+            "stage": st.column_config.TextColumn(t("app_col_stage")),
+            "today": st.column_config.NumberColumn(t("app_col_today"), format="%d"),
+            "campaign_to_date": st.column_config.ProgressColumn(t("app_col_ctd"), format="%d",
                                                                 min_value=0, max_value=max(top, 1)),
-            "pct_of_proposals": st.column_config.NumberColumn("% of proposals", format="%.1f%%"),
+            "pct_of_proposals": st.column_config.NumberColumn(t("app_col_pct"), format="%.1f%%"),
         })
 
 
@@ -155,43 +180,44 @@ def _render_package(pkg: dict) -> None:
     th, dsl = pkg.get("thesis") or {}, pkg.get("dsl") or {}
     data, tests = pkg.get("data_declaration") or {}, pkg.get("tests") or []
     prov, ev = pkg.get("provenance") or {}, pkg.get("evaluation") or {}
-    tabs = st.tabs(["Thesis", "DSL", "Data declaration", "Tests", "Provenance", "Evaluation"])
+    tabs = st.tabs([t("app_tab_thesis"), t("app_tab_dsl"), t("app_tab_data"), t("app_tab_tests"),
+                    t("app_tab_provenance"), t("app_tab_evaluation")])
     with tabs[0]:
-        st.markdown(f"**Mechanism** — {_md(th.get('mechanism', '—'))}")
-        st.markdown(f"**Direction** — {_md(th.get('direction', '—'))}")
-        st.markdown(f"**Cluster** — `{th.get('mechanism_cluster', '—')}`")
-        st.markdown("**Falsifiers**")
+        st.markdown(t("app_pkg_mechanism", v=_md(th.get("mechanism", "—"))))
+        st.markdown(t("app_pkg_direction", v=_md(th.get("direction", "—"))))
+        st.markdown(t("app_pkg_cluster", v=th.get("mechanism_cluster", "—")))
+        st.markdown(t("app_pkg_falsifiers"))
         for f in th.get("falsifiers") or ["—"]:
             st.markdown(f"- {_md(f)}")
-        st.markdown("**Expected gain**")
+        st.markdown(t("app_pkg_expected_gain"))
         st.json(th.get("expected_gain") or {}, expanded=True)
         if th.get("source_refs"):
-            st.caption("Sources: " + ", ".join(map(str, th["source_refs"])))
+            st.caption(t("app_pkg_sources", refs=", ".join(map(str, th["source_refs"]))))
     with tabs[1]:
         st.code(dsl.get("text", ""), language="text")
-        st.caption(f"semantic hash `{dsl.get('semantic_hash', '—')}` · operators: "
-                   f"{', '.join(map(str, dsl.get('operators') or [])) or '—'}")
+        st.caption(t("app_pkg_dsl_caption", h=dsl.get("semantic_hash", "—"),
+                     ops=", ".join(map(str, dsl.get("operators") or [])) or "—"))
     with tabs[2]:
         fields = data.get("fields") or []
         if fields:
             st.dataframe(_table(fields) if isinstance(fields[0], dict) else _table({"field": fields}), hide_index=True)
-        st.caption(f"snapshot `{data.get('snapshot_id', '—')}` · hash `{data.get('hash', '—')}`")
+        st.caption(t("app_pkg_snapshot", snap=data.get("snapshot_id", "—"), h=data.get("hash", "—")))
         if data.get("versions"):
             st.json(data["versions"], expanded=False)
     with tabs[3]:
         if tests:
             st.dataframe(_table(tests), hide_index=True)
         else:
-            st.caption("No tests recorded.")
+            st.caption(t("app_pkg_no_tests"))
     with tabs[4]:
         st.json(prov, expanded=True)
     with tabs[5]:
         gates = ev.get("gates") or []
         if gates:
             st.dataframe(_table(gates), hide_index=True)
-        st.markdown(f"**Disposition** — {_md(ev.get('disposition', '—'))}")
-        for key, title in (("analyst_summary", "Analyst summary"), ("diagnosis", "Diagnosis"),
-                           ("next_experiment", "Next experiment")):
+        st.markdown(t("app_pkg_disposition", v=_md(ev.get("disposition", "—"))))
+        for key, title in (("analyst_summary", t("app_pkg_analyst_summary")), ("diagnosis", t("app_pkg_diagnosis")),
+                           ("next_experiment", t("app_pkg_next_experiment"))):
             if ev.get(key):
                 val = ev[key]
                 st.markdown(f"**{title}** — {_md(val) if isinstance(val, str) else ''}")
@@ -201,35 +227,36 @@ def _render_package(pkg: dict) -> None:
 
 @st.fragment(run_every=REFRESH)
 def explain_panel(campaign: str | None) -> None:
-    st.subheader("Explain this candidate")
+    _apply_lang()
+    st.subheader(t("app_explain_title"))
     cands = _q("candidates", campaign)
     if cands.empty:
-        st.info("No candidates in the registry yet.")
+        st.info(t("app_no_candidates"))
         return
     meta = {r["candidate_id"]: r for r in cands.to_dict("records")}
     # candidates that have a BreedingPackage (full evaluation + Analyst) come first, promoted before rejected
     has_pkg = {c for c in meta if (paths.registry_dir() / "packages" / f"{c}.json").exists()}
     order = sorted(meta, key=lambda c: (c not in has_pkg, meta[c]["state"] != "promoted", c))
-    cid = st.selectbox("candidate_id", order, key="explain_cid",
+    cid = st.selectbox(t("app_candidate_select"), order, key="explain_cid",
                        format_func=lambda c: f"{c} · {meta[c]['state']} · {meta[c]['mechanism_cluster']}")
     if not cid:
         return
     row = meta[cid]
-    st.caption(f"state **{row['state']}** · retries {row['retry_count']} · proposal `{row['proposal_id']}` · "
-               f"campaign `{row['campaign_id']}`")
+    st.caption(t("app_cand_caption", state=row["state"], retries=row["retry_count"], pid=row["proposal_id"],
+                 cid=row["campaign_id"]))
     pkg = load_package(cid)
     if pkg:
         _render_package(pkg)
     else:
-        st.caption(f"No BreedingPackage at registry/packages/{cid}.json yet.")
-    st.markdown("**Gate results (registry, with thresholds)**")
+        st.caption(t("app_no_package", cid=cid))
+    st.markdown(t("app_gate_results_title"))
     gr = _q("gate_results_for", cid)
     if gr.empty:
-        st.caption("No gate results recorded.")
+        st.caption(t("app_no_gate_results"))
     else:
         gr = gr.assign(passed=gr["passed"].map(lambda v: "PASS" if int(v or 0) else "FAIL"))
         st.dataframe(gr, hide_index=True)
-    with st.expander("Critic reviews and state history"):
+    with st.expander(t("app_reviews_history")):
         st.dataframe(_q("critic_reviews", None, cid), hide_index=True)
         st.dataframe(_q("transitions", cid), hide_index=True)
 
@@ -239,30 +266,32 @@ def explain_panel(campaign: str | None) -> None:
 # --------------------------------------------------------------------------------------------
 @st.fragment(run_every=REFRESH)
 def budget_panel(campaign: str | None) -> None:
-    st.subheader("Budget")
+    _apply_lang()
+    st.subheader(t("app_budget_title"))
     b = _q("budget", campaign)
     if b.empty:
-        st.info("No campaign in the registry yet.")
+        st.info(t("app_no_campaign"))
         return
     rows = b.to_dict("records")
     shown = [r for r in rows if r["active"]] or rows[:1]
     for r in shown:
-        st.markdown(f"**{r['campaign_id']}**" + ("" if r["active"] else " · ended"))
+        st.markdown(f"**{r['campaign_id']}**" + ("" if r["active"] else t("app_ended")))
         c1, c2 = st.columns(2)
         tu, tc = int(r["tokens_used"] or 0), int(r["budget_tokens"] or 0)
         eu, ec = int(r["evals_used"] or 0), int(r["budget_full_evals"] or 0)
-        c1.metric("Tokens used / cap", f"{tu:,} / {tc:,}")
+        c1.metric(t("app_tokens_cap"), f"{tu:,} / {tc:,}")
         c1.progress(min(tu / tc, 1.0) if tc else 0.0)
-        c2.metric("Full evaluations / cap", f"{eu} / {ec}")
+        c2.metric(t("app_evals_cap"), f"{eu} / {ec}")
         c2.progress(min(eu / ec, 1.0) if ec else 0.0)
-        st.caption(f"Burn over the last {r['window_hours']} h: {float(r['tokens_per_hour']):,.0f} tokens/h · "
-                   f"{float(r['evals_per_hour']):.2f} evals/h · tokens run out: {r['tokens_exhaust_at'] or '—'} · "
-                   f"evals run out: {r['evals_exhaust_at'] or '—'} · spend ${float(r['cost_usd']):.4f}")
+        st.caption(t("app_burn_caption", h=r["window_hours"], tph=f"{float(r['tokens_per_hour']):,.0f}",
+                     eph=f"{float(r['evals_per_hour']):.2f}", tout=_when(r["tokens_exhaust_at"]),
+                     eout=_when(r["evals_exhaust_at"]), cost=f"{float(r['cost_usd']):.4f}"))
 
 
 @st.fragment(run_every=REFRESH)
 def alarms_panel() -> None:
-    st.subheader("Policy alarms")
+    _apply_lang()
+    st.subheader(t("app_alarms_title"))
     feed = _feed()
     feed.poll()
     alarms = compute_alarms(feed.alarm_events(), _CachedReader(), utcnow())
@@ -271,86 +300,100 @@ def alarms_panel() -> None:
         for a in alarms:
             st.error(f"**{a.kind}** — {_md(a.message)}", icon=":material/warning:")
     else:
-        st.success("No policy alarms.", icon=":material/verified_user:")
+        st.success(t("app_no_alarms"), icon=":material/verified_user:")
     ts = _q("threshold_status")
     if not ts.empty:
-        with st.expander("Threshold file hash (campaign start vs now)"):
+        with st.expander(t("app_threshold_hash")):
             st.dataframe(ts[["campaign_id", "start_hash", "current_hash", "changed", "active"]], hide_index=True)
 
 
 @st.fragment(run_every=REFRESH)
 def control_panel() -> None:
-    st.subheader("Controls")
+    _apply_lang()
+    st.subheader(t("app_controls_title"))
     s = control.control_state()
     if s["paused"]:
-        st.warning("PAUSED — control/PAUSE exists; the Orchestrator stops before its next step.",
-                   icon=":material/pause_circle:")
+        st.warning(t("app_paused"), icon=":material/pause_circle:")
     elif s["run"]:
-        st.success("RUNNING — control/RUN present, no PAUSE.", icon=":material/play_circle:")
+        st.success(t("app_running"), icon=":material/play_circle:")
     else:
-        st.info("IDLE — control/RUN is missing.", icon=":material/stop_circle:")
+        st.info(t("app_idle"), icon=":material/stop_circle:")
     c1, c2 = st.columns(2)
     # callbacks run before the rerun, so the state box above already shows the new state
-    c1.button("PAUSE", type="primary", disabled=s["paused"], key="btn_pause", width="stretch",
+    c1.button(t("app_btn_pause"), type="primary", disabled=s["paused"], key="btn_pause", width="stretch",
               on_click=control.pause)
-    c2.button("RESUME", disabled=not s["paused"], key="btn_resume", width="stretch", on_click=control.resume)
+    c2.button(t("app_btn_resume"), disabled=not s["paused"], key="btn_resume", width="stretch", on_click=control.resume)
     st.caption(f"`{control.pause_file()}`")
 
 
 @st.fragment(run_every=REFRESH)
 def reliability_panel(campaign: str | None) -> None:
-    st.subheader("Agent reliability")
+    _apply_lang()
+    st.subheader(t("app_reliability_title"))
     nc = _q("negative_control_reviews", campaign)
     fp = _q("false_promotions", campaign)
     n = len(nc)
     ok = int(pd.to_numeric(nc["correct"]).sum()) if n else 0
     c1, c2 = st.columns(2)
-    c1.metric("Negative controls rejected by Critic", f"{ok} / {n}")
-    c2.metric("False promotions", len(fp))
+    c1.metric(t("app_nc_rejected"), f"{ok} / {n}")
+    c2.metric(t("app_false_promotions"), len(fp))
     if len(fp):
-        st.error("Negative-control candidate(s) promoted: " + ", ".join(map(str, fp["candidate_id"])),
-                 icon=":material/gpp_bad:")
+        st.error(t("app_nc_promoted", ids=", ".join(map(str, fp["candidate_id"]))), icon=":material/gpp_bad:")
     if n and ok < n:
-        st.warning(f"The Critic did not REJECT {n - ok} negative-control review(s).", icon=":material/rule:")
+        st.warning(t("app_nc_not_rejected", n=n - ok), icon=":material/rule:")
     if n:
         st.dataframe(nc[["candidate_id", "mechanism_cluster", "verdict", "expected", "created_at"]], hide_index=True)
     cq = _q("critic_quality")
     if not cq.empty:
-        with st.expander("Critic quality by arm (v_critic_quality)"):
+        with st.expander(t("app_critic_quality")):
             st.dataframe(cq, hide_index=True)
 
 
 # --------------------------------------------------------------------------------------------
 # page
 # --------------------------------------------------------------------------------------------
+def _lang_switch() -> None:
+    """Sidebar 中文 / English switch; the value lives in st.session_state[LANG_KEY]."""
+    label = t("app_lang_label")
+    if hasattr(st, "segmented_control"):
+        st.segmented_control(label, list(i18n.LANGS), required=True, format_func=i18n.lang_label, key=LANG_KEY)
+    else:
+        st.radio(label, list(i18n.LANGS), format_func=i18n.lang_label, horizontal=True, key=LANG_KEY)
+
+
 def main() -> None:
-    st.set_page_config(page_title="ABL Guardian & Learning", layout="wide")
+    _apply_lang()                                  # before any text renders (page title included)
+    st.set_page_config(page_title=t("app_page_title"), layout="wide")
+    with st.sidebar:
+        _lang_switch()
+    _apply_lang()                                  # the switch may just have changed this run's language
     camps = _q("campaigns")
     ids = list(camps["campaign_id"]) if not camps.empty else []
     active = [c for c, a in zip(ids, camps["active"]) if a] if ids else []
-    options = ["(all campaigns)"] + ids
+    options = [ALL_CAMPAIGNS] + ids
     default = options.index(active[0]) if active else 0
     with st.sidebar:
-        choice = st.selectbox("Campaign", options, index=default, key="campaign")
-        st.caption(f"ABL_ROOT `{paths.root()}`")
-        st.caption(f"registry `{paths.registry_db()}`" + ("" if paths.registry_db().exists() else " (missing)"))
+        choice = st.selectbox(t("app_campaign"), options, index=default, key="campaign",
+                              format_func=lambda c: t("app_all_campaigns") if c == ALL_CAMPAIGNS else c)
+        st.caption(t("app_abl_root", root=paths.root()))
+        st.caption(t("app_registry_path", path=paths.registry_db())
+                   + ("" if paths.registry_db().exists() else t("app_registry_missing")))
         err = _reader().last_error
         if err and paths.registry_db().exists():
-            st.caption(f"last registry read skipped: {err}")
-        st.caption("Read-only · polls every 5 s · writes only dashboard/state.json, registry/alarms.log "
-                   "and control/PAUSE")
-    campaign = None if choice == options[0] else choice
+            st.caption(t("app_last_read_skipped", err=err))
+        st.caption(t("app_readonly_note"))
+    campaign = None if choice == ALL_CAMPAIGNS else choice
 
-    st.title("ABL — Guardian & Learning")
+    st.title(t("app_title"))
     left, right = st.columns(2, gap="large")
     with left:
-        st.header("Learning")
+        st.header(t("app_learning"))
         feed_panel()
         mechanism_panel(campaign)
         funnel_panel(campaign)
         explain_panel(campaign)
     with right:
-        st.header("Guardian")
+        st.header(t("app_guardian"))
         alarms_panel()
         budget_panel(campaign)
         control_panel()

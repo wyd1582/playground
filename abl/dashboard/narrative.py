@@ -10,29 +10,32 @@ from __future__ import annotations
 import re
 from typing import Any
 
+from dashboard.i18n import t
 from dashboard.reader import event_flags
 
 LEVELS = ("info", "warn", "fail", "promote")
 GATES = ("validity", "accuracy", "incremental", "plan", "robustness", "research")
 GATE_AGENTS = {"gate", "gates", "evaluator", "evaluate", "evaluation", "harness", "engine"}
-AGENT_NAMES = {"orchestrator": "Orchestrator", "geneticist": "Geneticist", "researcher": "Geneticist",
-               "builder": "Builder", "critic": "Critic", "analyst": "Analyst", "registry": "Registry",
-               "digest": "Digest", "final_table": "Final table"}
-VERBS = {"propose": "proposed", "hypothesize": "proposed", "hypothesis": "proposed", "build": "implemented",
-         "implement": "implemented", "diagnose": "diagnosed", "analyse": "analysed", "analyze": "analysed",
-         "register": "registered", "plan": "planned", "allocate": "allocated budget for", "step": "stepped",
-         "status": "reported status", "validate": "validated", "evaluate": "evaluated", "review": "reviewed",
-         "dedup": "deduplicated", "stop": "stopped", "pause": "paused", "select": "selected",
-         "defer": "deferred", "end": "ended the campaign", "budget": "hit the budget cap",
-         "retry_limit": "hit the retry limit for", "reject": "rejected"}
+# role -> i18n key (ids, DSL text, metric and gate names stay untranslated)
+AGENT_KEYS = {"orchestrator": "agent_orchestrator", "geneticist": "agent_geneticist",
+              "researcher": "agent_geneticist", "builder": "agent_builder", "critic": "agent_critic",
+              "analyst": "agent_analyst", "registry": "agent_registry", "digest": "agent_digest",
+              "final_table": "agent_final_table"}
+# action -> i18n key of the past-tense verb
+VERB_KEYS = {"propose": "verb_proposed", "hypothesize": "verb_proposed", "hypothesis": "verb_proposed",
+             "build": "verb_implemented", "implement": "verb_implemented", "diagnose": "verb_diagnosed",
+             "analyse": "verb_analysed", "analyze": "verb_analysed", "register": "verb_registered",
+             "plan": "verb_planned", "allocate": "verb_allocated", "step": "verb_stepped",
+             "status": "verb_reported_status", "validate": "verb_validated", "evaluate": "verb_evaluated",
+             "review": "verb_reviewed", "dedup": "verb_deduplicated", "stop": "verb_stopped",
+             "pause": "verb_paused", "select": "verb_selected", "defer": "verb_deferred", "end": "verb_ended",
+             "budget": "verb_budget_cap", "retry_limit": "verb_retry_limit", "reject": "verb_rejected"}
 LEADING_VERBS = ("proposed", "built", "implemented", "diagnosed")
 SERIOUS_FLAGS = {"holdout_touch", "budget_exceeded", "threshold_edit", "retry_limit"}
-FLAG_TEXT = {"holdout_touch": "tried to touch the sealed holdout",
-             "budget_exceeded": "budget exceeded",
-             "threshold_edit": "attempted a gate-threshold edit",
-             "retry_limit": "retry limit exceeded",
-             "holdout_final_read": "sanctioned final holdout read",
-             "paused": "stopped: control/PAUSE present"}
+# policy flag -> i18n key of its explanation (unknown flags are shown as-is)
+FLAG_KEYS = {"holdout_touch": "flag_holdout_touch", "budget_exceeded": "flag_budget_exceeded",
+             "threshold_edit": "flag_threshold_edit", "retry_limit": "flag_retry_limit",
+             "holdout_final_read": "flag_holdout_final_read", "paused": "flag_paused"}
 MAX_SUMMARY = 280
 # "Returned to builder: …", "RETURN_TO_BUILDER (temporal): …", "REJECT — …", "PASS (-): …"
 _PREFIX = re.compile(r"^\s*(returned\s+to\s+builder|return(?:_to_builder)?|rejected|reject|passed|pass|"
@@ -123,7 +126,7 @@ def _leak_group(summary: str) -> str | None:
 
 def _append_reason(text: str, summary: str, strip: bool = True) -> str:
     reason = strip_verdict(summary) if strip else summary.strip()
-    return f"{text}: {reason}" if reason else text
+    return t("narr_reason", text=text, reason=reason) if reason else text
 
 
 def _generic(text: str, summary: str) -> str:
@@ -134,72 +137,92 @@ def _generic(text: str, summary: str) -> str:
         rest = rest[m.end():]
     b = re.match(r"^\[([^\]]+)\]\s*:?\s*(.*)$", rest)
     if b:
-        text, rest = f"{text} [{b.group(1)}]", b.group(2)
-    return f"{text}: {rest}" if rest else text
+        text, rest = t("narr_cluster_tag", text=text, cluster=b.group(1)), b.group(2)
+    return t("narr_reason", text=text, reason=rest) if rest else text
+
+
+def _who(agent: str) -> str:
+    key = AGENT_KEYS.get(agent.lower())
+    if key:
+        return t(key)
+    return agent[:1].upper() + agent[1:] if agent else t("agent_unknown")
 
 
 def narrate(event: Any) -> tuple[str, str]:
-    """Plain-language line for one event and its highlight level."""
+    """Plain-language line for one event (in the current i18n language) and its highlight level.
+
+    The level is a language-independent identifier."""
     if not isinstance(event, dict):
-        return "Unreadable event (not a JSON object)", "warn"
+        return t("narr_unreadable"), "warn"
     agent = str(event.get("agent") or "").strip()
     a = agent.lower()
     action = str(event.get("action") or "").strip().lower()
     cand = event.get("candidate_id")
     cand = str(cand) if cand not in (None, "") else None
     summary = _clean(event.get("summary"))
-    who = AGENT_NAMES.get(a, agent[:1].upper() + agent[1:] if agent else "Unknown agent")
+    who = _who(agent)
     is_gate = a in GATE_AGENTS or "gate" in event or action.startswith("gate")
     to_state = _to_state(event, action)
     level = "info"
 
     if a == "critic":
-        target = f"candidate {cand}" if cand else "the candidate"
+        target = t("narr_target_cand", cand=cand) if cand else t("narr_target_the")
         verdict = _verdict(event, action, summary)
         leak = _leak_group(summary)
-        tag = f" ({leak})" if leak else ""
+        tag = t("narr_leak_tag", leak=leak) if leak else ""
         if verdict == "RETURN":
-            text, level = _append_reason(f"Critic returned {target} to builder{tag}", summary), "warn"
+            text, level = _append_reason(t("narr_critic_return", target=target, tag=tag), summary), "warn"
         elif verdict == "REJECT":
-            text, level = _append_reason(f"Critic rejected {target}{tag}", summary), "fail"
+            text, level = _append_reason(t("narr_critic_reject", target=target, tag=tag), summary), "fail"
         elif verdict == "PASS":
-            text = _append_reason(f"Critic passed {target}", summary)
+            text = _append_reason(t("narr_critic_pass", target=target), summary)
         else:
-            text = _append_reason(f"Critic reviewed {target}", summary)
+            text = _append_reason(t("narr_critic_review", target=target), summary)
     elif to_state == "promoted" and (is_gate or a in ("registry", "orchestrator")):
-        text, level = _append_reason(f"Candidate {cand or '?'} PROMOTED", summary), "promote"
+        text, level = _append_reason(t("narr_promoted", cand=cand or "?"), summary), "promote"
     elif is_gate:
         g = _gate(event, action, summary) or "?"
         passed = _passed(event, action, summary)
         summary = re.sub(rf"^\s*{re.escape(g)}(?:\s+gate)?\s+(?:failed|passed|fail|pass)\s*[:\-—]\s*", "",
                          summary, flags=re.I)
+        if str(event.get("source") or "") == "registry:gate_results":     # "<metric> <v> vs threshold <thr>"
+            summary = summary.replace(" vs threshold ", t("narr_vs_threshold"))
+        target = t("narr_gate_target", cand=cand) if cand else t("narr_target_the")
         if to_state == "rejected" and g == "promotion":
-            text, level = _append_reason(f"Candidate {cand or '?'} REJECTED at promotion", summary, False), "fail"
+            text, level = _append_reason(t("narr_rejected", cand=cand or "?"), summary, False), "fail"
         elif to_state == "rejected":
-            text, level = _append_reason(f"Gate {g} rejected {cand or 'the candidate'}", summary, False), "fail"
+            text, level = _append_reason(t("narr_gate_rejected", gate=g, target=target), summary, False), "fail"
         elif passed is False:
-            text, level = _append_reason(f"Gate {g} FAILED for {cand or 'the candidate'}", summary), "fail"
+            text, level = _append_reason(t("narr_gate_failed", gate=g, target=target), summary), "fail"
         elif passed is True:
-            text = _append_reason(f"Gate {g} passed for {cand or 'the candidate'}", summary)
+            text = _append_reason(t("narr_gate_passed", gate=g, target=target), summary)
         else:
-            text = _append_reason(f"Gate {g} ran on {cand or 'the candidate'}", summary)
+            text = _append_reason(t("narr_gate_ran", gate=g, target=target), summary)
     elif a == "builder" and summary.upper().startswith("NEED_OPERATOR"):
-        target = f" for candidate {cand}" if cand else ""
+        target = t("narr_need_operator_target", cand=cand) if cand else ""
         spec = summary[len("NEED_OPERATOR"):].lstrip(" :")
-        text, level = _append_reason(f"Builder needs a new DSL operator{target}", spec, False), "warn"
+        text, level = _append_reason(t("narr_need_operator", target=target), spec, False), "warn"
     else:
-        verb = VERBS.get(action, action.replace("_", " ") if action else "acted on")
-        if cand:
-            obj = f" candidate {cand}"
-        elif a in ("geneticist", "researcher") and verb == "proposed":
-            obj = " a hypothesis"
+        vkey = VERB_KEYS.get(action)
+        if vkey:
+            verb = t(vkey)
+        elif action:
+            verb = t("verb_unknown", action=action.replace("_", " "))
         else:
-            obj = ""
-        text = _generic(f"{who} {verb}{obj}", summary)
+            verb = t("verb_acted")
+        if cand:
+            head = t("narr_generic_cand", who=who, verb=verb, cand=cand)
+        elif a in ("geneticist", "researcher") and vkey == "verb_proposed":
+            head = t("narr_generic_hypothesis", who=who, verb=verb)
+        else:
+            head = t("narr_generic", who=who, verb=verb)
+        text = _generic(head, summary)
 
     flags = event_flags(event)
     if flags:
-        text += " [policy: " + "; ".join(f"{f} — {FLAG_TEXT.get(f, f)}" for f in flags) + "]"
+        items = t("sep_list").join(t("narr_policy_item", flag=f, text=t(FLAG_KEYS[f]) if f in FLAG_KEYS else f)
+                                   for f in flags)
+        text += t("narr_policy", items=items)
         if SERIOUS_FLAGS.intersection(flags):
             level = "fail"
         elif level == "info":

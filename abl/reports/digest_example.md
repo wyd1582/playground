@@ -1,6 +1,6 @@
 # ABL daily digest — 2026-09-24
 
-_Window: last 24 h (2026-09-23T12:14:34Z → 2026-09-24T12:14:34Z). Numbers come from the registry (SQL, read-only); narrative bullets: stub._
+_Window: last 24 h (2026-09-23T16:16:47Z → 2026-09-24T16:16:47Z). Numbers come from the registry (SQL, read-only); narrative bullets: stub._
 
 ## What was learned
 

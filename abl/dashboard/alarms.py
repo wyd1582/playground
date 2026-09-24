@@ -21,6 +21,7 @@ from pathlib import Path
 from typing import Any, Iterable
 
 from common import paths
+from dashboard.i18n import LANGS, set_lang, t
 from dashboard.reader import POLL_SECONDS, EventFeed, RegistryReader, as_utc, event_flags, iso, parse_ts
 
 ALARM_KINDS = ("holdout_touch", "threshold_changed", "retry_limit", "budget_exceeded",
@@ -80,7 +81,8 @@ def _describe(ev: dict) -> str:
     who = ev.get("agent") or "?"
     act = ev.get("action") or "?"
     cand = ev.get("candidate_id")
-    return f"{who}/{act}" + (f" on {cand}" if cand else "") + f" at {ev.get('ts') or '?'}"
+    return t("alarm_describe", who=who, act=act, on=t("alarm_describe_on", cand=cand) if cand else "",
+             ts=ev.get("ts") or "?")
 
 
 def _active_campaigns(reader: RegistryReader) -> set[str] | None:
@@ -100,7 +102,7 @@ def _check_flag(events, flag, kind, now, window, label) -> Alarm | None:
     if not hits:
         return None
     last = _latest(hits)
-    return Alarm(kind, f"{len(hits)} event(s) flagged {flag} ({label}); latest {_describe(last)}",
+    return Alarm(kind, t("alarm_flagged_label", n=len(hits), flag=flag, label=label, latest=_describe(last)),
                  str(last.get("ts") or iso(now)))
 
 
@@ -109,14 +111,14 @@ def _check_threshold(events, reader, now) -> Alarm | None:
     df = reader.threshold_status()
     for r in df.to_dict("records"):
         if bool(r.get("active")) and bool(r.get("changed")):
-            parts.append(f"campaign {r['campaign_id']}: gates/thresholds.yaml sha256 {str(r['start_hash'])[:12]} "
-                         f"at start, now {str(r['current_hash'])[:12]}")
+            parts.append(t("alarm_threshold_hash", cid=r["campaign_id"], start=str(r["start_hash"])[:12],
+                           now=str(r["current_hash"])[:12]))
     edits = _flagged(events, "threshold_edit", now, FLAG_WINDOW)
     if edits:
         last = _latest(edits)
-        parts.append(f"{len(edits)} threshold_edit flag(s); latest {_describe(last)}")
+        parts.append(t("alarm_threshold_edit_flags", n=len(edits), latest=_describe(last)))
         ts = str(last.get("ts") or ts)
-    return Alarm("threshold_changed", "; ".join(parts), ts) if parts else None
+    return Alarm("threshold_changed", t("sep_list").join(parts), ts) if parts else None
 
 
 def _check_retry(events, reader, now, active) -> Alarm | None:
@@ -124,7 +126,7 @@ def _check_retry(events, reader, now, active) -> Alarm | None:
     hits = _flagged(events, "retry_limit", now, FLAG_WINDOW)
     if hits:
         last = _latest(hits)
-        parts.append(f"{len(hits)} event(s) flagged retry_limit; latest {_describe(last)}")
+        parts.append(t("alarm_flagged", n=len(hits), flag="retry_limit", latest=_describe(last)))
         ts = str(last.get("ts") or ts)
     cands = reader.candidates()
     if not cands.empty:
@@ -132,8 +134,8 @@ def _check_retry(events, reader, now, active) -> Alarm | None:
                 if _is_tracked(r.get("campaign_id"), active) and int(r.get("retry_count") or 0) > RETRY_LIMIT]
         if over:
             ids = ", ".join(f"{r['candidate_id']} ({int(r['retry_count'])})" for r in over[:5])
-            parts.append(f"{len(over)} candidate(s) retried more than {RETRY_LIMIT}x: {ids}")
-    return Alarm("retry_limit", "; ".join(parts), ts) if parts else None
+            parts.append(t("alarm_retry_over", n=len(over), limit=RETRY_LIMIT, ids=ids))
+    return Alarm("retry_limit", t("sep_list").join(parts), ts) if parts else None
 
 
 def _check_budget(events, reader, now) -> Alarm | None:
@@ -141,7 +143,7 @@ def _check_budget(events, reader, now) -> Alarm | None:
     hits = _flagged(events, "budget_exceeded", now, FLAG_WINDOW)
     if hits:
         last = _latest(hits)
-        parts.append(f"{len(hits)} event(s) flagged budget_exceeded; latest {_describe(last)}")
+        parts.append(t("alarm_flagged", n=len(hits), flag="budget_exceeded", latest=_describe(last)))
         ts = str(last.get("ts") or ts)
     b = reader.budget(now=now)
     for r in b.to_dict("records"):
@@ -150,10 +152,10 @@ def _check_budget(events, reader, now) -> Alarm | None:
         tu, tc = int(r.get("tokens_used") or 0), int(r.get("budget_tokens") or 0)
         eu, ec = int(r.get("evals_used") or 0), int(r.get("budget_full_evals") or 0)
         if tc and tu > tc:
-            parts.append(f"campaign {r['campaign_id']}: tokens {tu:,} > cap {tc:,}")
+            parts.append(t("alarm_budget_tokens", cid=r["campaign_id"], used=f"{tu:,}", cap=f"{tc:,}"))
         if ec and eu > ec:
-            parts.append(f"campaign {r['campaign_id']}: full evaluations {eu} > cap {ec}")
-    return Alarm("budget_exceeded", "; ".join(parts), ts) if parts else None
+            parts.append(t("alarm_budget_evals", cid=r["campaign_id"], used=eu, cap=ec))
+    return Alarm("budget_exceeded", t("sep_list").join(parts), ts) if parts else None
 
 
 def _check_clusters(reader, now, active) -> Alarm | None:
@@ -172,9 +174,9 @@ def _check_clusters(reader, now, active) -> Alarm | None:
         top = g.sort_values("n", ascending=False).iloc[0]
         share = int(top["n"]) / total
         if share > CLUSTER_MAX_SHARE:
-            parts.append(f"campaign {cid}: cluster '{top['mechanism_cluster']}' holds {share:.0%} of "
-                         f"{total} proposals (> {CLUSTER_MAX_SHARE:.0%})")
-    return Alarm("cluster_concentration", "; ".join(parts), iso(now)) if parts else None
+            parts.append(t("alarm_cluster", cid=cid, cluster=top["mechanism_cluster"], share=f"{share:.0%}",
+                           total=total, limit=f"{CLUSTER_MAX_SHARE:.0%}"))
+    return Alarm("cluster_concentration", t("sep_list").join(parts), iso(now)) if parts else None
 
 
 def _check_pass_rate(reader, now, active) -> Alarm | None:
@@ -190,9 +192,9 @@ def _check_pass_rate(reader, now, active) -> Alarm | None:
             continue
         recent, base = rp / rn, (bp + 1) / (bn + 2)
         if recent > PASS_RATE_FACTOR * base:
-            parts.append(f"campaign {r['campaign_id']}: gate pass-rate {recent:.0%} over the last 24h "
-                         f"({rp}/{rn}) vs baseline {bp}/{bn} (> {PASS_RATE_FACTOR:g}x)")
-    return Alarm("suspicious_pass_rate", "; ".join(parts), iso(now)) if parts else None
+            parts.append(t("alarm_pass_rate", cid=r["campaign_id"], recent=f"{recent:.0%}", rp=rp, rn=rn,
+                           bp=bp, bn=bn, factor=f"{PASS_RATE_FACTOR:g}"))
+    return Alarm("suspicious_pass_rate", t("sep_list").join(parts), iso(now)) if parts else None
 
 
 def _check_stalled(events, now, active) -> Alarm | None:
@@ -212,8 +214,7 @@ def _check_stalled(events, now, active) -> Alarm | None:
     if now - last <= STALL_AFTER:
         return None
     mins = int((now - last).total_seconds() // 60)
-    return Alarm("events_stalled", f"no agent event for {mins} min (last at {iso(last)}) while control/RUN "
-                                   f"exists and control/PAUSE does not", iso(now))
+    return Alarm("events_stalled", t("alarm_stalled", mins=mins, last=iso(last)), iso(now))
 
 
 def compute_alarms(events: Iterable[dict] | None, registry_reader: RegistryReader | None = None,
@@ -227,7 +228,7 @@ def compute_alarms(events: Iterable[dict] | None, registry_reader: RegistryReade
     except Exception:
         active = None
     checks = [
-        lambda: _check_flag(evs, "holdout_touch", "holdout_touch", n, None, "sealed holdout"),
+        lambda: _check_flag(evs, "holdout_touch", "holdout_touch", n, None, t("alarm_label_sealed_holdout")),
         lambda: _check_threshold(evs, reader, n),
         lambda: _check_retry(evs, reader, n, active),
         lambda: _check_budget(evs, reader, n),
@@ -273,7 +274,7 @@ def _applescript_str(s: str) -> str:
 def _mac_notify(alarm: Alarm) -> None:
     body = alarm.message if len(alarm.message) <= 220 else alarm.message[:217] + "..."
     script = (f"display notification {_applescript_str(body)} with title "
-              f"{_applescript_str('ABL alarm: ' + alarm.kind)}")
+              f"{_applescript_str(t('alarm_notify_title', kind=alarm.kind))}")
     try:
         subprocess.run(["osascript", "-e", script], check=False, timeout=5,
                        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
@@ -335,7 +336,10 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="ABL alarm watcher (read-only; logs + notifies red alarms)")
     ap.add_argument("--once", action="store_true", help="run one pass and exit")
     ap.add_argument("--interval", type=float, default=POLL_SECONDS)
+    ap.add_argument("--lang", choices=LANGS, default=None, help="message language (overrides ABL_LANG)")
     args = ap.parse_args(argv)
+    if args.lang:
+        set_lang(args.lang)
     reader = RegistryReader(keep_last=True)
     feed = EventFeed()
     while True:
