@@ -207,7 +207,10 @@ def explain_panel(campaign: str | None) -> None:
         st.info("No candidates in the registry yet.")
         return
     meta = {r["candidate_id"]: r for r in cands.to_dict("records")}
-    cid = st.selectbox("candidate_id", list(meta), key="explain_cid",
+    # candidates that have a BreedingPackage (full evaluation + Analyst) come first, promoted before rejected
+    has_pkg = {c for c in meta if (paths.registry_dir() / "packages" / f"{c}.json").exists()}
+    order = sorted(meta, key=lambda c: (c not in has_pkg, meta[c]["state"] != "promoted", c))
+    cid = st.selectbox("candidate_id", order, key="explain_cid",
                        format_func=lambda c: f"{c} · {meta[c]['state']} · {meta[c]['mechanism_cluster']}")
     if not cid:
         return
