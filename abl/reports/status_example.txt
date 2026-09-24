@@ -1,0 +1,25 @@
+ABL status — last 24h (2026-09-23T12:14:33Z → 2026-09-24T12:14:33Z)
+
+Control
+  State       RUNNING — control/RUN present, no PAUSE
+  Registry    /home/user/playground/abl/registry/abl.sqlite
+  Last event  2026-09-24T12:12:59Z
+
+Learning (last 24h)
+  Proposals         196
+  Critic verdicts   PASS 242 · RETURN 15 · REJECT 32
+  Gate results      passed 1765 · failed 298
+  Promotions        0  (rejections 128)
+  Full evaluations  61
+
+Cost (last 24h)
+  Tokens        954,359  (ledger to date 954,359)
+  Cost          $0.0000  (ledger to date $0.0000)
+  Agent calls   874
+  Event stream  874 events · 954,359 tokens · $0.0000
+
+Budget
+  Evaluations vs cap  pig_cleveland_F_s0_r20260924T1159 (ended): tokens 0/2,000,000 (0%) · full evals 5/5 · burn 0 tok/h, 0.00 evals/h · evals out: exhausted
+
+Alarms (1)
+  RED retry_limit  5 event(s) flagged retry_limit; latest orchestrator/retry_limit on k_1eb2c42d06 at 2026-09-24T12:07:14Z

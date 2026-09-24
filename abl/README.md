@@ -87,7 +87,68 @@ target above works offline; with `ANTHROPIC_API_KEY` (or `ant auth login`) the r
 ## Results
 
 See `reports/` — `sim_controls.md`, `scorecard.md`, `BreedingPackage_pig_cleveland.md`,
-`final_holdout_sim.json` and the per-dataset `campaign_*.json`. The section below is refreshed
-from those files.
+`final_holdout_sim.md`, `digest_example.md`, `status_example.txt` and the per-dataset `campaign_*.json`.
+The section below is rendered from those files by `scripts/readme_results.py`.
 
-_Results section pending: the first full run (`make sim-controls`, `make pig-public`, `make campaign`) is in progress; numbers land here with the reports._
+### Results of the first full run (`make campaign`, deterministic stub agents, seed 0)
+
+**Simulation** (775–1779 training animals per split, 3 forward-in-time splits, generation 5 sealed). Champion frozen at h2 = 0.247.
+
+| arm | what it measures | result |
+|---|---|---|
+| A champion | true accuracy cor(GEBV, TBV) on the next generation | **0.508** (LR ρ 0.770, dispersion b 1.12, predictive r 0.242) |
+| E shuffled labels | champion on labels shuffled within generation | true accuracy +0.018; LR ρ still 0.53 ± 0.04 (not null-calibrated); predictive r -0.012 ± 0.015 |
+| E shuffled labels (loop) | false promotions by the full ABL loop on shuffled data | **0** of 4 full evaluations |
+| F random SNP subset | false promotions of 30 % random panels | **0** of 5 |
+| B random operators | promotions / full evaluations, best ΔOOS | 0 / 12, best ΔOOS +0.0144 (best CI low +0.0051) |
+| C one-shot LLM | one proposal, no loop | 0 promoted of 0 evaluated |
+| D ABL loop | 100 hypotheses → 80 candidate rows (retries supersede) → 9 full evaluations | **0 promoted**, best ΔOOS +0.0066 (CI low +0.0030); Critic rejected 14, duplicates skipped 29, NEED_OPERATOR 2, validity rejects 1 |
+
+Full evaluations in the ABL loop (sim):
+
+| dsl_text | mechanism_cluster | state | delta_oos | delta_oos_ci_low |
+|---|---|---|---|---|
+| champion() + dominance(w=0.15) + qtl_prior(source='random_prior', weight=2.0) | prior_weighting | rejected | -0.01847 | -0.03122 |
+| champion() + snp_subset(fraction=0.3, source='random_prior', strategy='prior_list') | prior_subset | rejected | -0.103 | -0.1361 |
+| champion() + lambda_scale(factor=2.0) | shrinkage | rejected | -0.0015 | -0.007963 |
+| champion() + dominance(w=0.2) | dominance | rejected | -0.0008926 | -0.01039 |
+| champion() + blend_pedigree(w=0.3) | pedigree_blend | rejected | 0.003187 | -0.001664 |
+| champion() + covariate(field='sex') | fixed_effects | rejected | 0.001285 | 1.721e-05 |
+| champion() + snp_subset(fraction=0.5, strategy='top_maf') | panel_reduction | rejected | -0.007773 | -0.01693 |
+| champion() + region_weight(chrom=1, weight=3.0) | region_weighting | rejected | -0.01354 | -0.02638 |
+| champion() + grm_weights(power=-0.5, scheme='maf_power') | maf_weighting | rejected | 0.0066 | 0.003047 |
+
+**Sealed holdout (sim), opened once after the campaign:**
+
+| model | dsl | holdout_n | true_accuracy | predictive_r | lr_rho | delta_predictive_r_vs_champion |
+|---|---|---|---|---|---|---|
+| champion | champion() | 500 | 0.647 | 0.3247 | 0.8778 | 0 |
+
+**Cleveland 2012 public pig data** (835–2479 training animals per split over 3 genomic family blocks, trait t1, no pedigree/map/dates). Champion frozen at h2 = 0.024.
+
+- A champion: predictive r -0.003, LR ρ 0.450, dispersion b 0.86; shuffled-label null predictive r -0.005 ± 0.037.
+- D ABL loop: 100 proposals, 9 full evaluations, **0 promoted**; best ΔOOS +0.0095 (CI low +0.0000).
+- E shuffled labels: 0 false promotions; F random SNP: 0 false promotions; B random operators: 0 promoted of 12.
+- Reading: on this weak trait the frozen champion itself has no forward predictive ability across family blocks (REML h2 ≈ 0.02), which matches the leave-family-out result of the earlier ladder experiment in `../genomic-selection-pig/`; the honest outcome is that nothing is promoted, and the harness says so.
+
+**System scorecard** (`reports/scorecard.md`, DESIGN.md §3.4):
+
+| dataset | arm | proposals | valid_per_100_proposals | full_evaluations | promoted | best_delta_oos | best_delta_oos_ci_low | false_promotions_on_negative_controls | critic_reject_rate_on_leak_probes | mechanism_clusters | reproducible_from_hash | tokens | compute_seconds |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| sim | A | 0 | 0 | 0 | 0 |  |  | 0 |  | 0 |  | 0 | 0 |
+| sim | B | 12 | 100 | 12 | 0 | 0.0144 | 0.0051 | 0 |  | 1 | 1 | 0 | 20.7 |
+| sim | C | 0 | 0 | 0 | 0 |  |  | 0 |  | 0 |  | 1330 | 0 |
+| sim | D | 71 | 71.8 | 9 | 0 | 0.0066 | 0.003 | 0 | 1 | 12 | 1 | 454634 | 32 |
+| sim | E | 20 | 80 | 4 | 0 | -0.0001 | -0.0005 | 0 |  | 11 | 1 | 84161 | 12.5 |
+| sim | F | 5 | 100 | 5 | 0 | -0.0405 | -0.0663 | 0 |  | 1 | 1 | 0 | 8.3 |
+| pig_cleveland | A | 0 | 0 | 0 | 0 |  |  | 0 |  | 0 |  | 0 | 0 |
+| pig_cleveland | B | 12 | 100 | 12 | 0 | 0.01 | -0.0001 | 0 |  | 1 | 1 | 0 | 28.2 |
+| pig_cleveland | C | 1 | 100 | 1 | 0 | -0 | -0.0016 | 0 |  | 1 | 1 | 1454 | 2 |
+| pig_cleveland | D | 50 | 56 | 9 | 0 | 0.0095 | 0 | 0 | 1 | 11 | 1 | 332367 | 40.4 |
+| pig_cleveland | E | 20 | 80 | 4 | 0 | 0.0055 | 0.0002 | 0 |  | 8 | 1 | 80413 | 20.1 |
+| pig_cleveland | F | 5 | 100 | 5 | 0 | 0.0141 | 0.0064 | 0 |  | 1 | 1 | 0 | 11.3 |
+
+**What the harness rejected and why.** Every full evaluation above that ended `rejected` failed at least one mandatory gate; the limiting gate and the Analyst's diagnosis are in `registry/packages/<candidate_id>.md` and the best pig package is copied to `reports/BreedingPackage_pig_cleveland.md`. The leak probes (negative_control_leak) were rejected by the Critic before any code was written.
+
+_Agents in this run were the deterministic stubs (no API credentials in the build environment); rerun `make campaign` with `ANTHROPIC_API_KEY` set to use `claude-opus-5` with the same prompts, gates and ledger._
+

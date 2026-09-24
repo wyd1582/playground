@@ -30,7 +30,7 @@ def render() -> str:
                 f"| F random SNP subset | false promotions of 30 % random panels | **{a['F_random_snp']['false_promotions']}** of {a['F_random_snp']['full_evaluations']} |",
                 f"| B random operators | promotions / full evaluations, best ΔOOS | {a['B_random_ops']['promoted']} / {a['B_random_ops']['full_evaluations']}, best ΔOOS {a['B_random_ops']['best_delta_oos']:+.4f} (best CI low {a['B_random_ops']['best_ci_low']:+.4f}) |",
                 f"| C one-shot LLM | one proposal, no loop | {a['C_one_shot_llm']['promoted']} promoted of {a['C_one_shot_llm']['full_evaluations']} evaluated |",
-                f"| D ABL loop | {a['D_abl_loop']['proposals']} proposals → {a['D_abl_loop']['candidates']} candidates → {a['D_abl_loop']['full_evaluations']} full evaluations | **{a['D_abl_loop']['promoted']} promoted**, best ΔOOS {a['D_abl_loop']['best_delta_oos']:+.4f} (CI low {a['D_abl_loop']['best_ci_low']:+.4f}); Critic rejected {a['D_abl_loop']['critic_rejects']}, duplicates skipped {a['D_abl_loop']['duplicates']}, NEED_OPERATOR {a['D_abl_loop']['need_operator']}, validity rejects {a['D_abl_loop']['validity_rejects']} |", ""]
+                f"| D ABL loop | {a['D_abl_loop']['proposals']} hypotheses → {a['D_abl_loop']['candidates']} candidate rows (retries supersede) → {a['D_abl_loop']['full_evaluations']} full evaluations | **{a['D_abl_loop']['promoted']} promoted**, best ΔOOS {a['D_abl_loop']['best_delta_oos']:+.4f} (CI low {a['D_abl_loop']['best_ci_low']:+.4f}); Critic rejected {a['D_abl_loop']['critic_rejects']}, duplicates skipped {a['D_abl_loop']['duplicates']}, NEED_OPERATOR {a['D_abl_loop']['need_operator']}, validity rejects {a['D_abl_loop']['validity_rejects']} |", ""]
         ev = a["D_abl_loop"].get("evaluated", [])
         if ev:
             df = pd.DataFrame(ev)[["dsl_text", "mechanism_cluster", "state", "delta_oos", "delta_oos_ci_low"]]
@@ -43,7 +43,9 @@ def render() -> str:
                 f"Champion frozen at h2 = {pig['champion']['h2']:.3f}.", "",
                 f"- A champion: predictive r {a['A_champion']['predictive_r']:.3f}, LR ρ {a['A_champion']['lr_rho']:.3f}, dispersion b {a['A_champion']['dispersion_b']:.2f}; shuffled-label null predictive r {pig['null']['pred_mean']:+.3f} ± {pig['null']['pred_sd']:.3f}.",
                 f"- D ABL loop: {a['D_abl_loop']['proposals']} proposals, {a['D_abl_loop']['full_evaluations']} full evaluations, **{a['D_abl_loop']['promoted']} promoted**; best ΔOOS {a['D_abl_loop']['best_delta_oos']:+.4f} (CI low {a['D_abl_loop']['best_ci_low']:+.4f}).",
-                f"- E shuffled labels: {a['E_shuffled_labels']['false_promotions']} false promotions; F random SNP: {a['F_random_snp']['false_promotions']} false promotions; B random operators: {a['B_random_ops']['promoted']} promoted of {a['B_random_ops']['full_evaluations']}.", ""]
+                f"- E shuffled labels: {a['E_shuffled_labels']['false_promotions']} false promotions; F random SNP: {a['F_random_snp']['false_promotions']} false promotions; B random operators: {a['B_random_ops']['promoted']} promoted of {a['B_random_ops']['full_evaluations']}.",
+                "- Reading: on this weak trait the frozen champion itself has no forward predictive ability across family blocks (REML h2 ≈ 0.02), which matches the "
+                "leave-family-out result of the earlier ladder experiment in `../genomic-selection-pig/`; the honest outcome is that nothing is promoted, and the harness says so.", ""]
     if sc:
         df = pd.DataFrame(sc)[["dataset", "arm", "proposals", "valid_per_100_proposals", "full_evaluations", "promoted", "best_delta_oos", "best_delta_oos_ci_low",
                                "false_promotions_on_negative_controls", "critic_reject_rate_on_leak_probes", "mechanism_clusters", "reproducible_from_hash", "tokens", "compute_seconds"]]

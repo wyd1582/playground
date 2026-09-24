@@ -1,0 +1,12 @@
+[
+ {
+  "model": "champion",
+  "dsl": "champion()",
+  "holdout_n": 500,
+  "lr_rho": 0.8777944006899172,
+  "dispersion_b": 1.1455704519984626,
+  "predictive_r": 0.3246502722339403,
+  "delta_predictive_r_vs_champion": 0.0,
+  "true_accuracy": 0.646988917145353
+ }
+]
