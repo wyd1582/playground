@@ -1,0 +1,34 @@
+# ABL runtime state (never committed) -----------------------------------
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.env
+
+# registry: schema + views + code are committed; the ledger itself is not
+registry/*.sqlite
+registry/*.sqlite-*
+registry/status_*.json
+registry/*.duckdb
+registry/events.jsonl
+registry/alarms.log
+registry/prompts/
+registry/digest_*.md
+registry/holdout_seal.json
+
+# data: raw downloads and point-in-time snapshots are generated locally
+data/raw/*
+data/snapshots/*
+!data/raw/.gitkeep
+!data/snapshots/.gitkeep
+
+# holdout: sealed at runtime by `make seal-holdout`; only the README is tracked
+holdout/*
+!holdout/README.md
+
+# control switch: RUN is tracked, PAUSE is an operator action
+control/PAUSE
+
+# dashboard state
+dashboard/state.json
+registry/packages/

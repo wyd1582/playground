@@ -1,0 +1,30 @@
+# ABL gate thresholds — DESIGN.md §3.3. Changing this file requires a new commit; every campaign
+# records its sha256 in registry.threshold_versions and the dashboard alarms if it changes mid-campaign.
+version: 1
+validity:
+  max_operators: 4                # DSL expressions longer than this are rejected as un-auditable
+  replay_tolerance: 1.0e-9        # two replays with the same seed must agree to this tolerance
+accuracy:
+  min_rho: 0.05                   # LR-method correlation cor(u_partial, u_whole) on validation animals
+  max_abs_bias_sd: 0.5            # |mean(u_whole - u_partial)| in units of sd(u_whole)
+  dispersion_ci_must_cover_one: true   # b = cov(u_whole,u_partial)/var(u_partial); CI must include 1
+  min_coverage: 0.95              # share of validation animals that receive a score
+incremental:
+  ci_level: 0.90
+  bootstrap_reps: 400
+  min_delta_oos_ci_low: 0.0       # paired ΔOOS lower bound must exceed this (vs frozen champion)
+  metric: rho_true_or_lr          # sim: cor with true BV; real data: LR rho
+plan:
+  delta_f_cap: 0.01               # per-generation inbreeding rate ceiling
+  min_gain_ratio: 1.0             # gain/yr at equal genotyping cost must be >= champion's
+  selected_fraction: 0.10
+  generation_interval_years: 1.5
+robustness:
+  min_groups: 2
+  max_share_explained_by_single_group: 0.7   # no single farm/year/line may carry >70% of the total ΔOOS
+  drop_top_family_min_delta: 0.0             # ΔOOS must stay >= this after removing the largest family
+research:
+  alpha: 0.10
+  correction: expected_max        # Bailey & López de Prado style deflation for N trials
+promotion:
+  mandatory_gates: [validity, accuracy, incremental, plan, robustness, research]
