@@ -843,6 +843,7 @@ def test_app_avoids_streamlit_apis_newer_than_1_37():
     """Python 3.9 users get Streamlit ≤1.40: no segmented_control kwargs, no width=, no bar_chart sort=.
     The app must route those through its version-adaptive helpers instead of calling them directly."""
     src = (Path(__file__).resolve().parents[1] / "app.py").read_text()
-    assert "st.segmented_control(" not in src
-    assert 'width="stretch"' not in src.replace('{"width": "stretch"}', "")
-    assert "st.bar_chart(chart" not in src          # goes through _bar_chart
+    code = "\n".join(l for l in src.splitlines() if not l.lstrip().startswith("#"))   # ignore comments
+    assert "st.segmented_control(" not in code
+    assert 'width="stretch"' not in code.replace('{"width": "stretch"}', "")
+    assert "st.bar_chart(chart" not in code          # goes through _bar_chart
