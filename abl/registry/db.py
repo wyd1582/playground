@@ -141,11 +141,17 @@ class Registry:
             r = self.one("SELECT 1 FROM proposals WHERE novelty_hash=?", (novelty_hash,))
         return r is not None
 
-    def dsl_hash_evaluated(self, dsl_hash: str) -> bool:
-        """Orchestrator rule: never run a full evaluation for a semantic hash already in the registry."""
-        r = self.one(
-            "SELECT 1 FROM candidates c JOIN evaluations e ON e.candidate_id=c.candidate_id WHERE c.dsl_hash=?",
-            (dsl_hash,))
+    def dsl_hash_evaluated(self, dsl_hash: str, snapshot_id: str | None = None) -> bool:
+        """Orchestrator rule: never run a full evaluation for a semantic hash already in the registry.
+        A candidate is (DSL, data): the same expression on another data snapshot (another dataset, or
+        the shuffled-label control) is a new trial, so the check is scoped to ``snapshot_id``."""
+        if snapshot_id is None:
+            r = self.one("SELECT 1 FROM candidates c JOIN evaluations e ON e.candidate_id=c.candidate_id WHERE c.dsl_hash=?",
+                         (dsl_hash,))
+        else:
+            r = self.one("SELECT 1 FROM candidates c JOIN evaluations e ON e.candidate_id=c.candidate_id "
+                         "JOIN gate_results g ON g.candidate_id=c.candidate_id AND g.gate='incremental' "
+                         "WHERE c.dsl_hash=? AND g.data_snapshot_id=?", (dsl_hash, snapshot_id))
         return r is not None
 
     def add_candidate(self, *, proposal_id: str, dsl_text: str, dsl_hash: str, code_hash: str,
@@ -249,6 +255,7 @@ class Registry:
         clusters = props["mechanism_cluster"].value_counts().to_dict() if len(props) else {}
         rejected = cands[cands.state == "rejected"][["mechanism_cluster", "dsl_text"]].to_dict("records")
         promoted = cands[cands.state == "promoted"][["mechanism_cluster", "dsl_text"]].to_dict("records")
+        rejected = rejected[:60]
         evals = self.df(
             "SELECT e.candidate_id, e.delta_oos, e.delta_oos_ci_low, e.rho FROM evaluations e "
             "JOIN candidates c ON c.candidate_id=e.candidate_id JOIN proposals p ON p.proposal_id=c.proposal_id "
@@ -256,9 +263,9 @@ class Registry:
         return {
             "n_proposals": int(len(props)),
             "mechanism_clusters": clusters,
-            "rejected": rejected[:20],
+            "rejected": rejected,
             "promoted": promoted[:20],
             "full_evaluations": int(len(evals)),
             "best_delta_oos": float(evals.delta_oos.max()) if len(evals) else None,
-            "recent_dsl": cands["dsl_text"].head(20).tolist(),
+            "recent_dsl": cands["dsl_text"].tolist(),
         }

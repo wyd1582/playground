@@ -9,7 +9,7 @@ from genoframe.splitter import assert_no_leak
 
 
 def run(program_text: str, declared_fields: list[dict], *, evaluator, splits, registry, thresholds: dict,
-        known_priors: set[str], has_pedigree: bool) -> tuple[bool, list[dict], object | None]:
+        known_priors: set[str], has_pedigree: bool, snapshot_id: str | None = None) -> tuple[bool, list[dict], object | None]:
     checks: list[dict] = []
     max_ops = int(thresholds["validity"]["max_operators"])
     tol = float(thresholds["validity"]["replay_tolerance"])
@@ -35,7 +35,7 @@ def run(program_text: str, declared_fields: list[dict], *, evaluator, splits, re
         return False, checks, None
     spec = compile_program(prog)
     # dedup: a semantic hash already fully evaluated never gets another full evaluation
-    dup = registry.dsl_hash_evaluated(spec.semantic_hash)
+    dup = registry.dsl_hash_evaluated(spec.semantic_hash, snapshot_id)
     checks.append({"name": "semantic_hash_unique", "passed": not dup, "detail": spec.semantic_hash[:16]})
     if dup:
         return False, checks, spec

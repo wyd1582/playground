@@ -6,8 +6,11 @@ validity:
   replay_tolerance: 1.0e-9        # two replays with the same seed must agree to this tolerance
 accuracy:
   min_rho: 0.05                   # LR-method correlation cor(u_partial, u_whole) on validation animals
+  null_sd_multiplier: 2.0         # rho must exceed shuffled-label null mean + k·sd (the LR rho is not null-calibrated)
   max_abs_bias_sd: 0.5            # |mean(u_whole - u_partial)| in units of sd(u_whole)
-  dispersion_ci_must_cover_one: true   # b = cov(u_whole,u_partial)/var(u_partial); CI must include 1
+  dispersion_rule: relative_to_champion   # relative_to_champion | absolute
+  dispersion_tolerance: 0.05      # relative: |b_cand - 1| <= |b_champ - 1| + tolerance (never more mis-dispersed than the champion)
+  dispersion_ci_must_cover_one: true      # absolute rule (always logged as a diagnostic): CI of b must include 1
   min_coverage: 0.95              # share of validation animals that receive a score
 incremental:
   ci_level: 0.90
@@ -15,7 +18,8 @@ incremental:
   min_delta_oos_ci_low: 0.0       # paired ΔOOS lower bound must exceed this (vs frozen champion)
   metric: rho_true_or_lr          # sim: cor with true BV; real data: LR rho
 plan:
-  delta_f_cap: 0.01               # per-generation inbreeding rate ceiling
+  delta_f_cap: 0.01               # per-generation inbreeding rate ceiling (OCS target)
+  delta_f_tolerance_vs_champion: 0.005   # a candidate may not exceed max(cap, champion ΔF + tolerance) on the same selection
   min_gain_ratio: 1.0             # gain/yr at equal genotyping cost must be >= champion's
   selected_fraction: 0.10
   generation_interval_years: 1.5

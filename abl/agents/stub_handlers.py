@@ -94,14 +94,40 @@ def _fill(plan: str, catalog: dict) -> str:
     return plan.replace("{prior}", priors[0] if priors else "none")
 
 
-def _vary(plan: str, k: int) -> str:
-    """k-th numeric variant of a plan (what a real Geneticist does when the registry says 'tried')."""
+FLOAT_FACTORS = (1.0, 0.5, 2.0, 0.25, 1.5, 0.75)
+
+
+def _vary(plan: str, k: int) -> str | None:
+    """k-th parameter variant of a plan (what a real Geneticist does when the registry says 'tried'):
+    floats are rescaled by a fixed factor ladder, chromosome indices rotate, seeds advance.
+    Returns None when the plan has nothing to vary (so the caller moves on instead of repeating)."""
     if k == 0:
         return plan
-    def rep(m):
-        v = float(m.group(0))
-        return f"{v * (1 + 0.25 * k):.3g}" if "." in m.group(0) else m.group(0)
-    return re.sub(r"(?<![\w'])\d+\.\d+(?![\w'])", rep, plan)
+    if k >= len(FLOAT_FACTORS):
+        return None
+    try:
+        prog = parse(plan)
+    except DSLError:
+        return None
+    changed = False
+    parts = ["champion()"]
+    for op in prog.ops:
+        if op.name == "champion":
+            continue
+        kw = []
+        for key, val in op.kwargs:
+            if isinstance(val, bool):
+                kw.append((key, val))
+            elif isinstance(val, float):
+                kw.append((key, round(val * FLOAT_FACTORS[k], 4))); changed = True
+            elif isinstance(val, int) and key == "chrom":
+                kw.append((key, (val - 1 + k) % 5 + 1)); changed = True
+            elif isinstance(val, int) and key == "seed":
+                kw.append((key, val + k)); changed = True
+            else:
+                kw.append((key, val))
+        parts.append(f"{op.name}(" + ", ".join(f"{a}={b!r}" for a, b in kw) + ")")
+    return " + ".join(parts) if changed else None
 
 
 def geneticist(system: str, user: str, schema, seed: int) -> dict:
@@ -114,14 +140,16 @@ def geneticist(system: str, user: str, schema, seed: int) -> dict:
                     falsifiers=p["falsifiers"], expected_gain=p["gain"], novelty_check="probe", source_refs=p["refs"],
                     mechanism_cluster=p["cluster"], _leak_decl=p["leak_decl"])
     counts = summary.get("mechanism_clusters", {}) or {}
-    tried = set(summary.get("recent_dsl", []) or [])
+    tried = set(summary.get("recent_dsl", []) or []) | {r.get("dsl_text") for r in (summary.get("rejected") or [])} | {r.get("dsl_text") for r in (summary.get("promoted") or [])}
     has_ped = catalog.get("has_pedigree", True)
     bank = [b for b in BANK if not (b["cluster"] == "pedigree_blend" and not has_ped)]
     order = sorted(range(len(bank)), key=lambda i: (counts.get(bank[i]["cluster"], 0), (i + seed) % len(bank)))
-    for k in range(0, 6):
+    for k in range(0, len(FLOAT_FACTORS)):
         for i in order:
             b = bank[i]
             plan = _vary(_fill(b["plan"], catalog), k)
+            if plan is None:
+                continue
             try:
                 canon = validate(parse(plan), known_priors=set(catalog.get("priors", [])), has_pedigree=has_ped).canonical()
             except NeedOperator:

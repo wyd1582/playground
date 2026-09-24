@@ -22,13 +22,16 @@ def build_scorecard(reg: Registry) -> pd.DataFrame:
         negcrit = crit[crit.mechanism_cluster.str.startswith("negative_control")]
         cost = reg.df("SELECT COALESCE(SUM(tokens),0) t, COALESCE(SUM(compute_seconds),0) s, COALESCE(SUM(cash_cost),0) c FROM costs WHERE campaign_id=?", (cid,)).iloc[0]
         n_prop = max(1, len(props))
-        valid = int(cands.state.isin(["validated", "evaluated", "promoted"]).sum())
+        valid = int(reg.one("SELECT COUNT(DISTINCT t.candidate_id) FROM candidate_transitions t JOIN candidates c ON c.candidate_id=t.candidate_id "
+                            "JOIN proposals p ON p.proposal_id=c.proposal_id WHERE p.campaign_id=? AND t.to_state='validated'", (cid,))[0])
+        hyps = int(reg.one("SELECT COUNT(*) FROM agent_events WHERE campaign_id=? AND agent='geneticist' AND action='hypothesize'", (cid,))[0])
+        dups = int(reg.one("SELECT COUNT(*) FROM agent_events WHERE campaign_id=? AND agent='orchestrator' AND action='dedup'", (cid,))[0])
         promoted = int((cands.state == "promoted").sum())
         m = re.search(r"^(.*)_([A-F])_s\d+", cid)
         arm = m.group(2) if m else "?"
         dataset = m.group(1) if m else cid
         rows.append({
-            "campaign_id": cid, "dataset": dataset, "arm": arm, "proposals": len(props),
+            "campaign_id": cid, "dataset": dataset, "arm": arm, "hypotheses": hyps or len(props), "duplicates_skipped": dups, "proposals": len(props),
             "valid_per_100_proposals": round(100 * valid / n_prop, 1),
             "full_evaluations": len(ev), "promoted": promoted,
             "full_evals_per_promotion": (round(len(ev) / promoted, 2) if promoted else None),

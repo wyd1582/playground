@@ -21,11 +21,15 @@ def run(cand_stats, champ_stats, cand_spec, champ_spec, evaluator, thresholds: d
                                          accuracy=max(h.extra["predictive_r"], 0.0) / sigma_a, sigma_a=sigma_a,
                                          generation_interval_years=float(th["generation_interval_years"])))
     df = float(np.mean([m["delta_f"] for m in out["cand"]]))
+    dfh = float(np.mean([m["delta_f"] for m in out["champ"]]))
     gc = float(np.mean([m["gain_per_year"] for m in out["cand"]]))
     gh = float(np.mean([m["gain_per_year"] for m in out["champ"]]))
     ratio = gc / gh if gh > 0 else (1.0 if gc >= gh else 0.0)
-    rows = [{"metric": "delta_f", "value": df, "threshold": float(th["delta_f_cap"]), "passed": df <= float(th["delta_f_cap"])},
+    # OCS-style rule: the candidate's plan may not inbreed faster than max(cap, what the champion's plan already does)
+    df_line = max(float(th["delta_f_cap"]), dfh + float(th.get("delta_f_tolerance_vs_champion", 0.0)))
+    rows = [{"metric": "delta_f", "value": df, "threshold": df_line, "passed": df <= df_line},
+            {"metric": "delta_f_champion", "value": dfh, "threshold": float(th["delta_f_cap"]), "passed": True, "diagnostic": True},
             {"metric": "gain_per_year_ratio", "value": ratio, "threshold": float(th["min_gain_ratio"]),
              "passed": ratio >= float(th["min_gain_ratio"])},
             {"metric": "gain_per_year", "value": gc, "threshold": gh, "passed": True, "diagnostic": True}]
-    return all(r["passed"] for r in rows if not r.get("diagnostic")), rows, {"cand_gain": gc, "champ_gain": gh, "delta_f": df}
+    return all(r["passed"] for r in rows if not r.get("diagnostic")), rows, {"cand_gain": gc, "champ_gain": gh, "delta_f": df, "delta_f_champion": dfh}

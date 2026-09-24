@@ -16,13 +16,21 @@ from scripts._common import sim_bundle
 
 
 def write_sim_controls_report(res: dict) -> str:
+    a = res["arms"]
+    A, B, E, F = a["A_champion"], a["B_random_ops"], a["E_shuffled_labels"], a["F_random_snp"]
+    Es = E["champion_on_shuffled"]
+    f = lambda v, d=3: (round(v, d) if isinstance(v, (int, float)) and v is not None else "")
     rows = [
-        {"arm": "A champion (frozen ssGBLUP)", **{k: v for k, v in res["arms"]["A_champion"].items() if k in ("true_accuracy", "lr_rho", "predictive_r", "dispersion_b")}},
-        {"arm": "B random-operator search", "full_evaluations": res["arms"]["B_random_ops"]["full_evaluations"], "promoted": res["arms"]["B_random_ops"]["promoted"],
-         "best_delta_oos": res["arms"]["B_random_ops"]["best_delta_oos"]},
-        {"arm": "E shuffled labels (loop)", "false_promotions": res["arms"]["E_shuffled_labels"]["false_promotions"],
-         **{f"champion_on_shuffled_{k}": v for k, v in res["arms"]["E_shuffled_labels"]["champion_on_shuffled"].items() if k in ("true_accuracy", "lr_rho", "predictive_r")}},
-        {"arm": "F random SNP subset", "false_promotions": res["arms"]["F_random_snp"]["false_promotions"], "full_evaluations": res["arms"]["F_random_snp"]["full_evaluations"]},
+        {"arm": "A frozen champion (ssGBLUP, uniform weights)", "true_accuracy": f(A.get("true_accuracy")), "lr_rho": f(A["lr_rho"]),
+         "predictive_r": f(A["predictive_r"]), "dispersion_b": f(A["dispersion_b"], 2), "full_evaluations": "", "promoted": "", "best_delta_oos": ""},
+        {"arm": "E champion on labels shuffled within generation", "true_accuracy": f(Es.get("true_accuracy")), "lr_rho": f(Es["lr_rho"]),
+         "predictive_r": f(Es["predictive_r"]), "dispersion_b": f(Es["dispersion_b"], 2), "full_evaluations": "", "promoted": "", "best_delta_oos": ""},
+        {"arm": "B random-operator search (same budget as the loop)", "true_accuracy": "", "lr_rho": "", "predictive_r": "", "dispersion_b": "",
+         "full_evaluations": B["full_evaluations"], "promoted": B["promoted"], "best_delta_oos": f(B["best_delta_oos"], 4)},
+        {"arm": "E ABL loop on shuffled labels (negative control)", "true_accuracy": "", "lr_rho": "", "predictive_r": "", "dispersion_b": "",
+         "full_evaluations": E["full_evaluations"], "promoted": f"{E['false_promotions']} (false promotions)", "best_delta_oos": f(E["best_delta_oos"], 4)},
+        {"arm": "F random 30 % SNP subsets (negative control)", "true_accuracy": "", "lr_rho": "", "predictive_r": "", "dispersion_b": "",
+         "full_evaluations": F["full_evaluations"], "promoted": f"{F['false_promotions']} (false promotions)", "best_delta_oos": f(F["best_delta_oos"], 4)},
     ]
     df = pd.DataFrame(rows)
     out = paths.reports_dir(); out.mkdir(exist_ok=True)

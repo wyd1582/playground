@@ -111,16 +111,20 @@ class Campaign:
                               budget_tokens=self.budget_tokens, owner=self.b.owner, sharing_tier=self.b.sharing_tier)
         return cid
 
-    def _gates(self, cid: str, ev: Evaluator | None = None, truth=None) -> GateRunner:
+    def _gates(self, cid: str, ev: Evaluator | None = None, truth=None, snapshot_id: str | None = None) -> GateRunner:
         return GateRunner(registry=self.reg, evaluator=ev or self.ev, splits=self.splits, thresholds=self.th, campaign_id=cid,
-                          snapshot_id=self.snapshot_id, known_priors=set(self.b.priors), truth=truth if truth is not None else self.truth,
+                          snapshot_id=snapshot_id or self.snapshot_id, known_priors=set(self.b.priors), truth=truth if truth is not None else self.truth,
                           null_rho=self.null, seed=self.seed)
 
     def _run_candidate(self, gates: GateRunner, cid: str, dsl_text: str, cluster: str, mechanism: str, agent_model: str) -> dict:
         """Register → (implicit PASS review) → implement → validity → full evaluation. Used by arms B, C, F."""
         pid = self.reg.add_proposal(campaign_id=cid, agent_model=agent_model, mechanism_text=mechanism, mechanism_cluster=cluster, direction="n/a",
                                     falsifiers=[], expected_gain={}, novelty_hash=dsl_text, source_refs=[], owner=self.b.owner, sharing_tier=self.b.sharing_tier)
-        cand = self.reg.add_candidate(proposal_id=pid, dsl_text=dsl_text, dsl_hash=dsl_text, code_hash=dsl_text, data_decl_hash="")
+        try:
+            sem = compile_program(validate(parse(dsl_text), known_priors=set(self.b.priors), has_pedigree=self.ev.has_pedigree)).semantic_hash
+        except DSLError:
+            sem = "invalid:" + dsl_text
+        cand = self.reg.add_candidate(proposal_id=pid, dsl_text=dsl_text, dsl_hash=sem, code_hash=sem, data_decl_hash="")
         gates.apply_review(cand, "PASS", "hypothesis", f"{cluster}: no Critic in this arm")
         gates.mark_implemented(cand, "arm build")
         try:
@@ -208,7 +212,11 @@ class Campaign:
         cid = self._new_registry_campaign("E", n, max_evals)
         sh = shuffled_frame(self.pub, self.b.trait, derive_seed("armE", self.seed))
         ev = Evaluator(sh, self.b.priors, self.b.trait, champion=self.champion)
-        gates = self._gates(cid, ev=ev, truth=self.truth)
+        snap = self.reg.add_snapshot(customer_id=self.b.customer_id, genotype_source=sh.genotype_source,
+                                     genotype_build=sh.versions.get("genotype_build", "?"), pedigree_version=sh.versions.get("pedigree_snapshot", "?"),
+                                     phenotype_version="shuffled:" + sh.phenotype_hash(), n_animals=sh.n_animals, n_markers=sh.n_markers,
+                                     cutoff_date=str(self.splits[-1].cutoff_t), owner=self.b.owner, sharing_tier=self.b.sharing_tier, deidentified=1)
+        gates = self._gates(cid, ev=ev, truth=self.truth, snapshot_id=snap)
         cfg = CampaignConfig(campaign_id=cid, customer_id=self.b.customer_id, species=self.b.species, trait=self.b.trait, horizon="next_generation",
                              n_proposals=n, budget_full_evals=max_evals, budget_tokens=self.budget_tokens, seed=self.seed + 1, probe_every=0,
                              owner=self.b.owner, sharing_tier=self.b.sharing_tier)

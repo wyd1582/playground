@@ -33,7 +33,13 @@ the one-page argument and the operator's map.
    but *is not null-calibrated*: on shuffled labels it stays high because partial and whole
    predictions share the same shrinkage noise. ABL therefore calibrates the accuracy gate against
    the campaign's own shuffled-label null and uses a within-contemporary-group predictive
-   correlation for the incremental gate (see `reports/sim_controls.md`).
+   correlation for the incremental gate (see `reports/sim_controls.md`). Dispersion (b) and the
+   plan's ΔF are judged *relative to the frozen champion* on the same selection — a gate the
+   champion itself fails cannot rank challengers — while the absolute rules stay logged as
+   diagnostics (`gates/thresholds.yaml`).
+7. **A candidate is (DSL, data).** The semantic-hash dedup that blocks a second full evaluation
+   is scoped to the data snapshot, so the same expression on the shuffled-label control or on
+   another species is a new trial, and every run appends new campaigns to the ledger.
 
 ## What was built
 

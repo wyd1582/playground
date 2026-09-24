@@ -66,7 +66,7 @@ class GateRunner:
         t0 = time.perf_counter()
         ok, checks, spec = validity.run(program_text, declared_fields, evaluator=self.ev, splits=self.splits,
                                         registry=self.reg, thresholds=self.th, known_priors=self.known_priors,
-                                        has_pedigree=self.ev.has_pedigree)
+                                        has_pedigree=self.ev.has_pedigree, snapshot_id=self.snapshot_id)
         rows = []
         for c in checks:
             self.reg.add_gate_result(candidate_id=candidate_id, gate="validity", metric=c["name"], value=1.0 if c["passed"] else 0.0,
@@ -107,7 +107,7 @@ class GateRunner:
                                          seed=self.seed, data_snapshot_id=self.snapshot_id)
                 rows.append(dict(r, gate=gate))
 
-        ok1, r1 = accuracy.run(cand, self.th, self.null_rho); record("accuracy", r1)
+        ok1, r1 = accuracy.run(cand, self.th, self.null_rho, champ); record("accuracy", r1)
         ok2, r2, inc = incremental.run(cand, champ, self.ev, self.th, self.seed, self.truth); record("incremental", r2)
         ok3, r3, pl = plan.run(cand, champ, spec, self.champ_spec, self.ev, self.th); record("plan", r3)
         ok4, r4 = robustness.run(cand, champ, spec, self.champ_spec, self.ev, self.splits, self.th, self.seed, inc["delta"]); record("robustness", r4)
