@@ -51,6 +51,9 @@ make watch           # 浏览器打开 http://localhost:8501 看面板
 | `make watch` | 监护面板（独立进程，只读） | 浏览器 |
 | `make status` | 一屏文本：最近 24 小时 | 终端 |
 | `make digest` | 每日摘要 | `registry/digest_YYYY-MM-DD.md` |
+| `make demo` | 生成小规模演示台账（线上面板显示的就是它），约 8 分钟 | `registry/abl.sqlite` |
+| `make site` | 构建 Vercel 落地页 | `site/dist/` |
+| `make docker` / `make docker-run` | 本地构建并运行部署镜像 | http://localhost:8501 |
 | `make clean-runtime` | 删除台账、事件流、快照、封存数据（**不可逆**） | — |
 
 `make campaign` 的参数（直接调脚本）：
@@ -70,6 +73,8 @@ make watch           # 浏览器打开 http://localhost:8501 看面板
 | `ABL_LLM_FALLBACKS=0` | 关闭服务器端 fallback | 开 |
 | `ABL_LANG=zh\|en` | 面板、`make status`、`make digest` 的语言（面板侧栏也可切换） | `zh` |
 | `ABL_ROOT` | 把整个系统指向另一棵目录（测试用） | 项目目录 |
+| `ABL_DEMO=1` | 演示模式：只读、隐藏暂停/恢复按钮、顶部显示横幅（线上部署用） | 关 |
+| `ABL_DASHBOARD_PASSWORD` | 设置后面板要求输入访问密码（线上部署必设） | 不设 |
 | `control/RUN` | 存在 = 允许运行 | 随仓库存在 |
 | `control/PAUSE` | 存在 = Orchestrator 在下一步前停下并写 `registry/status_<campaign>.json` | 面板 PAUSE 按钮创建 |
 | `gates/thresholds.yaml` | 六道门的阈值。**改它必须新 commit**；campaign 开始时记录其哈希，中途变化面板会红警 | — |
@@ -147,3 +152,7 @@ for s in splits:
 3. 每次 agent 调用都往 `registry/events.jsonl` 追加一行。
 4. 到处用确定性种子；改阈值必须新 commit 并进台账。
 5. 每步之前检查 `control/RUN`；有 `control/PAUSE` 就停下写状态。
+
+## 11. 部署上线
+
+见 `docs/DEPLOY.zh.md`：新建 repo、本地跑通、Render 部署面板、Vercel 部署落地页、绑定域名，共 8 步。

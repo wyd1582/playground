@@ -55,6 +55,9 @@ to `claude-opus-5` automatically.
 | `make watch` | Guardian & Learning dashboard (separate read-only process) | browser |
 | `make status` | one-screen text summary of the last 24 h | terminal |
 | `make digest` | daily digest | `registry/digest_YYYY-MM-DD.md` |
+| `make demo` | small demo ledger (what the deployed dashboard shows), ≈8 min | `registry/abl.sqlite` |
+| `make site` | build the Vercel landing site | `site/dist/` |
+| `make docker` / `make docker-run` | build and run the deployment image locally | http://localhost:8501 |
 | `make clean-runtime` | delete ledger, event stream, snapshots, sealed data (**irreversible**) | — |
 
 `make campaign` options (call the script directly):
@@ -74,6 +77,8 @@ Every run appends new campaigns (time-stamped ids) to the ledger; nothing is ove
 | `ABL_LLM_FALLBACKS=0` | disable server-side fallbacks | on |
 | `ABL_LANG=zh\|en` | language of the dashboard, `make status`, `make digest` (the dashboard sidebar can switch too) | `zh` |
 | `ABL_ROOT` | point the whole system at another tree (tests) | project dir |
+| `ABL_DEMO=1` | demo mode: read-only, PAUSE/RESUME hidden, banner shown (for public deployments) | off |
+| `ABL_DASHBOARD_PASSWORD` | when set, the dashboard asks for this shared password (always set it in public deployments) | unset |
 | `control/RUN` | must exist for the loop to run | tracked in git |
 | `control/PAUSE` | if present the Orchestrator stops before its next step and writes `registry/status_<campaign>.json` | created by the dashboard PAUSE button |
 | `gates/thresholds.yaml` | gate thresholds. **Changing it requires a new commit**; its hash is recorded at campaign start and the dashboard alarms if it changes mid-campaign | — |
@@ -151,3 +156,7 @@ Adding a dataset: write a function returning a `GenoFrame` like `dataio/loaders.
 3. Every agent call appends one line to `registry/events.jsonl`.
 4. Deterministic seeds everywhere; threshold edits need a new commit and a registry entry.
 5. Check `control/RUN` before each step; if `control/PAUSE` exists, stop and write status.
+
+## 11. Deployment
+
+See `docs/DEPLOY.md` (summary) and `docs/DEPLOY.zh.md` (full step-by-step): new repo, local run, Render for the dashboard, Vercel for the landing site, custom domain.

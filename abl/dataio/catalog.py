@@ -7,7 +7,11 @@ from pathlib import Path
 
 from common import paths
 
-VENDORED = Path(__file__).resolve().parent.parent.parent / "genomic-selection-pig" / "data"
+_HERE = Path(__file__).resolve().parent.parent
+# data/vendor/ ships with the project (so a standalone repo or Docker image is self-contained);
+# the sibling genomic-selection-pig/data/ is the original location in the playground monorepo.
+VENDORED = next((d for d in (_HERE / "data" / "vendor", _HERE.parent / "genomic-selection-pig" / "data")
+                 if (d / "pig_cleveland_curated.rdata").exists()), _HERE / "data" / "vendor")
 
 CATALOG: list[dict] = [
     dict(id="g2p_datasets", star=True, name="G2P Datasets (Genetics 2026)", kind="genotype+phenotype", species="60+ species", use="cross-species method benchmark", access="open",

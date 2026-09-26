@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ABL · 育种值智能闭环</title>
+<meta name="description" content="Agentic Breeding-value Loop — agents propose, deterministic gates decide.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">ABL · Agentic Breeding-value Loop</div>
+    <div class="lang" role="group" aria-label="Language">
+      <button data-set-lang="zh">中文</button> <button data-set-lang="en">English</button>
+    </div>
+  </header>
+
+  <h1 data-lang-only="zh">任何方法都要过的裁判</h1>
+  <h1 data-lang-only="en">A judge every method has to pass</h1>
+  <p class="lede" data-lang-only="zh">Agents 提出改进育种值排名的假设，确定性的门槛决定谁存活。冻结的 GBLUP 是冠军，任何大模型或深度学习方法都是挑战者，只有在同一批候选、同一截止日上配对胜出才能晋级。每一个提案、拒绝和成本都进入永久台账。</p>
+  <p class="lede" data-lang-only="en">Agents propose ways to improve breeding-value rankings; deterministic gates decide what survives. Frozen GBLUP is the champion; any LLM or deep-learning method is a challenger and is promoted only by a paired win on the same candidates and cutoffs. Every proposal, rejection and cost goes into a permanent ledger.</p>
+  <a class="cta" id="app-link" href="__ABL_APP_URL__"><span data-lang-only="zh">打开监护面板 →</span><span data-lang-only="en">Open the dashboard →</span></a>
+
+  <div class="stats">
+    <div class="stat"><b>0</b><span data-lang-only="zh">负对照误晋级（模拟 + 猪数据）</span><span data-lang-only="en">false promotions on negative controls</span></div>
+    <div class="stat"><b>20 / 20</b><span data-lang-only="zh">泄漏探针被评审者拦截</span><span data-lang-only="en">leak probes rejected by the Critic</span></div>
+    <div class="stat"><b>0.51</b><span data-lang-only="zh">冠军对下一代的真实准确度</span><span data-lang-only="en">champion true accuracy, next generation</span></div>
+    <div class="stat"><b>6</b><span data-lang-only="zh">道确定性门槛</span><span data-lang-only="en">deterministic gates</span></div>
+  </div>
+
+  <figure>
+    <img data-lang-only="zh" src="img/dashboard_full_zh.png" alt="ABL 监护与学习面板（中文）" loading="lazy">
+    <img data-lang-only="en" src="img/dashboard_full.png" alt="ABL Guardian and Learning dashboard" loading="lazy">
+    <figcaption data-lang-only="zh">监护与学习面板：左侧是 agents 在做什么，右侧是报警、预算和一键暂停。</figcaption>
+    <figcaption data-lang-only="en">Guardian &amp; Learning dashboard: what the agents are doing on the left; alarms, budget and a one-click pause on the right.</figcaption>
+  </figure>
+
+  <div class="grid">
+    <div class="card">
+      <h3 data-lang-only="zh">用户手册</h3><h3 data-lang-only="en">Manuals</h3>
+      <ul>
+        <li><a href="view.html?f=docs/USER_MANUAL.zh.md">用户手册（中文）</a></li>
+        <li><a href="view.html?f=docs/USER_MANUAL.md">User manual (English)</a></li>
+        <li><a href="view.html?f=docs/DEPLOY.zh.md">部署手册（中文）</a> · <a href="view.html?f=docs/DEPLOY.md">Deploy (EN)</a></li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3 data-lang-only="zh">实验结果</h3><h3 data-lang-only="en">Results</h3>
+      <ul>
+        <li><a href="view.html?f=reports/sim_controls.md" data-lang-only="zh">模拟对照：真准确度 vs 负对照</a><a href="view.html?f=reports/sim_controls.md" data-lang-only="en">Simulation controls</a></li>
+        <li><a href="view.html?f=reports/scorecard.md" data-lang-only="zh">系统记分卡</a><a href="view.html?f=reports/scorecard.md" data-lang-only="en">System scorecard</a></li>
+        <li><a href="view.html?f=reports/final_holdout_sim.md" data-lang-only="zh">封存世代最终表</a><a href="view.html?f=reports/final_holdout_sim.md" data-lang-only="en">Sealed-holdout table</a></li>
+        <li><a href="view.html?f=reports/BreedingPackage_pig_cleveland.md">BreedingPackage（Cleveland pig）</a></li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3 data-lang-only="zh">设计文档</h3><h3 data-lang-only="en">Design</h3>
+      <ul>
+        <li><a href="view.html?f=docs/DESIGN.md" data-lang-only="zh">设计与 Prompt 包（v0.1）</a><a href="view.html?f=docs/DESIGN.md" data-lang-only="en">Design &amp; prompt pack (v0.1)</a></li>
+        <li><a href="view.html?f=docs/OPS.md" data-lang-only="zh">开干手册（v0.2）</a><a href="view.html?f=docs/OPS.md" data-lang-only="en">Operations handbook (v0.2)</a></li>
+        <li><a href="view.html?f=reports/digest_example.zh.md" data-lang-only="zh">每日摘要示例</a><a href="view.html?f=reports/digest_example.md" data-lang-only="en">Daily digest example</a></li>
+      </ul>
+    </div>
+  </div>
+  <footer>ABL · research harness · agents recommend, gates decide.</footer>
+</div>
+<script>
+(function () {
+  var KEY = "abl_site_lang";
+  function set(lang) {
+    document.documentElement.lang = lang;
+    document.title = lang === "zh" ? "ABL · 育种值智能闭环" : "ABL · Agentic Breeding-value Loop";
+    document.querySelectorAll("[data-set-lang]").forEach(function (b) {
+      b.setAttribute("aria-pressed", String(b.dataset.setLang === lang));
+    });
+    try { localStorage.setItem(KEY, lang); } catch (e) {}
+  }
+  var saved = null;
+  try { saved = localStorage.getItem(KEY); } catch (e) {}
+  set(saved === "en" || saved === "zh" ? saved : "zh");
+  document.querySelectorAll("[data-set-lang]").forEach(function (b) {
+    b.addEventListener("click", function () { set(b.dataset.setLang); });
+  });
+  var url = __ABL_APP_URL_JSON__;
+  if (!url) { document.getElementById("app-link").setAttribute("aria-disabled", "true"); }
+})();
+</script>
+</body>
+</html>

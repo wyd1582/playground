@@ -1,0 +1,19 @@
+# Render Blueprint — one-click deploy of the ABL dashboard (docs/DEPLOY.zh.md step 4).
+services:
+  - type: web
+    name: abl-dashboard
+    runtime: docker
+    plan: starter            # measured runtime peak ≈183 MB, so 512 MB is enough. `free` also works but
+                             # sleeps after 15 min idle (≈1 min cold start); starter stays up.
+    region: oregon
+    branch: main
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /_stcore/health
+    autoDeploy: true
+    envVars:
+      - key: ABL_DEMO
+        value: "1"
+      - key: ABL_LANG
+        value: zh
+      - key: ABL_DASHBOARD_PASSWORD
+        sync: false          # Render asks you for the value on first deploy; never commit it

@@ -100,6 +100,28 @@ _FULL_WIDTH = ({"width": "stretch"} if "width" in __import__("inspect").signatur
                else {"use_container_width": True})
 
 
+# deployment switches (docs/DEPLOY.zh.md): ABL_DEMO=1 hides the controls and shows a banner;
+# ABL_DASHBOARD_PASSWORD, when set, gates the whole page behind one shared password.
+DEMO = __import__("os").environ.get("ABL_DEMO", "").strip().lower() in ("1", "true", "yes")
+_PASSWORD = __import__("os").environ.get("ABL_DASHBOARD_PASSWORD", "")
+
+
+def _password_ok() -> bool:
+    """Shared-password gate for public deployments. No-op when ABL_DASHBOARD_PASSWORD is unset."""
+    import hmac
+    if not _PASSWORD or st.session_state.get("abl_auth_ok"):
+        return True
+    st.title(t("app_login_title"))
+    with st.form("abl_login"):
+        pw = st.text_input(t("app_login_password"), type="password")
+        if st.form_submit_button(t("app_login_button")):
+            if hmac.compare_digest(pw.encode(), _PASSWORD.encode()):
+                st.session_state["abl_auth_ok"] = True
+                st.rerun()
+            st.error(t("app_login_wrong"))
+    return False
+
+
 def _bar_chart(data, **kwargs) -> None:
     """st.bar_chart with only the keyword arguments this Streamlit release supports
     (horizontal/stack/sort/x_label/y_label arrived between 1.36 and 1.41)."""
@@ -324,6 +346,9 @@ def alarms_panel() -> None:
 def control_panel() -> None:
     _apply_lang()
     st.subheader(t("app_controls_title"))
+    if DEMO:                                       # public deployment: never expose the PAUSE switch
+        st.info(t("app_demo_controls"))
+        return
     s = control.control_state()
     if s["paused"]:
         st.warning(t("app_paused"), icon=":material/pause_circle:")
@@ -379,6 +404,8 @@ def main() -> None:
     with st.sidebar:
         _lang_switch()
     _apply_lang()                                  # the switch may just have changed this run's language
+    if not _password_ok():
+        return
     camps = _q("campaigns")
     ids = list(camps["campaign_id"]) if not camps.empty else []
     active = [c for c, a in zip(ids, camps["active"]) if a] if ids else []
@@ -397,6 +424,8 @@ def main() -> None:
     campaign = None if choice == ALL_CAMPAIGNS else choice
 
     st.title(t("app_title"))
+    if DEMO:
+        st.info(t("app_demo_banner"))
     left, right = st.columns(2, gap="large")
     with left:
         st.header(t("app_learning"))

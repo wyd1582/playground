@@ -32,3 +32,4 @@ control/PAUSE
 # dashboard state
 dashboard/state.json
 registry/packages/
+site/dist/

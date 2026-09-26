@@ -56,6 +56,12 @@ the one-page argument and the operator's map.
 | public data | `dataio/` | OPS.md C.1 catalogue; loaders for the vendored Cleveland 2012 pig data and BGLR wheat (pseudo-generations from genomic family blocks, declared as such) |
 | dashboard | `dashboard/` | Guardian & Learning dashboard (Streamlit), a separate read-only process; `make status`, `make digest`, alarms |
 
+## Deploy
+
+`docs/DEPLOY.zh.md` (step by step, Chinese) · `docs/DEPLOY.md` (summary). Dashboard on Render via
+`render.yaml` + `Dockerfile` (demo mode, password-gated); landing site and manuals on Vercel via
+`vercel.json` + `scripts/build_site.py`; CI in `.github/workflows/ci.yml` (Python 3.9 and 3.11).
+
 ## Run it
 
 Operator's manual: `docs/USER_MANUAL.md` (English) · `docs/USER_MANUAL.zh.md`（中文）. The dashboard,

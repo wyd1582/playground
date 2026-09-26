@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ABL · 文档</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
+</head>
+<body>
+<div class="wrap">
+  <header><a class="brand" href="./" style="color:inherit;text-decoration:none">← ABL</a><span id="path" style="color:var(--muted);font-size:14px"></span></header>
+  <article class="md" id="doc"><p>…</p></article>
+</div>
+<script>
+(function () {
+  var f = new URLSearchParams(location.search).get("f") || "";
+  // only files that the build copied under docs/ or reports/
+  if (!/^(docs|reports)\/[A-Za-z0-9_.-]+\.md$/.test(f)) { document.getElementById("doc").textContent = "not found"; return; }
+  document.getElementById("path").textContent = f;
+  fetch(f).then(function (r) { if (!r.ok) throw new Error(r.status); return r.text(); })
+    .then(function (md) {
+      document.getElementById("doc").innerHTML = window.marked ? marked.parse(md) : "<pre>" + md.replace(/[&<]/g, function (c) { return c === "&" ? "&amp;" : "&lt;"; }) + "</pre>";
+      var h = document.querySelector("#doc h1"); if (h) document.title = "ABL · " + h.textContent;
+    })
+    .catch(function () { document.getElementById("doc").textContent = "not found: " + f; });
+})();
+</script>
+</body>
+</html>

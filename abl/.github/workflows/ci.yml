@@ -1,0 +1,33 @@
+# CI — runs on every push and pull request once this directory is the repository root
+# (after `scripts/export_to_new_repo.sh`). Python 3.9 is included on purpose: it is the
+# oldest interpreter the team uses locally (macOS system Python).
+name: ci
+on:
+  push:
+    branches: [main]
+  pull_request:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.9", "3.11"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+          cache: pip
+      - run: pip install -r requirements.txt
+      - run: python -m pytest -q
+        env:
+          PYTHONPATH: .
+          ABL_LLM: stub
+  site:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 scripts/build_site.py
+      - run: test -f site/dist/index.html && test -f site/dist/docs/USER_MANUAL.zh.md
