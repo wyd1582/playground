@@ -389,8 +389,8 @@ STRINGS: dict[str, dict[str, str]] = {
                            "en": "Threshold file hash (campaign start vs now)"},
     # controls
     "app_controls_title": {"zh": "控制", "en": "Controls"},
-    "app_demo_banner": {"zh": "演示模式：只读的演示台账（模拟数据 + 公开猪数据），控制按钮已隐藏。",
-                        "en": "Demo mode: a read-only demo ledger (simulation + public pig data); controls are hidden."},
+    "app_demo_banner": {"zh": "演示模式：只读的演示台账（模拟数据，真实育种值已知），控制按钮已隐藏。",
+                        "en": "Demo mode: a read-only demo ledger (simulated data with known true breeding values); controls are hidden."},
     "app_demo_controls": {"zh": "演示部署中不提供暂停 / 恢复。在自己的机器上运行 `make watch` 可使用控制功能。",
                           "en": "PAUSE / RESUME are not available in the demo deployment. Run `make watch` locally to use them."},
     "app_login_title": {"zh": "ABL — 请输入访问密码", "en": "ABL — enter the access password"},

@@ -24,5 +24,5 @@ echo "==> split head: $(git log --oneline -n 1 abl-split)"
 
 echo "==> pushing to $NEW_REMOTE as main"
 git push "$NEW_REMOTE" "abl-split:refs/heads/main"
-git branch -D abl-export >/dev/null
+git branch -D abl-export abl-split >/dev/null   # leave no helper branches behind
 echo "Done. Next: clone the new repo and follow docs/DEPLOY.zh.md step 3."

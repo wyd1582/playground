@@ -2,6 +2,9 @@
 headless = true
 enableXsrfProtection = true
 
+[client]
+toolbarMode = "viewer"   # no Deploy / developer menu in production
+
 [browser]
 gatherUsageStats = false
 
