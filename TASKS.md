@@ -84,3 +84,7 @@ agents 提假设，确定性门槛决定谁存活。入口 `abl/README.md`；`cd
 - 复用本仓库已入库的 `genomic-selection-pig/data/pig_cleveland_curated.rdata` 与 `wheat.RData`（无需联网）。
 - LLM 后端：有 `ANTHROPIC_API_KEY`（或 `ant auth login`）时走 `claude-opus-5` + 结构化输出；否则自动用
   确定性 StubLLM，整条流水线、测试与面板离线可跑。`ABL_LLM=anthropic|stub` 可强制。
+
+## 2026-09-27 · 全部拉索相关工作已合并到独立仓库 `wyd1582/lasoai`
+
+Task A（`genomic-selection-pig/`）、Task B（`refpop-agent/`）、Task C（`lowdensity-sku/`）、Task D（`demo-station/`）和 ABL（`abl/`）连同各自的提交历史都在 `lasoai` 的 `main` 分支。后续开发在 `lasoai` 进行；本仓库的这些分支只作存档，不再更新。
